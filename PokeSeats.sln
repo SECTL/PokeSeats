@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PokeSeats.IR", " PokeSeats.IR\PokeSeats.IR.csproj", "{FFEF7328-4EBA-49C6-8844-C3067C86B932}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PokeSeats.Core", "PokeSeats.Core\PokeSeats.Core.csproj", "{BD44E495-0F19-4146-8F9A-D9CBF75ADB3B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PokeSeats.UI", "PokeSeats.UI\PokeSeats.UI.csproj", "{9E72300B-66CC-4EEB-9E21-5E146244DECB}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{FFEF7328-4EBA-49C6-8844-C3067C86B932}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FFEF7328-4EBA-49C6-8844-C3067C86B932}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FFEF7328-4EBA-49C6-8844-C3067C86B932}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FFEF7328-4EBA-49C6-8844-C3067C86B932}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BD44E495-0F19-4146-8F9A-D9CBF75ADB3B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BD44E495-0F19-4146-8F9A-D9CBF75ADB3B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BD44E495-0F19-4146-8F9A-D9CBF75ADB3B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BD44E495-0F19-4146-8F9A-D9CBF75ADB3B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9E72300B-66CC-4EEB-9E21-5E146244DECB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9E72300B-66CC-4EEB-9E21-5E146244DECB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9E72300B-66CC-4EEB-9E21-5E146244DECB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9E72300B-66CC-4EEB-9E21-5E146244DECB}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
