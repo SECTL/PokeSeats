@@ -6,17 +6,27 @@ public enum CellType
     Aisle,
     NarrowAisle,
     Podium,
+    Empty,
     OutOfBounds
 }
 
-public class LayoutGrid
+public sealed class LayoutGrid
 {
     private CellType[,] cells;
 
     public int Rows => cells.GetLength(0);
     public int Cols => cells.GetLength(1);
 
-    public LayoutGrid(int r, int c) => cells = new CellType[r, c];
+    public LayoutGrid(CellType[,] cells) => this.cells = cells;
 
+    public static LayoutGrid Blank(int rows, int cols) => new(new CellType[rows, cols]);
 
+    public CellType TypeAt(GridPos p) =>
+        p.Row >= 0 && p.Row < Rows && p.Col >= 0 && p.Col < Cols
+            ? cells[p.Row, p.Col]
+            : CellType.OutOfBounds;
+
+    public bool IsDesk(GridPos p) => TypeAt(p) == CellType.Desk;
+
+    public void ReplaceWith(CellType[,] newCells) => cells = newCells;
 }
