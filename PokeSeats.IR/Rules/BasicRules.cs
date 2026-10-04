@@ -13,8 +13,8 @@ public sealed record RelationRule(
     RulePolarity   Polarity,
     DistanceMetric Metric          = DistanceMetric.Manhattan,
     int?           Distance        = 1, // null = 不限距离，仅方向约束
-    int            OffsetDx        = 0,
-    int            OffsetDy        = 0
+    int            OffsetDx        = 0, // ExactOffset: A.Col = B.Col + OffsetDx（右为正）
+    int            OffsetDy        = 0  // ExactOffset: A.Row = B.Row + OffsetDy（下为正）
 ) : Rule(Id, DisplayName);
 public sealed record PinnedRule(
     RuleId   Id,

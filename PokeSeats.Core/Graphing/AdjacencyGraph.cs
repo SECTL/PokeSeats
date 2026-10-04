@@ -10,10 +10,10 @@ public sealed class AdjacencyGraph
         => Neighbors = neighbors;
 
     // 只枚举"半方向"集合：每条无向边 {p,q} 恰好被生成一次（AddEdge 负责写入双向）。
-    private static readonly (int Dr, int Dc)[] ChebyshevHalf =
+    private static readonly (int Dr, int Dc)[] chebyshev_half =
         { (0, 1), (1, -1), (1, 0), (1, 1) };
 
-    private static readonly (int Dr, int Dc)[] OrthoHalf =
+    private static readonly (int Dr, int Dc)[] ortho_half =
         { (0, 1), (1, 0) };
 
     public static AdjacencyGraph Build(LayoutGrid layout, DistanceMetric metric)
@@ -24,7 +24,7 @@ public sealed class AdjacencyGraph
         foreach (var cell in layout.GetDeskCells())
             neighbors[cell] = new List<GridPos>();
 
-        var dirs = metric == DistanceMetric.Chebyshev ? ChebyshevHalf : OrthoHalf;
+        var dirs = metric == DistanceMetric.Chebyshev ? chebyshev_half : ortho_half;
 
         foreach (var d in layout.GetDeskCells())
         {
@@ -33,16 +33,16 @@ public sealed class AdjacencyGraph
             {
                 var q = new GridPos(d.Row + dr, d.Col + dc);
                 if (layout.IsDesk(q))
-                    AddEdge(neighbors, d, q);
+                    addEdge(neighbors, d, q);
             }
 
             // 窄过道：允许跨越 2 格正交连通
-            foreach (var (dr, dc) in OrthoHalf)
+            foreach (var (dr, dc) in ortho_half)
             {
                 var mid = new GridPos(d.Row + dr,       d.Col + dc);
                 var far = new GridPos(d.Row + 2 * dr,   d.Col + 2 * dc);
                 if (layout.TypeAt(mid) == CellType.NarrowAisle && layout.IsDesk(far))
-                    AddEdge(neighbors, d, far);
+                    addEdge(neighbors, d, far);
             }
         }
 
@@ -53,7 +53,7 @@ public sealed class AdjacencyGraph
     /// 提交一条无向边 {p, q}：两个方向的邻接表都写入，因此 p、q 互为邻居。
     /// 调用方只需保证每条无向边恰好提交一次（见 Build 中的半方向枚举）。
     /// </summary>
-    private static void AddEdge(Dictionary<GridPos, List<GridPos>> neighbors, GridPos p, GridPos q)
+    private static void addEdge(Dictionary<GridPos, List<GridPos>> neighbors, GridPos p, GridPos q)
     {
         neighbors[p].Add(q);
         neighbors[q].Add(p);
