@@ -29,4 +29,29 @@ public sealed class LayoutGrid
     public bool IsDesk(GridPos p) => TypeAt(p) == CellType.Desk;
 
     public void ReplaceWith(CellType[,] newCells) => cells = newCells;
+
+    public IEnumerable<GridPos> GetDeskCells(
+        int? rowMin = null,
+        int? rowMax = null,
+        int? colMin = null,
+        int? colMax = null
+    )
+    {
+        int rMin = rowMin ?? 0, rMax = rowMax ?? Rows - 1;
+        int cMin = colMin ?? 0, cMax = colMax ?? Cols - 1;
+
+        if (rMin > rMax || cMin > cMax) yield break;
+
+        for (int r = rMin; r <= rMax; r++)
+            for (int c = cMin; c <= cMax; c++)
+                if (cells[r, c] == CellType.Desk)
+                    yield return new GridPos(r, c);
+    }
+
+    public int GetDeskCount(
+        int? rowMin = null,
+        int? rowMax = null,
+        int? colMin = null,
+        int? colMax = null
+    ) => GetDeskCells(rowMin, rowMax, colMin, colMax).Count();
 }

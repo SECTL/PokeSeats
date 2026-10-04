@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PokeSeats.IR", " PokeSeats.IR\PokeSeats.IR.csproj", "{FFEF7328-4EBA-49C6-8844-C3067C86B932}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PokeSeats.IR", "PokeSeats.IR\PokeSeats.IR.csproj", "{FFEF7328-4EBA-49C6-8844-C3067C86B932}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PokeSeats.Core", "PokeSeats.Core\PokeSeats.Core.csproj", "{BD44E495-0F19-4146-8F9A-D9CBF75ADB3B}"
 EndProject
