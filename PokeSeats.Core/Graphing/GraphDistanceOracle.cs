@@ -3,12 +3,12 @@ using PokeSeats.IR.Base;
 namespace PokeSeats.Core.Graphing;
 
 /// <summary>
-/// <see cref="AdjacencyGraph"/> 上的最短路预言机：跳数距离与半径球。
-/// 图是无权、无向的（<see cref="DistanceMetric"/> 已经体现在边的构造里），因此距离就是 BFS 层数。
+/// <see cref="AdjacencyGraph"/> 上的最短路预言机：加权距离与半径球。
+/// 图无向，普通边权重为 1、窄过道桥边权重为 2；最短距离由 Dijkstra 求得。
 /// 图节点即座位；不在图中的坐标（过道、讲台、越界）不是可查询的位置，一律视为不可达。
 /// </summary>
 /// <remarks>
-/// 邻接表在构造时压成 CSR（扁平 int 索引），因此每个 BFS 步只做索引算术，不再访问字典或 List。
+/// 邻接表在构造时压成 CSR（扁平索引与权重），松弛边时不再访问字典或 List。
 /// 单源距离按需计算并缓存：图无向，所以一个方向的缓存能同时回答两个方向。
 /// 缓存不设上限——查询的不同源点越多，内存越接近 O(N²)，这是调用方的选择。
 /// </remarks>
@@ -20,6 +20,7 @@ public sealed class GraphDistanceOracle : IDistanceOracle
     private readonly Dictionary<GridPos, int> _index;   // 坐标 -> index
     private readonly int[]                    _offsets; // CSR 行起止：节点 u 的边在 [_offsets[u], _offsets[u+1])
     private readonly int[]                    _targets; // CSR 列：邻居的 index
+    private readonly byte[]                   _weights; // 与 _targets 对齐，边权为 1 或 2
 
     private readonly Dictionary<int, int[]> _bySource = new();
 
@@ -46,11 +47,16 @@ public sealed class GraphDistanceOracle : IDistanceOracle
             _offsets[i + 1] = _offsets[i] + graph.Neighbors[_nodes[i]].Count;
 
         _targets = new int[_offsets[_nodes.Length]];
+        _weights = new byte[_targets.Length];
         for (int i = 0; i < _nodes.Length; i++)
         {
             int at = _offsets[i];
             foreach (var neighbor in graph.Neighbors[_nodes[i]])
-                _targets[at++] = _index[neighbor];
+            {
+                _targets[at] = _index[neighbor.Target];
+                _weights[at] = (byte)neighbor.Weight;
+                at++;
+            }
         }
     }
 
@@ -80,7 +86,8 @@ public sealed class GraphDistanceOracle : IDistanceOracle
 
     /// <summary>
     /// 闭球：与任一源点的图距离 ≤ <paramref name="radius"/> 的全部座位。
-    /// 一次多源 BFS 就得到各单源球的并集。结果按 (Row, Col) 排序并立即求值，
+    /// 一次多源 Dijkstra 得到各单源球的并集，并按加权半径截断。
+    /// 结果按 (Row, Col) 排序并立即求值，
     /// 返回的序列不持有任何可变的共享状态。
     /// </summary>
     private GridPos[] BallCore(IEnumerable<GridPos> centers, int radius)
@@ -90,72 +97,67 @@ public sealed class GraphDistanceOracle : IDistanceOracle
         if (radius < 0)
             return Array.Empty<GridPos>();
 
-        var visited = new bool[_nodes.Length];
-        var frontier = new List<int>();
+        var distances = new int[_nodes.Length];
+        Array.Fill(distances, Unreachable);
+        var queue = new PriorityQueue<int, int>();
 
         foreach (var center in centers)
         {
-            if (_index.TryGetValue(center, out int seed) && !visited[seed])
+            if (_index.TryGetValue(center, out int seed) && distances[seed] == Unreachable)
             {
-                visited[seed] = true;
-                frontier.Add(seed);
+                distances[seed] = 0;
+                queue.Enqueue(seed, 0);
             }
         }
 
+        dijkstra(distances, queue, radius);
+
+        // 节点索引已按坐标排序，扫描即可得到稳定顺序，无需再次排序。
         var ball = new List<GridPos>();
-        for (int level = 0; frontier.Count > 0; level++)
-        {
-            foreach (int u in frontier)
-                ball.Add(_nodes[u]);
-
-            if (level == radius)
-                break; // 半径处的节点不再扩展，免去一整层无用功
-
-            var next = new List<int>();
-            foreach (int u in frontier)
-            {
-                for (int e = _offsets[u]; e < _offsets[u + 1]; e++)
-                {
-                    int v = _targets[e];
-                    if (!visited[v])
-                    {
-                        visited[v] = true;
-                        next.Add(v);
-                    }
-                }
-            }
-            frontier = next;
-        }
-
-        ball.Sort(static (a, b) => a.Row != b.Row ? a.Row.CompareTo(b.Row) : a.Col.CompareTo(b.Col));
+        for (int i = 0; i < _nodes.Length; i++)
+            if (distances[i] != Unreachable)
+                ball.Add(_nodes[i]);
         return ball.ToArray();
     }
 
-    /// <summary>从 <paramref name="source"/> 出发的完整 BFS 层数；不可达为 <see cref="Unreachable"/>。</summary>
+    /// <summary>从 <paramref name="source"/> 出发的完整加权最短距离；不可达为 <see cref="Unreachable"/>。</summary>
     private int[] DistancesFrom(int source)
     {
         var distances = new int[_nodes.Length];
         Array.Fill(distances, Unreachable);
         distances[source] = 0;
 
-        var queue = new Queue<int>();
-        queue.Enqueue(source);
-        while (queue.Count > 0)
-        {
-            int u = queue.Dequeue();
-            int next = distances[u] + 1;
-            for (int e = _offsets[u]; e < _offsets[u + 1]; e++)
-            {
-                int v = _targets[e];
-                if (distances[v] == Unreachable)
-                {
-                    distances[v] = next;
-                    queue.Enqueue(v);
-                }
-            }
-        }
+        var queue = new PriorityQueue<int, int>();
+        queue.Enqueue(source, 0);
+        dijkstra(distances, queue, int.MaxValue);
 
         _bySource[source] = distances;
         return distances;
+    }
+
+    private void dijkstra(int[] distances, PriorityQueue<int, int> queue, int radius)
+    {
+        while (queue.TryDequeue(out int u, out int distance))
+        {
+            // 同一节点可能经更短的路径重新入队，丢弃旧优先级。
+            if (distance != distances[u])
+                continue;
+
+            for (int e = _offsets[u]; e < _offsets[u + 1]; e++)
+            {
+                int weight = _weights[e];
+                // 在加法前截断，半径为 int.MaxValue 时也不会溢出。
+                if (weight > radius - distance)
+                    continue;
+
+                int v = _targets[e];
+                int next = distance + weight;
+                if (distances[v] == Unreachable || next < distances[v])
+                {
+                    distances[v] = next;
+                    queue.Enqueue(v, next);
+                }
+            }
+        }
     }
 }
