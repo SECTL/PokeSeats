@@ -18,3 +18,8 @@ public enum AxisType
     Row,
     Column
 }
+
+public sealed record Axis(
+    AxisType Type,
+    int      Index
+);

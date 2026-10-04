@@ -10,4 +10,12 @@
       <PackageReference Include="Google.OrTools" Version="9.15.6755" />
     </ItemGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\ PokeSeats.IR\PokeSeats.IR.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Models\" />
+    </ItemGroup>
+
 </Project>
