@@ -72,6 +72,8 @@ window.Render += delta =>
         pendingFramebufferSize = null;
     }
 
+    catalog!.DrainPendingEvents();
+
     gl.ClearColor(0.08f, 0.08f, 0.08f, 1.0f);
     gl.Clear(ClearBufferMask.ColorBufferBit);
     imGui!.Update((float)delta);

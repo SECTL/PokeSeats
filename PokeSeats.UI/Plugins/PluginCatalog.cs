@@ -1,4 +1,5 @@
 using System.Reflection;
+using PokeSeats.UI.Events;
 using PokeSeats.UI.PluginContracts;
 
 namespace PokeSeats.UI.Plugins;
@@ -34,12 +35,13 @@ internal sealed record WorkspaceRegistration(string Id, string DisplayName, stri
 /// first manifest in scan order owns the id).
 /// </para>
 /// </remarks>
-internal sealed class PluginCatalog : IWorkspaceContext, IDisposable
+internal sealed class PluginCatalog : IDisposable
 {
     private const string ManifestFileName = "plugin.json";
     private const int MaxDependencyDepth = 256;
 
     private readonly string _dataDirectory;
+    private readonly UiEventBus _events;
     private readonly List<PluginCandidate> _discoveryOrder = new();
     private readonly Dictionary<string, PluginCandidate> _candidatesById = new(StringComparer.Ordinal);
     private readonly List<PluginCandidate> _initializedPlugins = new();
@@ -67,6 +69,7 @@ internal sealed class PluginCatalog : IWorkspaceContext, IDisposable
             throw new ArgumentException("A plugin data directory is required.", nameof(dataDirectory));
 
         _dataDirectory = Path.GetFullPath(dataDirectory);
+        _events = new UiEventBus(Report);
 
         ScanRoot(Path.GetFullPath(builtinsDirectory));
         ScanRoot(Path.GetFullPath(pluginsDirectory));
@@ -90,6 +93,9 @@ internal sealed class PluginCatalog : IWorkspaceContext, IDisposable
     /// <summary>Font requests from validated manifests.</summary>
     public IReadOnlyList<PluginFontRequest> FontRequests => _fontRequests;
 
+    internal UiEventBus.Scope CreateEventScope() => _events.CreateScope();
+    internal void DrainPendingEvents() => _events.DrainPending();
+
     /// <summary>Disposes successfully initialized plugins in reverse initialization order.</summary>
     public void Dispose()
     {
@@ -109,9 +115,14 @@ internal sealed class PluginCatalog : IWorkspaceContext, IDisposable
             {
                 Report($"plugin '{candidate.Id}': Dispose threw {PluginDiagnostics.Describe(exception)}");
             }
+            finally
+            {
+                candidate.EventScope?.Dispose();
+            }
         }
 
         _initializedPlugins.Clear();
+        _events.Dispose();
         GC.SuppressFinalize(this);
     }
 
@@ -296,9 +307,16 @@ internal sealed class PluginCatalog : IWorkspaceContext, IDisposable
         }
 
         IUiPlugin? plugin = null;
+        PluginRegistrationContext? context = null;
         try
         {
-            var loadContext = new PluginLoadContext(manifest.Id, assemblyPath);
+            var dependencies = new Dictionary<string, Assembly>(StringComparer.OrdinalIgnoreCase);
+            foreach (string dependencyId in manifest.Dependencies)
+            {
+                Assembly dependency = _candidatesById[dependencyId].Assembly!;
+                dependencies.Add(dependency.GetName().Name!, dependency);
+            }
+            var loadContext = new PluginLoadContext(manifest.Id, assemblyPath, dependencies);
             var assembly = loadContext.LoadFromAssemblyPath(assemblyPath);
 
             var entryType = FindEntryType(assembly, manifest, out var problem);
@@ -309,7 +327,7 @@ internal sealed class PluginCatalog : IWorkspaceContext, IDisposable
             }
 
             plugin = (IUiPlugin)Activator.CreateInstance(entryType)!;
-            var context = new PluginRegistrationContext(this, manifest.Id, dataDirectory);
+            context = new PluginRegistrationContext(this, manifest.Id, dataDirectory, _events.CreateScope());
 
             // Contributions are staged in the context and committed only after Initialize
             // returns, so a failed initialization leaves no orphan contributions.
@@ -325,12 +343,15 @@ internal sealed class PluginCatalog : IWorkspaceContext, IDisposable
 
             candidate.Plugin = plugin;
             candidate.LoadContext = loadContext;
+            candidate.Assembly = assembly;
+            candidate.EventScope = context.EventScope;
             return true;
         }
         catch (Exception exception)
         {
             Report($"plugin '{manifest.Id}': initialization failed: {PluginDiagnostics.Describe(exception)}");
             DisposePluginQuietly(manifest.Id, plugin);
+            context?.EventScope.Dispose();
             return false;
         }
     }
@@ -482,9 +503,11 @@ internal sealed class PluginCatalog : IWorkspaceContext, IDisposable
         internal CandidateStatus Status { get; set; }
         internal bool FailedInCycle { get; set; }
         internal IUiPlugin? Plugin { get; set; }
+        internal UiEventBus.Scope? EventScope { get; set; }
 
         /// <summary>Keeps the load context alive for the lifetime of the catalog; contexts are never unloaded.</summary>
         internal PluginLoadContext? LoadContext { get; set; }
+        internal Assembly? Assembly { get; set; }
 
         internal static PluginCandidate ForManifest(PluginManifest manifest, string manifestPath, string assemblyPath)
             => new(manifest.Id, manifestPath, manifest, assemblyPath);
@@ -496,14 +519,16 @@ internal sealed class PluginCatalog : IWorkspaceContext, IDisposable
     private sealed class PluginRegistrationContext : IPluginContext
     {
         private readonly PluginCatalog _catalog;
+        private readonly UiEventBus.Scope _events;
         private readonly HashSet<string> _workspaceIds = new(StringComparer.Ordinal);
         private readonly HashSet<string> _viewIds = new(StringComparer.Ordinal);
         private readonly HashSet<string> _commandIds = new(StringComparer.Ordinal);
         private bool _closed;
 
-        internal PluginRegistrationContext(PluginCatalog catalog, string pluginId, string dataDirectory)
+        internal PluginRegistrationContext(PluginCatalog catalog, string pluginId, string dataDirectory, UiEventBus.Scope events)
         {
             _catalog = catalog;
+            _events = events;
             PluginId = pluginId;
             DataDirectory = dataDirectory;
         }
@@ -511,6 +536,10 @@ internal sealed class PluginCatalog : IWorkspaceContext, IDisposable
         public string PluginId { get; }
 
         public string DataDirectory { get; }
+
+        public IUiEventBus Events => _events;
+
+        internal UiEventBus.Scope EventScope => _events;
 
         internal List<WorkspaceRegistration> Workspaces { get; } = new();
 
@@ -521,45 +550,43 @@ internal sealed class PluginCatalog : IWorkspaceContext, IDisposable
         public void RegisterWorkspace(string id, string displayName, Func<IWorkspace> create)
         {
             EnsureOpen();
-            var contributionId = RequireId(id, "workspace");
+            id = RequireId(id, "workspace");
             if (string.IsNullOrWhiteSpace(displayName))
-                throw new ArgumentException("The workspace display name must not be blank.", nameof(displayName));
-            if (create is null)
-                throw new ArgumentNullException(nameof(create), "the workspace factory must not be null");
-            if (!_workspaceIds.Add(contributionId))
-                throw new InvalidOperationException($"workspace id '{contributionId}' is registered twice by plugin '{PluginId}'");
-            if (_catalog._workspaceOwners.TryGetValue(contributionId, out var owner))
-                throw new InvalidOperationException($"workspace id '{contributionId}' is already provided by plugin '{owner}'");
-            Workspaces.Add(new WorkspaceRegistration(contributionId, displayName, PluginId, create));
+                throw new ArgumentException("Workspace display name cannot be blank.", nameof(displayName));
+            ArgumentNullException.ThrowIfNull(create);
+            if (!_workspaceIds.Add(id))
+                throw new InvalidOperationException($"workspace id '{id}' is already registered by this plugin");
+            if (_catalog._workspaceOwners.TryGetValue(id, out string? owner))
+                throw new InvalidOperationException($"workspace id '{id}' is already provided by plugin '{owner}'");
+            Workspaces.Add(new WorkspaceRegistration(id, displayName, PluginId, create));
         }
 
         public void RegisterView(IUiView view)
         {
             EnsureOpen();
-            if (view is null)
-                throw new ArgumentNullException(nameof(view));
-            var contributionId = RequireId(view.Id, "view");
-            if (!_viewIds.Add(contributionId))
-                throw new InvalidOperationException($"view id '{contributionId}' is registered twice by plugin '{PluginId}'");
-            if (_catalog._viewOwners.TryGetValue(contributionId, out var owner))
-                throw new InvalidOperationException($"view id '{contributionId}' is already provided by plugin '{owner}'");
-            Views.Add((contributionId, view));
+            ArgumentNullException.ThrowIfNull(view);
+            string id = RequireId(view.Id, "view");
+            if (!_viewIds.Add(id))
+                throw new InvalidOperationException($"view id '{id}' is already registered by this plugin");
+            if (_catalog._viewOwners.TryGetValue(id, out string? owner))
+                throw new InvalidOperationException($"view id '{id}' is already provided by plugin '{owner}'");
+            Views.Add((id, view));
         }
 
         public void RegisterCommand(IUiCommand command)
         {
             EnsureOpen();
-            if (command is null)
-                throw new ArgumentNullException(nameof(command));
-            var contributionId = RequireId(command.Id, "command");
-            if (!_commandIds.Add(contributionId))
-                throw new InvalidOperationException($"command id '{contributionId}' is registered twice by plugin '{PluginId}'");
-            if (_catalog._commandOwners.TryGetValue(contributionId, out var owner))
-                throw new InvalidOperationException($"command id '{contributionId}' is already provided by plugin '{owner}'");
-            Commands.Add((contributionId, command));
+            ArgumentNullException.ThrowIfNull(command);
+            string id = RequireId(command.Id, "command");
+            if (!_commandIds.Add(id))
+                throw new InvalidOperationException($"command id '{id}' is already registered by this plugin");
+            if (_catalog._commandOwners.TryGetValue(id, out string? owner))
+                throw new InvalidOperationException($"command id '{id}' is already provided by plugin '{owner}'");
+            Commands.Add((id, command));
         }
 
         internal void Close() => _closed = true;
+
 
         private void EnsureOpen()
         {

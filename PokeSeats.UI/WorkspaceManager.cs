@@ -1,3 +1,4 @@
+using PokeSeats.UI.Events;
 using PokeSeats.UI.PluginContracts;
 using PokeSeats.UI.Plugins;
 
@@ -9,6 +10,7 @@ internal sealed class WorkspaceManager : IDisposable
     private readonly WorkspaceSelectionStore _selection;
     private readonly Dictionary<string, IWorkspace> _instances = new(StringComparer.Ordinal);
     private readonly List<string> _diagnostics = new();
+    private WorkspaceContext? _activeContext;
     private bool _disposed;
 
     public WorkspaceManager(PluginCatalog catalog, WorkspaceSelectionStore selection)
@@ -71,43 +73,30 @@ internal sealed class WorkspaceManager : IDisposable
 
         WorkspaceRegistration? previous = Active;
         IWorkspace? previousInstance = previous is null ? null : _instances[previous.Id];
+        Active = null;
         try
         {
-            previousInstance?.Deactivate();
+            DeactivateWorkspace(previousInstance);
         }
         catch (Exception exception)
         {
             Report($"Cannot deactivate workspace '{previous!.Id}': {exception.Message}");
+            Restore(previous, previousInstance);
             return false;
         }
 
-        Active = null;
         try
         {
-            next.Activate(_catalog);
+            ActivateWorkspace(next);
             Active = registration;
         }
         catch (Exception exception)
         {
             Report($"Cannot activate workspace '{id}': {exception.Message}");
-            try { next.Deactivate(); }
-            catch (Exception cleanup) { Report($"Cannot clean up workspace '{id}': {cleanup.Message}"); }
             try { next.Dispose(); }
             catch (Exception cleanup) { Report($"Cannot dispose workspace '{id}': {cleanup.Message}"); }
             _instances.Remove(id);
-
-            if (previousInstance is not null)
-            {
-                try
-                {
-                    previousInstance.Activate(_catalog);
-                    Active = previous;
-                }
-                catch (Exception restore)
-                {
-                    Report($"Cannot restore workspace '{previous!.Id}': {restore.Message}");
-                }
-            }
+            Restore(previous, previousInstance);
             return false;
         }
 
@@ -124,7 +113,7 @@ internal sealed class WorkspaceManager : IDisposable
         _disposed = true;
         if (Active is not null)
         {
-            try { _instances[Active.Id].Deactivate(); }
+            try { DeactivateWorkspace(_instances[Active.Id]); }
             catch (Exception exception) { Report($"Cannot deactivate workspace '{Active.Id}': {exception.Message}"); }
             Active = null;
         }
@@ -134,6 +123,65 @@ internal sealed class WorkspaceManager : IDisposable
             catch (Exception exception) { Report($"Cannot dispose workspace '{id}': {exception.Message}"); }
         }
         _instances.Clear();
+    }
+
+    private void ActivateWorkspace(IWorkspace workspace)
+    {
+        var context = new WorkspaceContext(_catalog, _catalog.CreateEventScope());
+        try
+        {
+            workspace.Activate(context);
+            _activeContext = context;
+        }
+        catch
+        {
+            try { workspace.Deactivate(); }
+            catch (Exception cleanup) { Report($"Cannot clean up workspace activation: {cleanup.Message}"); }
+            finally { context.Dispose(); }
+            throw;
+        }
+    }
+
+    private void DeactivateWorkspace(IWorkspace? workspace)
+    {
+        try { workspace?.Deactivate(); }
+        finally
+        {
+            _activeContext?.Dispose();
+            _activeContext = null;
+        }
+    }
+
+    private void Restore(WorkspaceRegistration? registration, IWorkspace? workspace)
+    {
+        if (workspace is null)
+            return;
+        try
+        {
+            ActivateWorkspace(workspace);
+            Active = registration;
+        }
+        catch (Exception exception)
+        {
+            Report($"Cannot restore workspace '{registration!.Id}': {exception.Message}");
+        }
+    }
+
+    private sealed class WorkspaceContext : IWorkspaceContext, IDisposable
+    {
+        private readonly PluginCatalog _catalog;
+        private readonly UiEventBus.Scope _events;
+
+        internal WorkspaceContext(PluginCatalog catalog, UiEventBus.Scope events)
+        {
+            _catalog = catalog;
+            _events = events;
+        }
+
+        public IReadOnlyList<IUiView> Views => _catalog.Views;
+        public IReadOnlyList<IUiCommand> Commands => _catalog.Commands;
+        public IUiEventBus Events => _events;
+        public void Dispose() => _events.Dispose();
     }
 
     private void Remember(string id)

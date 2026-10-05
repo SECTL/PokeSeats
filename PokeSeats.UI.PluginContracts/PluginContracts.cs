@@ -5,7 +5,7 @@ namespace PokeSeats.UI.PluginContracts;
 /// <summary>The in-process UI contract version understood by this assembly.</summary>
 public static class PluginApi
 {
-    public const int Version = 2;
+    public const int Version = 3;
 }
 
 /// <summary>One entry point per plugin manifest. All callbacks run on the UI thread.</summary>
@@ -14,11 +14,26 @@ public interface IUiPlugin : IDisposable
     void Initialize(IPluginContext context);
 }
 
+/// <summary>
+/// Type-safe, exact-type cross-plugin messages. UI-thread publishing dispatches synchronously;
+/// worker publishing queues until the next frame. Handlers run on the UI thread and exceptions
+/// are isolated. Subscriptions and queued publications expire with their owning scope.
+/// </summary>
+public interface IUiEventBus
+{
+    /// <summary>Returns an idempotent unsubscribe token. No history is replayed.</summary>
+    IDisposable Subscribe<TMessage>(Action<TMessage> handler) where TMessage : notnull;
+    /// <summary>Publish immutable data; a released scope throws ObjectDisposedException.</summary>
+    void Publish<TMessage>(TMessage message) where TMessage : notnull;
+}
+
 /// <summary>Registrations belong to this plugin and are committed only after initialization succeeds.</summary>
 public interface IPluginContext
 {
     string PluginId { get; }
     string DataDirectory { get; }
+    /// <summary>Valid until failed initialization cleanup or plugin disposal completes.</summary>
+    IUiEventBus Events { get; }
     /// <summary>Factory creates a fresh instance. The host retains and disposes it.</summary>
     void RegisterWorkspace(string id, string displayName, Func<IWorkspace> create);
     void RegisterView(IUiView view);
@@ -38,6 +53,8 @@ public interface IWorkspaceContext
 {
     IReadOnlyList<IUiView> Views { get; }
     IReadOnlyList<IUiCommand> Commands { get; }
+    /// <summary>Valid for this activation only; the host releases it after Deactivate, even on failure.</summary>
+    IUiEventBus Events { get; }
 }
 
 /// <summary>

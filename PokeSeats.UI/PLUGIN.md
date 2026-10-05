@@ -29,7 +29,7 @@ plugins/
 ```json
 {
   "id": "example",
-  "apiVersion": 2,
+  "apiVersion": 3,
   "assembly": "Example.Plugin.dll",
   "entryPoint": "Example.Plugin.Plugin",
   "dependencies": [],
@@ -72,6 +72,65 @@ plugins/
 
 仅在 `Initialize` 内部注册贡献项。工作区工厂必须返回全新实例：宿主在切换期间保留它，并在释放插件前先释放它。所有生命周期和绘制回调都在 UI 线程上运行。平衡 ImGui `Begin`/`End` 调用；插件不得调用 `NewFrame`、`EndFrame`、`Render`，也不得销毁共享上下文。插件绘制异常或本地/上下文损坏无法被宿主安全恢复。
 
+## 插件间消息
+
+API 版本为 `3`。插件初始化通过 `IPluginContext.Events` 获取消息总线；工作区每次激活通过 `IWorkspaceContext.Events` 获取新的作用域。两者连接同一个宿主总线，不需要全局静态事件或业务服务注册表。
+
+```csharp
+// 放在提供者插件的入口程序集里，供消费者引用。
+public sealed record SelectionChanged(string PersonId);
+
+// 提供者：例如在面板点击后发送。
+context.Events.Publish(new SelectionChanged("person-42"));
+
+// 消费者：订阅返回 IDisposable，可提前取消；否则宿主自动回收。
+IDisposable subscription = context.Events.Subscribe<SelectionChanged>(message =>
+{
+    selectedPersonId = message.PersonId;
+});
+```
+
+消费者项目引用定义消息的提供者程序集，并在 `plugin.json` 的 `dependencies` 中声明提供者插件 ID。宿主共享这些直接依赖插件的已加载入口程序集，即使消费者目录里带了一份相同 DLL，也不会重复加载消息类型。不要把同名消息类分别复制到两个插件中；未声明依赖的私有 DLL（包括单独的消息契约 DLL）仍各自加载，不保证类型身份一致。消息总线按 `Publish<TMessage>` 的精确 .NET 类型匹配，不向基类或接口订阅广播。
+
+分发规则：
+
+- UI 线程发布同步分发，嵌套发布也同步执行；回调应保持短小，并避免递归发布同一消息。
+- 后台线程发布进入队列；宿主在下一帧开始、ImGui `Update` 之前按入队顺序分发当时待处理的消息。所有处理函数都在 UI 线程执行；消息处理用于更新状态，不应直接绘制 ImGui。
+- 消息不做历史回放。后台消息在分发时匹配仍有效的订阅；消息对象应不可变，发布后不要继续修改它。
+- 处理函数的托管异常逐个记录，其他订阅者继续执行。取消订阅不等待已开始的回调结束。
+- 插件初始化失败或插件释放后，宿主回收其所有订阅；工作区的 `Deactivate` 结束后（包括抛异常）回收本次激活的订阅。激活失败也会回收，新一次激活须重新订阅。
+- 已释放作用域不能再发布或订阅，会抛出 `ObjectDisposedException`；此前由该作用域排队、尚未分发的消息会丢弃。停用工作区不会取消通过插件初始化作用域创建的订阅。
+
+例如，工作区只在激活期间接收消息：
+
+```csharp
+public sealed class SelectionWorkspace : IWorkspace
+{
+    private string? _selectedPersonId;
+
+    public void Activate(IWorkspaceContext context)
+    {
+        context.Events.Subscribe<SelectionChanged>(message =>
+            _selectedPersonId = message.PersonId);
+    }
+
+    public void Draw(float deltaSeconds)
+    {
+        ImGuiNET.ImGui.DockSpaceOverViewport();
+        bool visible = ImGuiNET.ImGui.Begin("Selection");
+        try
+        {
+            if (visible)
+                ImGuiNET.ImGui.Text(_selectedPersonId ?? "No selection");
+        }
+        finally { ImGuiNET.ImGui.End(); }
+    }
+
+    public void Deactivate() { } // 宿主回收本次 Activate 的订阅。
+    public void Dispose() { }
+}
+```
+
 ## 内置插件与构建
 
 `PokeSeats.UI.DefaultPlugin` 提供默认停靠工作区、通用面板切换菜单、贡献命令和性能面板。它作为单独的 DLL 构建，并在 `dotnet build` 和 `dotnet publish` 期间部署到 `builtins/pokeseats.default`；可执行文件在运行时不会引用其实现。内置插件与外部插件使用完全相同的清单和注册契约。
@@ -82,4 +141,4 @@ dotnet run --project PokeSeats.UI
 dotnet publish PokeSeats.UI -c Release
 ```
 
-这次切换将停靠和帧时间 UI 移出了宿主，增加了运行时 DLL 发现和归属贡献注册，并引入了带有记忆选择的完整工作区替换。
+当前宿主将停靠和帧时间 UI 移至插件，以运行时 DLL 发现和归属贡献注册支持带记忆选择的完整工作区替换。API 3 新增类型安全的插件间消息、后台发布的 UI 线程分发、插件/工作区作用域自动清理，以及声明依赖插件的入口程序集共享。
