@@ -6,6 +6,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PokeSeats.Core", "PokeSeats
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PokeSeats.UI", "PokeSeats.UI\PokeSeats.UI.csproj", "{9E72300B-66CC-4EEB-9E21-5E146244DECB}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PokeSeats.UI.PluginContracts", "PokeSeats.UI.PluginContracts\PokeSeats.UI.PluginContracts.csproj", "{0A2EE4C8-885D-4C6D-A4AB-0E3BAE9C1A01}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PokeSeats.UI.DefaultPlugin", "PokeSeats.UI.DefaultPlugin\PokeSeats.UI.DefaultPlugin.csproj", "{6B2A0EE4-E4E0-4CA0-98BE-A8F73F65CB66}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -24,5 +28,13 @@ Global
 		{9E72300B-66CC-4EEB-9E21-5E146244DECB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9E72300B-66CC-4EEB-9E21-5E146244DECB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9E72300B-66CC-4EEB-9E21-5E146244DECB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0A2EE4C8-885D-4C6D-A4AB-0E3BAE9C1A01}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0A2EE4C8-885D-4C6D-A4AB-0E3BAE9C1A01}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0A2EE4C8-885D-4C6D-A4AB-0E3BAE9C1A01}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0A2EE4C8-885D-4C6D-A4AB-0E3BAE9C1A01}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6B2A0EE4-E4E0-4CA0-98BE-A8F73F65CB66}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6B2A0EE4-E4E0-4CA0-98BE-A8F73F65CB66}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6B2A0EE4-E4E0-4CA0-98BE-A8F73F65CB66}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6B2A0EE4-E4E0-4CA0-98BE-A8F73F65CB66}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

@@ -21,6 +21,42 @@
       <PackageReference Include="ImGui.NET" Version="1.91.6.1" />
       <PackageReference Include="Silk.NET" Version="2.23.0" />
       <PackageReference Include="Silk.NET.OpenGL.Extensions.ImGui" Version="2.23.0" />
+      <PackageReference Include="SixLabors.Fonts" Version="2.1.3" />
     </ItemGroup>
+
+    <ItemGroup>
+      <EmbeddedResource Include="Fonts\Assets\HarmonyOS_Sans_SC_Regular.ttf" LogicalName="PokeSeats.UI.Fonts.Assets.HarmonyOS_Sans_SC_Regular.ttf" />
+      <None Include="Fonts\Assets\LICENSE_Fonts" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\PokeSeats.UI.PluginContracts\PokeSeats.UI.PluginContracts.csproj" />
+      <ProjectReference Include="..\PokeSeats.UI.DefaultPlugin\PokeSeats.UI.DefaultPlugin.csproj" ReferenceOutputAssembly="false" />
+    </ItemGroup>
+
+    <Target Name="GetBuiltinPluginFiles" DependsOnTargets="ResolveProjectReferences">
+      <MSBuild Projects="..\PokeSeats.UI.DefaultPlugin\PokeSeats.UI.DefaultPlugin.csproj"
+               Targets="GetTargetPath" Properties="Configuration=$(Configuration)">
+        <Output TaskParameter="TargetOutputs" ItemName="BuiltinPluginAssembly" />
+      </MSBuild>
+      <ItemGroup>
+        <BuiltinPluginFiles Include="@(BuiltinPluginAssembly)" />
+        <BuiltinPluginFiles Include="..\PokeSeats.UI.DefaultPlugin\plugin.json" />
+      </ItemGroup>
+    </Target>
+
+    <Target Name="CopyBuiltinPlugin" AfterTargets="Build" DependsOnTargets="GetBuiltinPluginFiles">
+      <Copy SourceFiles="@(BuiltinPluginFiles)"
+            DestinationFolder="$(TargetDir)builtins\pokeseats.default" SkipUnchangedFiles="true" />
+    </Target>
+
+    <Target Name="PublishBuiltinPlugin" BeforeTargets="ComputeFilesToPublish" DependsOnTargets="GetBuiltinPluginFiles">
+      <ItemGroup>
+        <ResolvedFileToPublish Include="@(BuiltinPluginFiles)">
+          <RelativePath>builtins\pokeseats.default\%(Filename)%(Extension)</RelativePath>
+          <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+        </ResolvedFileToPublish>
+      </ItemGroup>
+    </Target>
 
 </Project>

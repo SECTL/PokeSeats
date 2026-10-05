@@ -1,0 +1,153 @@
+using PokeSeats.UI.PluginContracts;
+using PokeSeats.UI.Plugins;
+
+namespace PokeSeats.UI;
+
+internal sealed class WorkspaceManager : IDisposable
+{
+    private readonly PluginCatalog _catalog;
+    private readonly WorkspaceSelectionStore _selection;
+    private readonly Dictionary<string, IWorkspace> _instances = new(StringComparer.Ordinal);
+    private readonly List<string> _diagnostics = new();
+    private bool _disposed;
+
+    public WorkspaceManager(PluginCatalog catalog, WorkspaceSelectionStore selection)
+    {
+        _catalog = catalog;
+        _selection = selection;
+        string? preferredId = selection.Read();
+        if (preferredId is not null)
+        {
+            WorkspaceRegistration? preferred = Workspaces.FirstOrDefault(item => item.Id == preferredId);
+            if (preferred is not null && Switch(preferred.Id, remember: false))
+                return;
+        }
+
+        foreach (WorkspaceRegistration registration in Workspaces)
+        {
+            if (registration.Id != preferredId && Switch(registration.Id, remember: false))
+                break;
+        }
+    }
+
+    public IReadOnlyList<WorkspaceRegistration> Workspaces => _catalog.Workspaces;
+    public IReadOnlyList<string> Diagnostics => _diagnostics;
+    public IReadOnlyList<string> PluginDiagnostics => _catalog.Diagnostics;
+    public WorkspaceRegistration? Active { get; private set; }
+
+    public void Draw(float deltaSeconds)
+    {
+        if (Active is not null)
+            _instances[Active.Id].Draw(deltaSeconds);
+    }
+
+    // Called outside an ImGui frame so an outgoing workspace never draws after deactivation.
+    public bool Switch(string id, bool remember = true)
+    {
+        WorkspaceRegistration? registration = Workspaces.FirstOrDefault(item => item.Id == id);
+        if (registration is null)
+            return false;
+        if (Active?.Id == id)
+        {
+            if (remember)
+                Remember(id);
+            return true;
+        }
+
+        IWorkspace next;
+        try
+        {
+            if (!_instances.TryGetValue(id, out next!))
+            {
+                next = registration.Create() ?? throw new InvalidOperationException("Workspace factory returned null.");
+                _instances.Add(id, next);
+            }
+        }
+        catch (Exception exception)
+        {
+            Report($"Cannot create workspace '{id}': {exception.Message}");
+            return false;
+        }
+
+        WorkspaceRegistration? previous = Active;
+        IWorkspace? previousInstance = previous is null ? null : _instances[previous.Id];
+        try
+        {
+            previousInstance?.Deactivate();
+        }
+        catch (Exception exception)
+        {
+            Report($"Cannot deactivate workspace '{previous!.Id}': {exception.Message}");
+            return false;
+        }
+
+        Active = null;
+        try
+        {
+            next.Activate(_catalog);
+            Active = registration;
+        }
+        catch (Exception exception)
+        {
+            Report($"Cannot activate workspace '{id}': {exception.Message}");
+            try { next.Deactivate(); }
+            catch (Exception cleanup) { Report($"Cannot clean up workspace '{id}': {cleanup.Message}"); }
+            try { next.Dispose(); }
+            catch (Exception cleanup) { Report($"Cannot dispose workspace '{id}': {cleanup.Message}"); }
+            _instances.Remove(id);
+
+            if (previousInstance is not null)
+            {
+                try
+                {
+                    previousInstance.Activate(_catalog);
+                    Active = previous;
+                }
+                catch (Exception restore)
+                {
+                    Report($"Cannot restore workspace '{previous!.Id}': {restore.Message}");
+                }
+            }
+            return false;
+        }
+
+        Console.WriteLine($"Workspace activated: {registration.Id}");
+        if (remember)
+            Remember(id);
+        return true;
+    }
+
+    public void Dispose()
+    {
+        if (_disposed)
+            return;
+        _disposed = true;
+        if (Active is not null)
+        {
+            try { _instances[Active.Id].Deactivate(); }
+            catch (Exception exception) { Report($"Cannot deactivate workspace '{Active.Id}': {exception.Message}"); }
+            Active = null;
+        }
+        foreach (var (id, workspace) in _instances.Reverse())
+        {
+            try { workspace.Dispose(); }
+            catch (Exception exception) { Report($"Cannot dispose workspace '{id}': {exception.Message}"); }
+        }
+        _instances.Clear();
+    }
+
+    private void Remember(string id)
+    {
+        try { _selection.Write(id); }
+        catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
+        {
+            Report($"Workspace switched, but selection could not be saved: {exception.Message}");
+        }
+    }
+
+    private void Report(string message)
+    {
+        _diagnostics.Add(message);
+        Console.Error.WriteLine(message);
+    }
+}
