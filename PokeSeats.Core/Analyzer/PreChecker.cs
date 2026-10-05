@@ -1,4 +1,3 @@
-using PokeSeats.Core.Rules;
 using PokeSeats.IR.Base;
 using PokeSeats.IR.Rules;
 

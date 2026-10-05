@@ -2,7 +2,7 @@ using PokeSeats.Core.Graphing;
 using PokeSeats.IR.Base;
 using PokeSeats.IR.Rules;
 
-namespace PokeSeats.Core.Rules;
+namespace PokeSeats.Core.Analyzer;
 
 /// <summary>
 /// 规则正向基础支持（Positive/Base Support）的统计结果。
