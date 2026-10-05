@@ -45,14 +45,14 @@ internal sealed class PluginCatalog : IWorkspaceContext, IDisposable
     private readonly List<PluginCandidate> _initializedPlugins = new();
     private readonly List<string> _diagnostics = new();
     private readonly Dictionary<string, string> _workspaceOwners = new(StringComparer.Ordinal);
-    private readonly Dictionary<string, string> _panelOwners = new(StringComparer.Ordinal);
+    private readonly Dictionary<string, string> _viewOwners = new(StringComparer.Ordinal);
     private readonly Dictionary<string, string> _commandOwners = new(StringComparer.Ordinal);
     private readonly List<WorkspaceRegistration> _workspaceRegistrations = new();
-    private readonly List<(string Id, IUiPanel Panel)> _panelRegistrations = new();
+    private readonly List<(string Id, IUiView View)> _viewRegistrations = new();
     private readonly List<(string Id, IUiCommand Command)> _commandRegistrations = new();
 
     private IReadOnlyList<WorkspaceRegistration> _workspaces = Array.Empty<WorkspaceRegistration>();
-    private IReadOnlyList<IUiPanel> _panels = Array.Empty<IUiPanel>();
+    private IReadOnlyList<IUiView> _views = Array.Empty<IUiView>();
     private IReadOnlyList<IUiCommand> _commands = Array.Empty<IUiCommand>();
     private IReadOnlyList<PluginFontRequest> _fontRequests = Array.Empty<PluginFontRequest>();
     private bool _disposed;
@@ -75,14 +75,11 @@ internal sealed class PluginCatalog : IWorkspaceContext, IDisposable
         SnapshotFontRequests();
     }
 
-    /// <summary>
-    /// Workspaces from successfully initialized plugins, ordered by display name (ordinal,
-    /// ignoring case) and then by id (ordinal).
-    /// </summary>
+    /// <summary>Workspaces from successfully initialized plugins, ordered by display name.</summary>
     public IReadOnlyList<WorkspaceRegistration> Workspaces => _workspaces;
 
-    /// <summary>Panels from successfully initialized plugins, ordered by id (ordinal).</summary>
-    public IReadOnlyList<IUiPanel> Panels => _panels;
+    /// <summary>Views from successfully initialized plugins, ordered by id (ordinal).</summary>
+    public IReadOnlyList<IUiView> Views => _views;
 
     /// <summary>Commands from successfully initialized plugins, ordered by id (ordinal).</summary>
     public IReadOnlyList<IUiCommand> Commands => _commands;
@@ -90,17 +87,10 @@ internal sealed class PluginCatalog : IWorkspaceContext, IDisposable
     /// <summary>Human-readable load diagnostics; every entry has already been written to stderr.</summary>
     public IReadOnlyList<string> Diagnostics => _diagnostics;
 
-    /// <summary>
-    /// Font requests from manifests that passed validation, in discovery order and deduplicated by
-    /// family (the first declaration owns a family). The host applies them while the ImGui font
-    /// atlas is built.
-    /// </summary>
+    /// <summary>Font requests from validated manifests.</summary>
     public IReadOnlyList<PluginFontRequest> FontRequests => _fontRequests;
 
-    /// <summary>
-    /// Disposes successfully initialized plugins in reverse initialization order. Workspaces
-    /// belong to the caller's workspace manager and are not touched here.
-    /// </summary>
+    /// <summary>Disposes successfully initialized plugins in reverse initialization order.</summary>
     public void Dispose()
     {
         if (_disposed) return;
@@ -398,10 +388,10 @@ internal sealed class PluginCatalog : IWorkspaceContext, IDisposable
             _workspaceOwners.Add(workspace.Id, context.PluginId);
         }
 
-        foreach (var (id, panel) in context.Panels)
+        foreach (var (id, view) in context.Views)
         {
-            _panelRegistrations.Add((id, panel));
-            _panelOwners.Add(id, context.PluginId);
+            _viewRegistrations.Add((id, view));
+            _viewOwners.Add(id, context.PluginId);
         }
 
         foreach (var (id, command) in context.Commands)
@@ -432,9 +422,9 @@ internal sealed class PluginCatalog : IWorkspaceContext, IDisposable
             .OrderBy(workspace => workspace.DisplayName, StringComparer.OrdinalIgnoreCase)
             .ThenBy(workspace => workspace.Id, StringComparer.Ordinal)
             .ToArray();
-        _panels = _panelRegistrations
-            .OrderBy(panel => panel.Id, StringComparer.Ordinal)
-            .Select(panel => panel.Panel)
+        _views = _viewRegistrations
+            .OrderBy(view => view.Id, StringComparer.Ordinal)
+            .Select(view => view.View)
             .ToArray();
         _commands = _commandRegistrations
             .OrderBy(command => command.Id, StringComparer.Ordinal)
@@ -507,7 +497,7 @@ internal sealed class PluginCatalog : IWorkspaceContext, IDisposable
     {
         private readonly PluginCatalog _catalog;
         private readonly HashSet<string> _workspaceIds = new(StringComparer.Ordinal);
-        private readonly HashSet<string> _panelIds = new(StringComparer.Ordinal);
+        private readonly HashSet<string> _viewIds = new(StringComparer.Ordinal);
         private readonly HashSet<string> _commandIds = new(StringComparer.Ordinal);
         private bool _closed;
 
@@ -524,7 +514,7 @@ internal sealed class PluginCatalog : IWorkspaceContext, IDisposable
 
         internal List<WorkspaceRegistration> Workspaces { get; } = new();
 
-        internal List<(string Id, IUiPanel Panel)> Panels { get; } = new();
+        internal List<(string Id, IUiView View)> Views { get; } = new();
 
         internal List<(string Id, IUiCommand Command)> Commands { get; } = new();
 
@@ -543,17 +533,17 @@ internal sealed class PluginCatalog : IWorkspaceContext, IDisposable
             Workspaces.Add(new WorkspaceRegistration(contributionId, displayName, PluginId, create));
         }
 
-        public void RegisterPanel(IUiPanel panel)
+        public void RegisterView(IUiView view)
         {
             EnsureOpen();
-            if (panel is null)
-                throw new ArgumentNullException(nameof(panel));
-            var contributionId = RequireId(panel.Id, "panel");
-            if (!_panelIds.Add(contributionId))
-                throw new InvalidOperationException($"panel id '{contributionId}' is registered twice by plugin '{PluginId}'");
-            if (_catalog._panelOwners.TryGetValue(contributionId, out var owner))
-                throw new InvalidOperationException($"panel id '{contributionId}' is already provided by plugin '{owner}'");
-            Panels.Add((contributionId, panel));
+            if (view is null)
+                throw new ArgumentNullException(nameof(view));
+            var contributionId = RequireId(view.Id, "view");
+            if (!_viewIds.Add(contributionId))
+                throw new InvalidOperationException($"view id '{contributionId}' is registered twice by plugin '{PluginId}'");
+            if (_catalog._viewOwners.TryGetValue(contributionId, out var owner))
+                throw new InvalidOperationException($"view id '{contributionId}' is already provided by plugin '{owner}'");
+            Views.Add((contributionId, view));
         }
 
         public void RegisterCommand(IUiCommand command)

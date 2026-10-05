@@ -29,7 +29,7 @@ plugins/
 ```json
 {
   "id": "example",
-  "apiVersion": 1,
+  "apiVersion": 2,
   "assembly": "Example.Plugin.dll",
   "entryPoint": "Example.Plugin.Plugin",
   "dependencies": [],
@@ -42,8 +42,7 @@ plugins/
   ]
 }
 ```
-
-`fonts` 是可选的。每个请求指定一个字族、一个 8 到 128 之间的 `sizePixels` 值，以及一个字形范围（`Default`、`ChineseSimplifiedCommon`、`ChineseFull`、`Cyrillic`、`Greek`、`Japanese`、`Korean`、`Thai` 或 `Vietnamese`）。请求仅从通过宿主验证的清单中读取；宿主在构建 ImGui 字体图集之前解析它们。`HarmonyOS Sans SC` 已嵌入宿主，不需要系统安装。其他字族在 Windows、Linux 和 macOS 的常用系统字体目录中解析，优先选择 Regular 字形。缺失的字体会记录日志并跳过，不会阻止插件启动。请求按字族去重，第一个声明的字族拥有该字族，第一个成功加载的请求会成为默认的 ImGui 字体。宿主拥有图集和字体纹理的生命周期，因此插件不得自行调用 `AddFontFromFileTTF`。
+`fonts` 是可选的。每个请求指定一个字族、一个 8 到 128 之间的 `sizePixels` 值，以及一个字形范围（`Default`、`ChineseSimplifiedCommon`、`ChineseFull`、`Cyrillic`、`Greek`、`Japanese`、`Korean`、`Thai` 或 `Vietnamese`）。宿主在构建 ImGui 字体图集之前解析这些请求；为兼容已有清单，`ChineseSimplifiedCommon` 当前按完整中文范围加载，以覆盖 GB2312 中的“帧”等字符。`HarmonyOS Sans SC` 已嵌入宿主，不需要系统安装。其他字族在 Windows、Linux 和 macOS 的常用系统字体目录中解析，优先选择 Regular 字形。缺失的字体会记录日志并跳过，不会阻止插件启动。请求按字族去重，第一个声明的字族拥有该字族，第一个成功加载的请求会成为默认的 ImGui 字体。宿主拥有图集和字体纹理的生命周期，因此插件不得自行调用 `AddFontFromFileTTF`。
 
 宿主以 HarmonyOS Sans Fonts License Agreement 提供未修改的 `HarmonyOS Sans SC` Regular 字形。版权声明和许可证随应用一起分发，默认工作区在其帮助菜单中展示所需的署名。字体随应用捆绑，不作为独立字体包分发。
 

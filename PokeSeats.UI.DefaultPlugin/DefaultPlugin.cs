@@ -16,7 +16,7 @@ public sealed class DefaultPlugin : IUiPlugin
         ArgumentNullException.ThrowIfNull(context);
 
         context.RegisterWorkspace(WorkspaceId, "默认工作区", static () => new DefaultWorkspace());
-        context.RegisterPanel(new PerformancePanel());
+        context.RegisterView(new PerformancePanel());
     }
 
     public void Dispose()

@@ -1,12 +1,13 @@
 using ImGuiNET;
 using PokeSeats.UI.PluginContracts;
+using System.Numerics;
 
 namespace PokeSeats.UI.DefaultPlugin;
 
 /// <summary>
 /// Default workspace: owns the viewport dockspace and the main menu (panel toggles and
-/// contributed commands) and draws every visible contributed panel. Panels draw their own
-/// windows; this class never touches the ImGui frame or context lifecycle.
+/// contributed commands) and draws every visible contributed panel. Panels draw content only;
+/// this class owns their window lifetime and layout.
 /// </summary>
 internal sealed class DefaultWorkspace : IWorkspace
 {
@@ -25,25 +26,23 @@ internal sealed class DefaultWorkspace : IWorkspace
 
     public void Draw(float deltaSeconds)
     {
-        // Kept in the same order as the previous host loop: dockspace first, windows afterwards.
         ImGui.DockSpaceOverViewport();
-
         DrawMainMenuBar();
 
         IWorkspaceContext? context = _context;
         if (context is null)
             return;
 
-        foreach (IUiPanel panel in context.Panels)
+        foreach (IUiView view in context.Views)
         {
-            if (IsPanelVisible(panel.Id))
-                panel.Draw(deltaSeconds);
+            if (IsViewVisible(view.Id))
+                DrawView(view, deltaSeconds);
         }
     }
 
     public void Deactivate()
     {
-        // Visible-panel choices deliberately survive deactivation.
+        // Visible-view choices deliberately survive deactivation.
         _context = null;
     }
 
@@ -52,6 +51,21 @@ internal sealed class DefaultWorkspace : IWorkspace
         _context = null;
         _panelVisibility.Clear();
         IsDisposed = true;
+    }
+
+    private void DrawView(IUiView view, float deltaSeconds)
+    {
+        if (view.MinimumSize is { } minimumSize)
+            ImGui.SetNextWindowSizeConstraints(minimumSize, new Vector2(float.MaxValue, float.MaxValue));
+
+        bool open = true;
+        string title = $"{view.DisplayName}###{view.Id}";
+        if (ImGui.Begin(title, ref open))
+            view.DrawContent(deltaSeconds);
+        ImGui.End();
+
+        if (!open)
+            SetViewVisible(view.Id, false);
     }
 
     private void DrawMainMenuBar()
@@ -70,20 +84,20 @@ internal sealed class DefaultWorkspace : IWorkspace
 
         if (ImGui.BeginMenu("面板"))
         {
-            if (context is null || context.Panels.Count == 0)
+            if (context is null || context.Views.Count == 0)
             {
                 ImGui.MenuItem("（未注册面板）", null, false, false);
             }
             else
             {
-                foreach (IUiPanel panel in context.Panels)
+                foreach (IUiView view in context.Views)
                 {
-                    bool visible = IsPanelVisible(panel.Id);
-                    ImGui.PushID(panel.Id);
-                    bool clicked = ImGui.MenuItem(panel.DisplayName, null, visible, true);
+                    bool visible = IsViewVisible(view.Id);
+                    ImGui.PushID(view.Id);
+                    bool clicked = ImGui.MenuItem(view.DisplayName, null, visible, true);
                     ImGui.PopID();
                     if (clicked)
-                        SetPanelVisible(panel.Id, !visible);
+                        SetViewVisible(view.Id, !visible);
                 }
             }
 
@@ -109,10 +123,10 @@ internal sealed class DefaultWorkspace : IWorkspace
         pendingCommand?.Execute();
     }
 
-    /// <summary>Panels a workspace has not seen yet start visible; explicit choices stick.</summary>
-    private bool IsPanelVisible(string panelId)
-        => !_panelVisibility.TryGetValue(panelId, out bool visible) || visible;
+    /// <summary>Views a workspace has not seen yet start visible; explicit choices stick.</summary>
+    private bool IsViewVisible(string viewId)
+        => !_panelVisibility.TryGetValue(viewId, out bool visible) || visible;
 
-    private void SetPanelVisible(string panelId, bool visible)
-        => _panelVisibility[panelId] = visible;
+    private void SetViewVisible(string viewId, bool visible)
+        => _panelVisibility[viewId] = visible;
 }

@@ -82,7 +82,7 @@ internal static class PluginManifestParser
             var declaredId = id;
 
             if (!TryReadInt32(root, "apiVersion", out var apiVersion))
-                return new ManifestParseResult(null, declaredId, "missing or invalid \"apiVersion\" (this host expects the integer 1)");
+                return new ManifestParseResult(null, declaredId, $"missing or invalid \"apiVersion\" (this host expects the integer {PluginApi.Version})");
             if (apiVersion != PluginApi.Version)
                 return new ManifestParseResult(null, declaredId,
                     $"unsupported apiVersion {apiVersion}; this host supports apiVersion {PluginApi.Version}");

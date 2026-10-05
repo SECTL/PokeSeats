@@ -167,8 +167,9 @@ internal static class PluginFontLoader
         => range switch
         {
             "Default" => fonts.GetGlyphRangesDefault(),
-            "ChineseSimplifiedCommon" => fonts.GetGlyphRangesChineseSimplifiedCommon(),
-            "ChineseFull" => fonts.GetGlyphRangesChineseFull(),
+            // Keep the manifest name for compatibility, but load the complete Chinese range.
+            // The common preset omits valid GB2312 characters such as 帧.
+            "ChineseSimplifiedCommon" or "ChineseFull" => fonts.GetGlyphRangesChineseFull(),
             "Cyrillic" => fonts.GetGlyphRangesCyrillic(),
             "Greek" => fonts.GetGlyphRangesGreek(),
             "Japanese" => fonts.GetGlyphRangesJapanese(),
