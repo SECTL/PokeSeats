@@ -8,6 +8,9 @@ public static class PluginApi
     public const int Version = 3;
 }
 
+/// <summary>Published to request a graceful shutdown of the host application.</summary>
+public sealed record ApplicationExitRequested;
+
 /// <summary>One entry point per plugin manifest. All callbacks run on the UI thread.</summary>
 public interface IUiPlugin : IDisposable
 {
@@ -43,7 +46,7 @@ public interface IPluginContext
 /// <summary>Owns the entire application content area, including layout, window chrome, and navigation.</summary>
 public interface IWorkspace : IDisposable
 {
-    void Activate(IWorkspaceContext context);
+    void Activate(IWorkspaceContext _context);
     void Draw(float deltaSeconds);
     void Deactivate();
 }
@@ -67,7 +70,8 @@ public interface IUiView
     string DisplayName { get; }
 
     /// <summary>
-    /// Minimum content window size. Null means the view supports responsive layout and can use any available space.
+    /// Minimum window size in reference pixels; workspaces multiply by UiScale.Current.
+    /// Null means the view supports responsive layout and can use any available space.
     /// </summary>
     Vector2? MinimumSize => null;
 
