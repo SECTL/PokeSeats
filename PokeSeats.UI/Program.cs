@@ -7,11 +7,12 @@ using Silk.NET.Windowing;
 using PokeSeats.UI;
 using PokeSeats.UI.Fonts;
 using PokeSeats.UI.Plugins;
+using PokeSeats.UI.PluginContracts;
 
 
 var options = WindowOptions.Default with
 {
-    Size = new Vector2D<int>(1280, 720),
+    Size = new Vector2D<int>((int)UiScale.ReferenceWidth, (int)UiScale.ReferenceHeight),
     Title = "PokeSeats 戳座",
     API = GraphicsAPI.Default,
     VSync = true,
@@ -24,10 +25,12 @@ using var window = Window.Create(options);
 GL? gl = null;
 IInputContext? input = null;
 ImGuiController? imGui = null;
+FontAtlasScaling? fontAtlasScaling = null;
 PluginCatalog? catalog = null;
 WorkspaceManager? workspaces = null;
 WorkspaceSelector? selector = null;
 Vector2D<int>? pendingFramebufferSize = null;
+var scaling = new UiScaling();
 
 window.Load += () =>
 {
@@ -51,9 +54,15 @@ window.Load += () =>
         io.ConfigFlags |= ImGuiConfigFlags.DockingEnable;
         PluginFontLoader.AddRequestedFonts(io.Fonts, fontRequests);
     });
+    // The controller starts a frame in its constructor; unlock the atlas before resizing it.
+    imGui.Render();
+    fontAtlasScaling = new FontAtlasScaling(gl);
 
-    workspaces = new WorkspaceManager(catalog, new WorkspaceSelectionStore());
+    scaling.CaptureStyle();
+    workspaces = new WorkspaceManager(catalog, new WorkspaceSelectionStore(), scaling);
     selector = new WorkspaceSelector(workspaces);
+    
+    catalog.CreateEventScope().Subscribe<ApplicationExitRequested>(_ => window.Close());
 };
 
 window.FramebufferResize += size =>
@@ -63,7 +72,7 @@ window.FramebufferResize += size =>
 
 window.Render += delta =>
 {
-    if (gl is null)
+    if (gl is null || window.Size.X <= 0 || window.Size.Y <= 0)
         return;
 
     if (pendingFramebufferSize is { } framebufferSize)
@@ -73,13 +82,21 @@ window.Render += delta =>
     }
 
     catalog!.DrainPendingEvents();
+    var viewportSize = new System.Numerics.Vector2(window.Size.X, window.Size.Y);
+    scaling.HandleShortcut(input!, viewportSize);
 
     gl.ClearColor(0.08f, 0.08f, 0.08f, 1.0f);
     gl.Clear(ClearBufferMask.ColorBufferBit);
+    scaling.Apply(viewportSize);
+    float pixelDensity = MathF.Max(
+        window.FramebufferSize.X / (float)window.Size.X,
+        window.FramebufferSize.Y / (float)window.Size.Y);
+    fontAtlasScaling!.Apply(UiScale.Current, pixelDensity);
     imGui!.Update((float)delta);
     selector!.HandleShortcut(input!);
     workspaces!.Draw((float)delta);
     selector.Draw();
+    scaling.DrawScaleIndicator();
     imGui.Render();
     selector.ApplyPendingSwitch();
 };
@@ -88,6 +105,7 @@ window.Closing += () =>
 {
     workspaces?.Dispose();
     catalog?.Dispose();
+    fontAtlasScaling?.Dispose();
     imGui?.Dispose();
     input?.Dispose();
     gl?.Dispose();

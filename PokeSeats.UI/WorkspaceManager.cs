@@ -8,15 +8,17 @@ internal sealed class WorkspaceManager : IDisposable
 {
     private readonly PluginCatalog _catalog;
     private readonly WorkspaceSelectionStore _selection;
+    private readonly UiScaling _scaling;
     private readonly Dictionary<string, IWorkspace> _instances = new(StringComparer.Ordinal);
     private readonly List<string> _diagnostics = new();
     private WorkspaceContext? _activeContext;
     private bool _disposed;
 
-    public WorkspaceManager(PluginCatalog catalog, WorkspaceSelectionStore selection)
+    public WorkspaceManager(PluginCatalog catalog, WorkspaceSelectionStore selection, UiScaling scaling)
     {
         _catalog = catalog;
         _selection = selection;
+        _scaling = scaling;
         string? preferredId = selection.Read();
         if (preferredId is not null)
         {
@@ -130,7 +132,9 @@ internal sealed class WorkspaceManager : IDisposable
         var context = new WorkspaceContext(_catalog, _catalog.CreateEventScope());
         try
         {
+            _scaling.RestoreStyle();
             workspace.Activate(context);
+            _scaling.CaptureStyle();
             _activeContext = context;
         }
         catch
