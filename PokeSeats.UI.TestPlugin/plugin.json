@@ -1,8 +1,8 @@
 {
-  "id": "pokeseats.default",
+  "id": "pokeseats.test",
   "apiVersion": 3,
-  "assembly": "PokeSeats.UI.DefaultPlugin.dll",
-  "entryPoint": "PokeSeats.UI.DefaultPlugin.DefaultPlugin",
+  "assembly": "PokeSeats.UI.TestPlugin.dll",
+  "entryPoint": "PokeSeats.UI.TestPlugin.TestPlugin",
   "dependencies": [],
   "fonts": [
     {

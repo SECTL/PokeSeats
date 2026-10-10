@@ -31,17 +31,18 @@
 
     <ItemGroup>
       <ProjectReference Include="..\PokeSeats.UI.PluginContracts\PokeSeats.UI.PluginContracts.csproj" />
-      <ProjectReference Include="..\PokeSeats.UI.DefaultPlugin\PokeSeats.UI.DefaultPlugin.csproj" ReferenceOutputAssembly="false" />
+      <ProjectReference Include="..\PokeSeats.UI.DefaultWorkspace\PokeSeats.UI.DefaultWorkspace.csproj" ReferenceOutputAssembly="false" />
+      <ProjectReference Include="..\PokeSeats.UI.DefaultPayload\PokeSeats.UI.DefaultPayload.csproj" ReferenceOutputAssembly="false" />
     </ItemGroup>
 
     <Target Name="GetBuiltinPluginFiles" DependsOnTargets="ResolveProjectReferences">
-      <MSBuild Projects="..\PokeSeats.UI.DefaultPlugin\PokeSeats.UI.DefaultPlugin.csproj"
+      <MSBuild Projects="..\PokeSeats.UI.DefaultWorkspace\PokeSeats.UI.DefaultWorkspace.csproj"
                Targets="GetTargetPath" Properties="Configuration=$(Configuration)">
         <Output TaskParameter="TargetOutputs" ItemName="BuiltinPluginAssembly" />
       </MSBuild>
       <ItemGroup>
         <BuiltinPluginFiles Include="@(BuiltinPluginAssembly)" />
-        <BuiltinPluginFiles Include="..\PokeSeats.UI.DefaultPlugin\plugin.json" />
+        <BuiltinPluginFiles Include="..\PokeSeats.UI.DefaultWorkspace\plugin.json" />
       </ItemGroup>
     </Target>
 
@@ -54,6 +55,28 @@
       <ItemGroup>
         <ResolvedFileToPublish Include="@(BuiltinPluginFiles)">
           <RelativePath>builtins\pokeseats.default\%(Filename)%(Extension)</RelativePath>
+          <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+        </ResolvedFileToPublish>
+      </ItemGroup>
+    </Target>
+
+    <Target Name="GetBuiltinPayloadFiles" DependsOnTargets="ResolveProjectReferences">
+      <ItemGroup>
+        <BuiltinPayloadFiles Include="..\PokeSeats.UI.DefaultPayload\bin\$(Configuration)\net6.0\**\*" />
+        <BuiltinPayloadFiles Include="..\PokeSeats.UI.DefaultPayload\plugin.json" />
+      </ItemGroup>
+    </Target>
+
+    <Target Name="CopyBuiltinPayload" AfterTargets="Build" DependsOnTargets="GetBuiltinPayloadFiles">
+      <Copy SourceFiles="@(BuiltinPayloadFiles)"
+            DestinationFiles="@(BuiltinPayloadFiles->'$(TargetDir)builtins\pokeseats.defaultpayload\%(RecursiveDir)%(Filename)%(Extension)')"
+            SkipUnchangedFiles="true" />
+    </Target>
+
+    <Target Name="PublishBuiltinPayload" BeforeTargets="ComputeFilesToPublish" DependsOnTargets="GetBuiltinPayloadFiles">
+      <ItemGroup>
+        <ResolvedFileToPublish Include="@(BuiltinPayloadFiles)">
+          <RelativePath>builtins\pokeseats.defaultpayload\%(RecursiveDir)%(Filename)%(Extension)</RelativePath>
           <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
         </ResolvedFileToPublish>
       </ItemGroup>

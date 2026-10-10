@@ -2,26 +2,26 @@ using ImGuiNET;
 using PokeSeats.UI.PluginContracts;
 using System.Numerics;
 
-namespace PokeSeats.UI.DefaultPlugin;
+namespace PokeSeats.UI.TestPlugin;
 
 /// <summary>
-/// Default workspace: owns the viewport dockspace and the main menu (panel toggles and
+/// Test workspace: owns the viewport dockspace and the main menu (panel toggles and
 /// contributed commands) and draws every visible contributed panel. Panels draw content only;
 /// this class owns their window lifetime and layout.
 /// </summary>
-internal sealed class DefaultWorkspace : IWorkspace
+internal sealed class TestWorkspace : IWorkspace
 {
     private readonly Dictionary<string, bool> _panelVisibility = new(StringComparer.Ordinal);
     private IWorkspaceContext? _context;
 
     internal bool IsDisposed { get; private set; }
 
-    public void Activate(IWorkspaceContext context)
+    public void Activate(IWorkspaceContext _context)
     {
         if (IsDisposed)
-            throw new ObjectDisposedException(nameof(DefaultWorkspace));
+            throw new ObjectDisposedException(nameof(TestWorkspace));
 
-        _context = context ?? throw new ArgumentNullException(nameof(context));
+        this._context = _context ?? throw new ArgumentNullException(nameof(_context));
     }
 
     public void Draw(float deltaSeconds)
@@ -56,7 +56,7 @@ internal sealed class DefaultWorkspace : IWorkspace
     private void DrawView(IUiView view, float deltaSeconds)
     {
         if (view.MinimumSize is { } minimumSize)
-            ImGui.SetNextWindowSizeConstraints(minimumSize, new Vector2(float.MaxValue, float.MaxValue));
+            ImGui.SetNextWindowSizeConstraints(minimumSize * UiScale.Current, new Vector2(float.MaxValue, float.MaxValue));
 
         bool open = true;
         string title = $"{view.DisplayName}###{view.Id}";

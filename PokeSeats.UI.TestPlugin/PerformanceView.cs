@@ -1,12 +1,12 @@
 using ImGuiNET;
 using PokeSeats.UI.PluginContracts;
 
-namespace PokeSeats.UI.DefaultPlugin;
+namespace PokeSeats.UI.TestPlugin;
 
-/// <summary>Frame-time readout contributed by the built-in plugin.</summary>
+/// <summary>Frame-time readout contributed by the test plugin.</summary>
 internal sealed class PerformancePanel : IUiView
 {
-    public string Id => DefaultPlugin.PerformancePanelId;
+    public string Id => TestPlugin.PerformancePanelId;
 
     public string DisplayName => "性能";
 

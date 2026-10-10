@@ -8,7 +8,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PokeSeats.UI", "PokeSeats.U
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PokeSeats.UI.PluginContracts", "PokeSeats.UI.PluginContracts\PokeSeats.UI.PluginContracts.csproj", "{0A2EE4C8-885D-4C6D-A4AB-0E3BAE9C1A01}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PokeSeats.UI.DefaultPlugin", "PokeSeats.UI.DefaultPlugin\PokeSeats.UI.DefaultPlugin.csproj", "{6B2A0EE4-E4E0-4CA0-98BE-A8F73F65CB66}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PokeSeats.UI.TestPlugin", "PokeSeats.UI.TestPlugin\PokeSeats.UI.TestPlugin.csproj", "{6B2A0EE4-E4E0-4CA0-98BE-A8F73F65CB66}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PokeSeats.UI.DefaultWorkspace", "PokeSeats.UI.DefaultWorkspace\PokeSeats.UI.DefaultWorkspace.csproj", "{D4ACA62E-0153-492F-B8C5-0A9AFB0FBBDF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PokeSeats.UI.DefaultPayload", "PokeSeats.UI.DefaultPayload\PokeSeats.UI.DefaultPayload.csproj", "{A8B3E2D1-2A4B-4C8F-9E61-7D50C1F4A9B6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -36,5 +40,13 @@ Global
 		{6B2A0EE4-E4E0-4CA0-98BE-A8F73F65CB66}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6B2A0EE4-E4E0-4CA0-98BE-A8F73F65CB66}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6B2A0EE4-E4E0-4CA0-98BE-A8F73F65CB66}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D4ACA62E-0153-492F-B8C5-0A9AFB0FBBDF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D4ACA62E-0153-492F-B8C5-0A9AFB0FBBDF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D4ACA62E-0153-492F-B8C5-0A9AFB0FBBDF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D4ACA62E-0153-492F-B8C5-0A9AFB0FBBDF}.Release|Any CPU.Build.0 = Release|Any CPU
+	{A8B3E2D1-2A4B-4C8F-9E61-7D50C1F4A9B6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+	{A8B3E2D1-2A4B-4C8F-9E61-7D50C1F4A9B6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+	{A8B3E2D1-2A4B-4C8F-9E61-7D50C1F4A9B6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+	{A8B3E2D1-2A4B-4C8F-9E61-7D50C1F4A9B6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
