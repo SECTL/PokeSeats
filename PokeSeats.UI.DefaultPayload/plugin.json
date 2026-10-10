@@ -1,0 +1,14 @@
+{
+  "id": "pokeseats.defaultpayload",
+  "apiVersion": 3,
+  "assembly": "PokeSeats.UI.DefaultPayload.dll",
+  "entryPoint": "PokeSeats.UI.DefaultPayload.DefaultPayloadPlugin",
+  "dependencies": [],
+  "fonts": [
+    {
+      "family": "HarmonyOS Sans SC",
+      "sizePixels": 18,
+      "glyphRange": "ChineseSimplifiedCommon"
+    }
+  ]
+}

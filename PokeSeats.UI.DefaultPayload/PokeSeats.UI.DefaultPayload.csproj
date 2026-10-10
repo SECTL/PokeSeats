@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <PlatformTarget>x64</PlatformTarget>
+    <RootNamespace>PokeSeats.UI.DefaultPayload</RootNamespace>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\PokeSeats.UI.PluginContracts\PokeSeats.UI.PluginContracts.csproj" />
+    <ProjectReference Include="..\PokeSeats.IR\PokeSeats.IR.csproj" />
+    <ProjectReference Include="..\PokeSeats.Core\PokeSeats.Core.csproj" />
+    <PackageReference Include="hyjiacan.pinyin4net" Version="4.1.1" />
+    <PackageReference Include="ImGui.NET" Version="1.91.6.1" />
+    <PackageReference Include="NPOI" Version="2.7.3" />
+  </ItemGroup>
+</Project>
