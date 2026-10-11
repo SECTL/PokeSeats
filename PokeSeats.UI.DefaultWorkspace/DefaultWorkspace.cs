@@ -225,7 +225,8 @@ public class DefaultWorkspace : IWorkspace
         if (ImGui.BeginPopupModal(popupId, ref open, ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoSavedSettings))
         {
             ImGui.Text("PokeSeats 戳座 - 智能教室排座系统");
-            ImGui.TextDisabled("版本 1.0 · Copyright (c) chenjintang-shrimp 2026");
+            ImGui.TextDisabled("版本 1.0 · Copyright (c) 2025-2026 SECTL Studio & chenjintang-shrimp");
+            ImGui.TextDisabled("本项目以 GPL-3.0-or-later 发布，源码见项目仓库。");
             ImGui.Separator();
             ImGui.Text("界面字体：HarmonyOS Sans SC");
             ImGui.TextDisabled("字体版权所有 2021 Huawei Device Co., Ltd. 根据字体许可协议分发。");

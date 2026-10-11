@@ -110,3 +110,11 @@ PokeSeats.UI.TestPlugin   插件开发用的示例，不随程序发布
 ## 字体
 
 界面使用 HarmonyOS Sans SC，字体已随程序打包，不需要额外安装。字体版权归华为所有，按 HarmonyOS Sans Fonts License Agreement 使用，许可证文本随程序一起分发（`LICENSE_Fonts`），程序内的"关于"对话框也有署名。
+
+## 版权与许可
+
+Copyright (c) 2025-2026 SECTL Studio & chenjintang-shrimp
+
+本项目以 GNU General Public License 第 3 版或更高版本（`GPL-3.0-or-later`）发布，完整协议文本见 [LICENSE](LICENSE)。你可以自由使用、修改和分发，包括商用；分发修改后的版本时需要一并提供源码，并保留版权声明。
+
+第三方依赖的许可证：Z3、Dear ImGui／ImGui.NET、Silk.NET、pinyin4net 为 MIT；OR-Tools、NPOI、SixLabors.Fonts 为 Apache-2.0。HarmonyOS Sans 字体单独适用字体许可，见上一节。
