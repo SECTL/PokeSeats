@@ -7,7 +7,7 @@ using PokeSeats.IR.Rules;
 namespace PokeSeats.Core.Solver;
 
 /// <summary>
-/// Runs prechecks, expands the rules, invokes the selected backend, and decodes a solution.
+/// Runs prechecks, expands the rules, optimizes empty seats, and decodes a solution.
 /// </summary>
 public sealed class SolverService
 {
@@ -68,12 +68,23 @@ public sealed class SolverService
         var expansion = new Z3RuleExpander().Expand(plan);
         try
         {
+            // 有空座时直接优化；无解再运行带跟踪断言的模型提取规则冲突，避免重复可行性搜索。
+            if (plan.Variables.Count > 0 && plan.Variables.Count < plan.Seats.Count)
+            {
+                using var optimizer = new EmptySeatOptimization(plan).CreateZ3(expansion);
+                var optimizedStatus = optimizer.Check();
+                if (optimizedStatus == Status.SATISFIABLE)
+                    return new SolverResult(SolveStatus.Satisfiable, decodeZ3(expansion, plan, optimizer.Model), preCheck);
+                if (optimizedStatus != Status.UNSATISFIABLE)
+                    return new SolverResult(SolveStatus.Unknown, Array.Empty<SeatAssignment>(), preCheck,
+                        $"Z3 未能完成空座分布优化：{optimizer.ReasonUnknown}。");
+            }
             var status = expansion.Solver.Check();
             return status switch
             {
                 Status.SATISFIABLE => new SolverResult(
                     SolveStatus.Satisfiable,
-                    decodeZ3(expansion, plan),
+                    decodeZ3(expansion, plan, expansion.Solver.Model),
                     preCheck),
                 Status.UNSATISFIABLE => new SolverResult(
                     SolveStatus.Unsatisfiable,
@@ -100,7 +111,20 @@ public sealed class SolverService
     {
         var expansion = new OrToolsRuleExpander().Expand(plan);
         using var solver = new CpSolver();
+        (LinearExpr Rear, LinearExpr Spread)? objectives = null;
+        if (plan.Variables.Count > 0 && plan.Variables.Count < plan.Seats.Count)
+        {
+            objectives = new EmptySeatOptimization(plan).AddOrTools(expansion);
+            expansion.Model.Minimize(objectives.Value.Rear);
+        }
         var status = solver.Solve(expansion.Model);
+        if (objectives is { } target && status == CpSolverStatus.Optimal)
+        {
+            // 固定已证明最优的靠后分数，再优化左右分布，避免权重混合改变优先级。
+            expansion.Model.Add(target.Rear == solver.Value(target.Rear));
+            expansion.Model.Minimize(target.Spread);
+            status = solver.Solve(expansion.Model);
+        }
         return status switch
         {
             CpSolverStatus.Optimal or CpSolverStatus.Feasible => new SolverResult(
@@ -142,12 +166,12 @@ public sealed class SolverService
         }
     }
 
-    private static IReadOnlyList<SeatAssignment> decodeZ3(Z3Expansion expansion, RuleExpansionPlan plan)
+    private static IReadOnlyList<SeatAssignment> decodeZ3(Z3Expansion expansion, RuleExpansionPlan plan, Model model)
     {
         var result = new List<SeatAssignment>(expansion.Variables.Count);
         foreach (var (person, variable) in expansion.Variables)
         {
-            if (expansion.Solver.Model.Eval(variable, true) is not IntNum value)
+            if (model.Eval(variable, true) is not IntNum value)
                 throw new InvalidOperationException($"Z3 求解器未返回学生 {person} 的有效座位序号。");
             result.Add(new SeatAssignment(person, plan.Seats[checked((int)value.Int64)]));
         }
