@@ -24,7 +24,7 @@ internal sealed class RuleEditorView : IUiView
     private readonly RuleDocument document;
     private readonly string storagePath;
     private readonly SeatingSession seating;
-    private readonly RuleEditorState state = new();
+    private RuleEditorState state = new();
     private string personSearch = "";
     private string referenceSearch = "";
     private string status;
@@ -280,7 +280,7 @@ internal sealed class RuleEditorView : IUiView
         Vector2 available = ImGui.GetContentRegionAvail();
         Vector2 labelSize = ImGui.CalcTextSize("讲");
         float minimumCell = Math.Max(labelSize.X, labelSize.Y) + UiScale.Pixels(8);
-        float cell = Math.Max(minimumCell, Math.Max((available.X - 1) / layout.Cols, (available.Y - 1) / layout.Rows));
+        float cell = Math.Max(minimumCell, Math.Max((available.X - 1) / layout.Cols, (available.Y - 1) / layout.Rows)) * .375f;
         Vector2 gridSize = new Vector2(layout.Cols, layout.Rows) * cell;
         Vector2 offset = Vector2.Max(Vector2.Zero, (available - gridSize) / 2);
         ImGui.SetCursorPos(ImGui.GetCursorPos() + offset);
@@ -366,6 +366,20 @@ internal sealed class RuleEditorView : IUiView
         ImGui.BeginDisabled(!state.Editing.HasValue);
         if (ImGui.Button("删除选中的规则")) ImGui.OpenPopup("删除规则确认");
         ImGui.EndDisabled();
+        ImGui.BeginDisabled(document.Rules.Count == 0);
+        if (ImGui.Button("清空所有规则")) ImGui.OpenPopup("清空所有规则确认");
+        ImGui.EndDisabled();
+        if (ImGui.BeginPopupModal("清空所有规则确认", ImGuiWindowFlags.AlwaysAutoResize))
+        {
+            ImGui.Text($"确认清空全部 {document.Rules.Count} 条排座规则？此操作无法撤销。");
+            if (ImGui.Button("确认清空"))
+            {
+                ClearAllRules();
+                ImGui.CloseCurrentPopup();
+            }
+            ImGui.SameLine(); if (ImGui.Button("取消")) ImGui.CloseCurrentPopup();
+            ImGui.EndPopup();
+        }
         if (ImGui.BeginPopupModal("删除规则确认", ImGuiWindowFlags.AlwaysAutoResize))
         {
             ImGui.Text("确认移除当前选中的这条排座规则？");
@@ -430,6 +444,26 @@ internal sealed class RuleEditorView : IUiView
         }
     }
 
+    private void ClearAllRules()
+    {
+        Rule[] previous = document.Rules.ToArray();
+        document.Clear();
+        try
+        {
+            document.Save(storagePath);
+            state = new RuleEditorState();
+            personSearch = referenceSearch = "";
+            hoveredRelation = null;
+            NewDraft();
+            status = $"已清空全部 {previous.Length} 条排座规则。";
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+            foreach (Rule rule in previous) document.Upsert(rule);
+            status = $"清空规则未写入磁盘，原规则已保留：{ex.Message}";
+        }
+    }
+
     private void NewDraft()
     {
         state.Editing = null; state.First = state.Last = null; state.Negated = false;
@@ -438,5 +472,10 @@ internal sealed class RuleEditorView : IUiView
 
     private static uint Color(float r, float g, float b) => ImGui.ColorConvertFloat4ToU32(new Vector4(r, g, b, 1));
     private static void DrawCentered(ImDrawListPtr draw, Vector2 min, float cell, string text)
-        => draw.AddText(min + (new Vector2(cell) - ImGui.CalcTextSize(text)) / 2, Color(1, 1, 1), text);
+    {
+        Vector2 size = ImGui.CalcTextSize(text);
+        float scale = Math.Min(1, Math.Max(1, cell - UiScale.Pixels(4)) / Math.Max(size.X, size.Y));
+        draw.AddText(ImGui.GetFont(), ImGui.GetFontSize() * scale,
+            min + (new Vector2(cell) - size * scale) / 2, Color(1, 1, 1), text);
+    }
 }

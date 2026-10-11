@@ -98,6 +98,9 @@ internal sealed class RuleDocument
         }
     }
 
+    /// <summary>清空所有已保存的规则。</summary>
+    public void Clear() => _rules.Clear();
+
     /// <summary>写规则文件；先写同目录临时文件再整体替换，避免写入中断留下半截文件。</summary>
     public void Save(string path)
     {
