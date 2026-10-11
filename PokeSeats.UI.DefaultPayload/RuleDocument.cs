@@ -126,6 +126,7 @@ internal sealed class RuleDocument
                 relation.Polarity,
                 relation.Metric,
                 relation.Distance,
+                relation.Adjacency,
                 relation.OffsetDx,
                 relation.OffsetDy),
             null,
@@ -189,7 +190,8 @@ internal sealed class RuleDocument
                     relation.Metric,
                     relation.Distance,
                     relation.OffsetDx,
-                    relation.OffsetDy);
+                    relation.OffsetDy,
+                    relation.Adjacency ?? (relation.Metric == DistanceMetric.Chebyshev ? AdjacencyMode.EightWay : AdjacencyMode.FourWay));
             }
             case PinnedType:
             {
@@ -241,8 +243,9 @@ internal sealed class RuleDocument
         RulePolarity Polarity,
         DistanceMetric Metric,
         int? Distance,
-        int OffsetDx,
-        int OffsetDy);
+        AdjacencyMode? Adjacency = null,
+        int OffsetDx = 0,
+        int OffsetDy = 0);
 
     private sealed record StoredPinned(Guid Person, int Row, int Col);
 

@@ -5,6 +5,7 @@ namespace PokeSeats.UI.DefaultPayload;
 public sealed class DefaultPayloadPlugin : IUiPlugin
 {
     private StudentRoster? _roster;
+    private SeatingSession? seating;
 
     public void Initialize(IPluginContext context)
     {
@@ -20,11 +21,16 @@ public sealed class DefaultPayloadPlugin : IUiPlugin
         context.RegisterView(new LayoutEditorView(layout, layoutPath, loadMessage));
         string rulesPath = Path.Combine(context.DataDirectory, "rules.json");
         var rules = RuleDocument.LoadOrCreate(rulesPath, out string? rulesMessage);
-        context.RegisterView(new RuleEditorView(roster, layout, rules, rulesPath, rulesMessage));
+        seating = new SeatingSession(roster, layout, rules, context.Events);
+        context.RegisterView(new RuleEditorView(roster, layout, rules, rulesPath, rulesMessage, seating));
+        context.RegisterView(new SeatingResultView(seating));
+        context.RegisterCommand(seating);
     }
 
     public void Dispose()
     {
+        seating?.Dispose();
+        seating = null;
         _roster = null;
     }
 }

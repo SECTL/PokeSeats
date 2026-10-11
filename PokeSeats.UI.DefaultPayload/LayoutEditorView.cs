@@ -12,7 +12,7 @@ namespace PokeSeats.UI.DefaultPayload;
 internal sealed class LayoutEditorView : IUiView
 {
     private const string TypePopupId = "##layout-cell-type";
-    private const string ResizePopupId = "缩小布局###layout-resize-confirm";
+    private const string ResizePopupId = "确认缩减教室尺寸###layout-resize-confirm";
     private float _cellSize = 36f;
     private float _gridLineWidth = 1f;
 
@@ -53,28 +53,28 @@ internal sealed class LayoutEditorView : IUiView
 
     private void DrawToolbar()
     {
-        ImGui.Text("布局尺寸");
+        ImGui.Text("教室规格：");
         ImGui.SameLine();
         ImGui.SetNextItemWidth(UiScale.Pixels(100));
-        ImGui.InputInt("行##layout-rows", ref _requestedRows, 1, 1);
+        ImGui.InputInt("排##layout-rows", ref _requestedRows, 1, 1);
         ImGui.SameLine();
         ImGui.SetNextItemWidth(UiScale.Pixels(100));
         ImGui.InputInt("列##layout-cols", ref _requestedCols, 1, 1);
         ImGui.SameLine();
-        if (ImGui.Button("应用尺寸"))
+        if (ImGui.Button("调整规格"))
             TryResize();
         ImGui.SameLine();
-        if (ImGui.Button("清空布局"))
+        if (ImGui.Button("清空教室"))
         {
             _layout.Clear();
             ClearSelection();
-            SaveLayout("布局已清空并保存。");
+            SaveLayout("教室布局已重置为空白并自动保存。");
         }
         ImGui.SameLine();
-        if (ImGui.Button("保存"))
-            SaveLayout("布局已保存。");
+        if (ImGui.Button("保存布局"))
+            SaveLayout("教室布局已保存。");
 
-        ImGui.TextDisabled($"{_layout.Rows} × {_layout.Cols}，座位 {_layout.DeskCount} 个");
+        ImGui.TextDisabled($"当前规格：{_layout.Rows} 排 × {_layout.Cols} 列 · 可用座位 {_layout.DeskCount} 个");
         if (!string.IsNullOrEmpty(_status))
             ImGui.TextWrapped(_status);
     }
@@ -201,13 +201,13 @@ internal sealed class LayoutEditorView : IUiView
             return;
         }
 
-        ImGui.Text("选择区域类型");
+        ImGui.Text("设置选中区域为：");
         ImGui.Separator();
-        DrawTypeMenuItem("桌子 / 座位", CellType.Desk);
-        DrawTypeMenuItem("宽过道", CellType.Aisle);
-        DrawTypeMenuItem("窄过道", CellType.NarrowAisle);
-        DrawTypeMenuItem("讲台", CellType.Podium);
-        DrawTypeMenuItem("空白", CellType.Empty);
+        DrawTypeMenuItem("学生座位（课桌）", CellType.Desk);
+        DrawTypeMenuItem("主走道（宽过道）", CellType.Aisle);
+        DrawTypeMenuItem("行间过道（窄过道）", CellType.NarrowAisle);
+        DrawTypeMenuItem("讲台区域", CellType.Podium);
+        DrawTypeMenuItem("空白区域（无设施）", CellType.Empty);
         ImGui.Separator();
         if (ImGui.MenuItem("取消"))
             ClearSelection();
@@ -221,7 +221,7 @@ internal sealed class LayoutEditorView : IUiView
         if (_selectionStart is { } start && _selectionEnd is { } end)
         {
             _layout.SetRectangle(start, end, type);
-            SaveLayout($"已设置 {SelectedCellCount(start, end)} 个格子：{label}。");
+            SaveLayout($"已将选中的 {SelectedCellCount(start, end)} 处位置设为：{label}。");
         }
         ClearSelection();
     }
@@ -231,7 +231,7 @@ internal sealed class LayoutEditorView : IUiView
         try
         {
             if (_requestedRows is < 1 or > 32 || _requestedCols is < 1 or > 32)
-                throw new InvalidDataException("行和列必须在 1 到 32 之间。");
+                throw new InvalidDataException("教室排数和列数必须在 1 至 32 之间。");
             if (!confirmed && (_requestedRows < _layout.Rows || _requestedCols < _layout.Cols))
             {
                 _requestResizeConfirmation = true;
@@ -239,13 +239,13 @@ internal sealed class LayoutEditorView : IUiView
             }
             _layout.Resize(_requestedRows, _requestedCols);
             ClearSelection();
-            SaveLayout($"布局已调整为 {_layout.Rows} × {_layout.Cols}。");
+            SaveLayout($"教室规格已更新为 {_layout.Rows} 排 × {_layout.Cols} 列。");
         }
         catch (InvalidDataException exception)
         {
             _requestedRows = _layout.Rows;
             _requestedCols = _layout.Cols;
-            _status = $"尺寸无效：{exception.Message}";
+            _status = $"尺寸设置无效：{exception.Message}";
         }
     }
 
@@ -258,9 +258,9 @@ internal sealed class LayoutEditorView : IUiView
         }
         if (!ImGui.BeginPopupModal(ResizePopupId, ImGuiWindowFlags.AlwaysAutoResize))
             return;
-        ImGui.Text($"缩小到 {_requestedRows} × {_requestedCols}？");
-        ImGui.Text("超出新边界的格子将被删除。");
-        if (ImGui.Button("确认缩小"))
+        ImGui.Text($"确认将教室规格缩减为 {_requestedRows} 排 × {_requestedCols} 列？");
+        ImGui.Text("注意：超出新范围的座位和走道设置将被永久裁剪。");
+        if (ImGui.Button("确认调整"))
         {
             TryResize(confirmed: true);
             ImGui.CloseCurrentPopup();

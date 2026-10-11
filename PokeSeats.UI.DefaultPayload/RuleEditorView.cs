@@ -9,19 +9,21 @@ namespace PokeSeats.UI.DefaultPayload;
 
 internal sealed class RuleEditorView : IUiView
 {
-    private static readonly string[] Categories = { "固定座位", "区域限制", "相对位置", "行列人数" };
+    private static readonly string[] Categories = { "固定特定座位", "限定就座区域", "学生相对位置", "单排行列人数" };
     private static readonly (RelationKind Kind, string Text)[] Relations =
     {
-        (RelationKind.ExactOffset, "固定偏移"), (RelationKind.InFrontOf, "在前面"),
-        (RelationKind.Behind, "在后面"), (RelationKind.LeftOf, "在左侧"),
-        (RelationKind.RightOf, "在右侧"), (RelationKind.SameRow, "同排"),
-        (RelationKind.SameColumn, "同列"), (RelationKind.Proximity, "相邻")
+        (RelationKind.ExactOffset, "指定相对偏移"), (RelationKind.InFrontOf, "坐在正前方"),
+        (RelationKind.Behind, "坐在正后方"), (RelationKind.LeftOf, "坐在正左侧"),
+        (RelationKind.RightOf, "坐在正右侧"), (RelationKind.SameRow, "安排在同一排"),
+        (RelationKind.SameColumn, "安排在同一列"), (RelationKind.Proximity, "相邻就座")
     };
+    private static readonly string[] AdjacencyLabels = { "横向（左右）", "四向（前后左右）", "八向（含斜角）" };
     private readonly StudentRoster roster;
     private readonly StudentSearchIndex people;
     private readonly LayoutDocument layout;
     private readonly RuleDocument document;
     private readonly string storagePath;
+    private readonly SeatingSession seating;
     private readonly RuleEditorState state = new();
     private string personSearch = "";
     private string referenceSearch = "";
@@ -37,11 +39,12 @@ internal sealed class RuleEditorView : IUiView
     private int checkedRoster = -1;
     private bool checksDirty = true;
 
-    public RuleEditorView(StudentRoster roster, LayoutDocument layout, RuleDocument document, string storagePath, string? loadMessage)
+    public RuleEditorView(StudentRoster roster, LayoutDocument layout, RuleDocument document, string storagePath, string? loadMessage, SeatingSession seating)
     {
         this.roster = roster; this.layout = layout; this.document = document; this.storagePath = storagePath;
+        this.seating = seating;
         people = new StudentSearchIndex(roster);
-        status = loadMessage ?? "选择规则类型，设置条件后保存。";
+        status = loadMessage ?? "请在左侧选择规则类型并配置约束条件，点击“保存规则”即可生效。";
     }
 
     public string Id => "pokeseats.defaultpayload.rules";
@@ -50,9 +53,10 @@ internal sealed class RuleEditorView : IUiView
 
     public void DrawContent(float deltaSeconds)
     {
+        seating.Update();
         if (ImGui.Button("新建规则")) NewDraft();
         ImGui.SameLine();
-        ImGui.TextDisabled($"已保存 {document.Rules.Count} 条规则");
+        ImGui.TextDisabled($"当前生效：{document.Rules.Count} 条排座规则");
         ImGui.SameLine();
         Rule? draft = state.Build();
         UpdateChecks(draft);
@@ -63,8 +67,8 @@ internal sealed class RuleEditorView : IUiView
         bool bodyVisible = ImGui.BeginChild("##rule-editor-body", new Vector2(0, UiScale.Pixels(-42)));
         if (bodyVisible && ImGui.BeginTable("##rule-editor-columns", 2, ImGuiTableFlags.Resizable))
         {
-            ImGui.TableSetupColumn("编辑", ImGuiTableColumnFlags.WidthStretch, 3);
-            ImGui.TableSetupColumn("规则列表", ImGuiTableColumnFlags.WidthStretch, 1.3f);
+            ImGui.TableSetupColumn("规则配置", ImGuiTableColumnFlags.WidthStretch, 3);
+            ImGui.TableSetupColumn("已设规则清单", ImGuiTableColumnFlags.WidthStretch, 1.3f);
             ImGui.TableNextRow(); ImGui.TableNextColumn();
             bool editorVisible = ImGui.BeginChild("##rule-editor-form", new Vector2(0, 0));
             if (editorVisible) DrawEditor();
@@ -86,13 +90,13 @@ internal sealed class RuleEditorView : IUiView
         }
         if (state.Category != 3)
         {
-            DrawPersonPicker(state.Category == 2 ? "中心对象 A" : "编辑对象 A", ref state.Person, ref personSearch, state.Category == 2 ? state.Reference : null);
+            DrawPersonPicker(state.Category == 2 ? "基准学生 A" : "目标学生", ref state.Person, ref personSearch, state.Category == 2 ? state.Reference : null);
             if (state.Category == 2)
-                DrawPersonPicker("相对对象 B", ref state.Reference, ref referenceSearch, state.Person);
+                DrawPersonPicker("参照学生 B", ref state.Reference, ref referenceSearch, state.Person);
         }
         if (state.Category is 1 or 2)
         {
-            ImGui.Checkbox(state.Category == 2 ? "取反（例如：相邻改为不相邻）" : "取反（禁止坐在所选区域内）", ref state.Negated);
+            ImGui.Checkbox(state.Category == 2 ? "反向限制（如：“相邻”改为“不可相邻”）" : "禁止就座（禁止安排在所选区域内）", ref state.Negated);
         }
         if (state.Category == 2)
         {
@@ -105,31 +109,31 @@ internal sealed class RuleEditorView : IUiView
         Rule? draft = state.Build();
         state.UpdatePreview(layout, state.BuildPreview(hoveredRelation));
         ImGui.TextWrapped(draft is null
-            ? state.Category == 2 ? "未选择人员时仍可预览 B 相对于 A 的关系；选择两人后可保存。" : "请完成规则条件。"
+            ? state.Category == 2 ? "未选定学生时可先在下方画布预览相对空间关系；选齐两名学生后方可保存。" : "请在下方配置具体的排座条件。"
             : RuleText.Describe(draft, people));
         UpdateChecks(draft);
         DrawChecks(draft?.Id);
         if (state.Category == 2)
-            ImGui.TextWrapped("下图仅预览当前规则。点击桌子临时放置 A，绿色为 B 可坐的桌子。");
+            ImGui.TextWrapped("说明：下图用于直观预览规则。点击任意课桌放置基准学生 A，高亮绿色课桌即为允许学生 B 就座的位置。");
         else if (state.Category == 1)
-            ImGui.TextWrapped("在教室中拖动框选区域；绿色为这条规则允许的座位。");
+            ImGui.TextWrapped("说明：请在教室网格中按住鼠标左键框选区域；高亮绿色课桌为该规则允许就座的位置。");
         else if (state.Category == 0)
-            ImGui.TextWrapped("点击教室中的桌子，固定该人员的座位。");
+            ImGui.TextWrapped("说明：请在教室网格中点击目标课桌，将该学生固定在该座位。");
         else
-            ImGui.TextWrapped("点击教室格子选择对应行 / 列。");
+            ImGui.TextWrapped("说明：请点击教室中的任意课桌，选定要设置容量上限的对应排或列。");
         DrawClassroom();
         if (state.Category == 2)
-            ImGui.TextWrapped($"当前布局有 {state.ReferenceSeats.Count} 个可用 A 中心座位；临时 A 对应 {state.Allowed.Count} 个 B 候选座位。");
+            ImGui.TextWrapped($"当前教室共 {state.ReferenceSeats.Count} 处有效课桌；当前临时基准 A 下，有 {state.Allowed.Count} 处课桌符合条件。");
     }
 
     private void DrawPersonPicker(string label, ref PersonId? selected, ref string query, PersonId? excluded)
     {
         Person? person = selected.HasValue ? people.Get(selected.Value) : null;
-        string preview = person is null ? "请选择人员" : $"{person.Name} · {person.StudentNumber ?? "无学号"}";
+        string preview = person is null ? "（点击选取学生）" : $"{person.Name} · {person.StudentNumber ?? "无学号"}";
         ImGui.SetNextItemWidth(UiScale.Pixels(320));
         if (!ImGui.BeginCombo(label, preview)) return;
         ImGui.SetNextItemWidth(UiScale.Pixels(300));
-        ImGui.InputTextWithHint($"搜索##{label}", "姓名 / 学号 / 拼音 / 首字母", ref query, 256);
+        ImGui.InputTextWithHint($"搜索##{label}", "输入姓名 / 学号 / 拼音 / 首字母检索", ref query, 256);
         if (ImGui.BeginChild($"人员结果##{label}", new Vector2(0, UiScale.Pixels(170))))
         {
             foreach (Person candidate in people.Find(query))
@@ -150,18 +154,26 @@ internal sealed class RuleEditorView : IUiView
     {
         string current = Relations.First(item => item.Kind == state.Relation).Text;
         ImGui.SetNextItemWidth(UiScale.Pixels(160));
-        if (ImGui.BeginCombo("关系", current))
+        if (ImGui.BeginCombo("相对关系", current))
         {
             foreach (var item in Relations)
                 if (ImGui.Selectable(item.Text, item.Kind == state.Relation)) state.Relation = item.Kind;
             ImGui.EndCombo();
         }
         if (state.Relation == RelationKind.Proximity)
-            ImGui.Checkbox("斜角也算相邻", ref state.DiagonalAdjacent);
-        if (ImGui.Button("回到 A 中心")) { pan = Vector2.Zero; zoom = 1; }
-        ImGui.SameLine(); ImGui.TextWrapped("左键拖动定位，松开选关系；中键平移；滚轮缩放。上方是教室前方。");
+        {
+            string label = AdjacencyLabels[(int)state.Adjacency];
+            ImGui.SetNextItemWidth(UiScale.Pixels(200));
+            if (ImGui.BeginCombo("相邻范围", label))
+            {
+                for (int index = 0; index < AdjacencyLabels.Length; index++)
+                    if (ImGui.Selectable(AdjacencyLabels[index], (int)state.Adjacency == index)) state.Adjacency = (AdjacencyMode)index;
+                ImGui.EndCombo();
+            }
+        }
+        if (ImGui.Button("视口复位至 A")) { pan = Vector2.Zero; zoom = 1; }
+        ImGui.SameLine(); ImGui.TextWrapped("操作：鼠标左键拖拽指定相对方位，松开选取关系；中键平移；滚轮缩放画布。上方朝向教室讲台。");
     }
-
     private void DrawRelativeCanvas()
     {
         Vector2 size = new(Math.Max(UiScale.Pixels(180), ImGui.GetContentRegionAvail().X), UiScale.Pixels(200));
@@ -199,12 +211,13 @@ internal sealed class RuleEditorView : IUiView
         hoveredRelation = null;
         if (ImGui.BeginPopup("##relative-kind-menu"))
         {
-            ImGui.TextDisabled($"B 相对于 A：左右 {state.Dx:+0;-0;0} 列，前后 {state.Dy:+0;-0;0} 排");
+            ImGui.TextDisabled($"B 相对 A 方位：横向偏 {state.Dx:+0;-0;0} 列，纵向偏 {state.Dy:+0;-0;0} 排");
             foreach (var item in Relations)
             {
                 if (item.Kind == RelationKind.Behind && state.Dy <= 0 || item.Kind == RelationKind.InFrontOf && state.Dy >= 0
                     || item.Kind == RelationKind.LeftOf && state.Dx >= 0 || item.Kind == RelationKind.RightOf && state.Dx <= 0) continue;
-                string text = item.Kind == RelationKind.ExactOffset ? $"固定偏移：{OffsetText()}" : item.Text;
+                if (item.Kind == RelationKind.Proximity && !state.MatchesBaseOffset(state.Dy, state.Dx, item.Kind)) continue;
+                string text = item.Kind == RelationKind.ExactOffset ? $"固定偏移位置：{OffsetText()}" : item.Text;
                 if (ImGui.MenuItem(text)) state.Relation = item.Kind;
                 if (ImGui.IsItemHovered()) hoveredRelation = item.Kind;
             }
@@ -239,32 +252,35 @@ internal sealed class RuleEditorView : IUiView
     }
 
     private string OffsetText()
-        => $"{(state.Dy < 0 ? "前" : "后")} {Math.Abs(state.Dy)} 排，{(state.Dx < 0 ? "左" : "右")} {Math.Abs(state.Dx)} 列";
+        => $"朝{(state.Dy < 0 ? "讲台前" : "教室后")} {Math.Abs(state.Dy)} 排、朝{(state.Dx < 0 ? "门左" : "窗右")} {Math.Abs(state.Dx)} 列";
 
     private void DrawCapacityControls()
     {
         bool rows = state.AxisType == AxisType.Row;
-        if (ImGui.RadioButton("行人数", rows)) state.AxisType = AxisType.Row;
+        if (ImGui.RadioButton("限制排人数（横向）", rows)) state.AxisType = AxisType.Row;
         ImGui.SameLine();
-        if (ImGui.RadioButton("列人数", !rows)) state.AxisType = AxisType.Column;
+        if (ImGui.RadioButton("限制列人数（纵向）", !rows)) state.AxisType = AxisType.Column;
         int index = state.AxisIndex + 1;
         ImGui.SetNextItemWidth(UiScale.Pixels(150));
-        if (ImGui.InputInt(rows ? "第几行" : "第几列", ref index)) state.AxisIndex = index - 1;
-        ImGui.Checkbox("最少人数", ref state.UseMin); ImGui.SameLine();
+        if (ImGui.InputInt(rows ? "目标排号（从1起）" : "目标列号（从1起）", ref index)) state.AxisIndex = index - 1;
+        ImGui.Checkbox("设定最少就座人数", ref state.UseMin); ImGui.SameLine();
         ImGui.SetNextItemWidth(UiScale.Pixels(120)); ImGui.InputInt("##capacity-min", ref state.Min);
-        ImGui.Checkbox("最多人数", ref state.UseMax); ImGui.SameLine();
+        ImGui.Checkbox("设定最多就座人数", ref state.UseMax); ImGui.SameLine();
         ImGui.SetNextItemWidth(UiScale.Pixels(120)); ImGui.InputInt("##capacity-max", ref state.Max);
-        if (ImGui.Button("设为恰好人数")) { state.UseMin = state.UseMax = true; state.Max = state.Min; }
+        if (ImGui.Button("固定为精确人数（最少=最多）")) { state.UseMin = state.UseMax = true; state.Max = state.Min; }
     }
 
     private void DrawClassroom()
     {
         float footer = state.Category == 2 ? ImGui.GetTextLineHeightWithSpacing() * 2 : 0;
         float height = Math.Max(UiScale.Pixels(120), ImGui.GetContentRegionAvail().Y - footer);
-        if (!ImGui.BeginChild("##rules-classroom", new Vector2(0, height), ImGuiChildFlags.Borders, ImGuiWindowFlags.HorizontalScrollbar))
+        if (!ImGui.BeginChild("##rules-classroom", new Vector2(0, height), ImGuiChildFlags.Borders,
+            ImGuiWindowFlags.HorizontalScrollbar | ImGuiWindowFlags.AlwaysVerticalScrollbar))
         { ImGui.EndChild(); return; }
         Vector2 available = ImGui.GetContentRegionAvail();
-        float cell = Math.Max(1, Math.Min((available.X - 1) / layout.Cols, (available.Y - 1) / layout.Rows));
+        Vector2 labelSize = ImGui.CalcTextSize("讲");
+        float minimumCell = Math.Max(labelSize.X, labelSize.Y) + UiScale.Pixels(8);
+        float cell = Math.Max(minimumCell, Math.Max((available.X - 1) / layout.Cols, (available.Y - 1) / layout.Rows));
         Vector2 gridSize = new Vector2(layout.Cols, layout.Rows) * cell;
         Vector2 offset = Vector2.Max(Vector2.Zero, (available - gridSize) / 2);
         ImGui.SetCursorPos(ImGui.GetCursorPos() + offset);
@@ -321,36 +337,45 @@ internal sealed class RuleEditorView : IUiView
 
     private void DrawList()
     {
-        ImGui.Text("已保存规则（点击编辑）");
+        ImGui.Text("已生效规则列表（点击可调入修改）：");
         if (ImGui.BeginChild("##saved-rule-list", new Vector2(0, UiScale.Pixels(440)), ImGuiChildFlags.Borders))
         {
             foreach (Rule rule in document.Rules)
             {
                 ImGui.PushID(rule.Id.value.ToString());
                 string text = RuleText.Describe(rule, people);
+                bool conflicting = seating.IsConflicting(rule.Id);
+                if (conflicting)
+                {
+                    text = $"[冲突规则] {text}";
+                    ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(.80f, .08f, .08f, 1));
+                    ImGui.PushStyleColor(ImGuiCol.Header, new Vector4(1, .74f, .74f, 1));
+                    ImGui.PushStyleColor(ImGuiCol.HeaderHovered, new Vector4(1, .82f, .82f, 1));
+                }
                 if (ImGui.Selectable(text, state.Editing == rule.Id))
                 {
                     state.Load(rule);
                     if (state.Last is { } last) state.Last = new GridPos(Math.Min(last.Row, layout.Rows - 1), Math.Min(last.Col, layout.Cols - 1));
                 }
                 if (ImGui.IsItemHovered()) ImGui.SetTooltip(text);
+                if (conflicting) ImGui.PopStyleColor(3);
                 ImGui.PopID();
             }
         }
         ImGui.EndChild();
         ImGui.BeginDisabled(!state.Editing.HasValue);
-        if (ImGui.Button("删除选中规则")) ImGui.OpenPopup("删除规则确认");
+        if (ImGui.Button("删除选中的规则")) ImGui.OpenPopup("删除规则确认");
         ImGui.EndDisabled();
         if (ImGui.BeginPopupModal("删除规则确认", ImGuiWindowFlags.AlwaysAutoResize))
         {
-            ImGui.Text("删除当前选中的规则？");
-            if (ImGui.Button("删除") && state.Editing is { } id)
+            ImGui.Text("确认移除当前选中的这条排座规则？");
+            if (ImGui.Button("确认删除") && state.Editing is { } id)
             {
                 Rule? previous = document.Rules.FirstOrDefault(rule => rule.Id == id);
                 document.Remove(id);
-                try { document.Save(storagePath); NewDraft(); status = "规则已删除。"; checksDirty = true; }
+                try { document.Save(storagePath); NewDraft(); status = "排座规则已成功移除。"; checksDirty = true; }
                 catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
-                { if (previous is not null) document.Upsert(previous); status = $"删除未保存：{ex.Message}"; }
+                { if (previous is not null) document.Upsert(previous); status = $"规则移除未写入磁盘：{ex.Message}"; }
                 ImGui.CloseCurrentPopup();
             }
             ImGui.SameLine(); if (ImGui.Button("取消")) ImGui.CloseCurrentPopup();
@@ -370,19 +395,22 @@ internal sealed class RuleEditorView : IUiView
     private void DrawChecks(RuleId? draftId)
     {
         if (checks is null) return;
-        foreach (var report in checks.Global) ImGui.TextWrapped($"{(report.Mark == PreCheckErrorMark.Error ? "错误" : "提示")}：{ErrorText(report.Error)}");
+        foreach (var report in checks.Global) ImGui.TextWrapped($"{(report.Mark == PreCheckErrorMark.Error ? "【规则错误】" : "【排座提示】")}：{ErrorText(report.Error)}");
         foreach (var report in checks.PerRule)
-            ImGui.TextWrapped($"{(report.Id == draftId ? "当前规则" : "已保存规则")}：{ErrorText(report.Error)}");
+            ImGui.TextWrapped($"{(report.Id == draftId ? "【当前编辑规则】" : "【已存冲突规则】")}：{ErrorText(report.Error)}");
     }
 
     private static string ErrorText(PreCheckError error) => error switch
     {
-        PreCheckError.DanglingRef => "引用的人员已不在名单中。", PreCheckError.AlwaysTrue => "这条规则在当前布局中总是成立。",
-        PreCheckError.AlwaysFalse => "这条规则在当前布局中不可能成立。", PreCheckError.OutOfBound => "位置或行列超出教室范围。",
-        PreCheckError.PinnedSeatCollision => "固定位置不是桌子。", PreCheckError.DuplicatePin => "不同人员固定在同一个座位。",
-        PreCheckError.OverCapacity => "人数或要求超过可用座位容量。", _ => error.ToString()
+        PreCheckError.DanglingRef => "规则中关联的学生已不在当前班级名单中。",
+        PreCheckError.AlwaysTrue => "该规则在当前教室布局下已自然满足（无实际约束作用）。",
+        PreCheckError.AlwaysFalse => "该规则在当前教室布局下在数学上不可达成（无任何合法座位）。",
+        PreCheckError.OutOfBound => "指定的行列编号或坐标已超出当前教室的实际尺寸边界。",
+        PreCheckError.PinnedSeatCollision => "固定座位的目标格当前不是有效学生课桌（例如被设为走道或讲台）。",
+        PreCheckError.DuplicatePin => "多位不同的学生被指定在同一个座位上，造成位置冲突。",
+        PreCheckError.OverCapacity => "班级学生总数超过了教室可用的课桌总容量，或单排行列人数上限不足。",
+        _ => error.ToString()
     };
-
     private bool CanSave(Rule draft)
         => (draft is not CapacityRule capacity || capacity.Axis.Index >= 0
             && capacity.Axis.Index < (capacity.Axis.Type == AxisType.Row ? layout.Rows : layout.Cols))
@@ -394,11 +422,11 @@ internal sealed class RuleEditorView : IUiView
         Rule saved = draft with { Id = id, DisplayName = RuleText.Describe(draft, people) };
         Rule? previous = document.Rules.FirstOrDefault(rule => rule.Id == id);
         document.Upsert(saved);
-        try { document.Save(storagePath); state.Editing = id; checksDirty = true; status = "规则已保存。"; }
+        try { document.Save(storagePath); state.Editing = id; checksDirty = true; status = "排座规则已保存生效。"; }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
         {
             if (previous is null) document.Remove(id); else document.Upsert(previous);
-            status = $"规则未保存：{ex.Message}";
+            status = $"保存规则失败：{ex.Message}";
         }
     }
 

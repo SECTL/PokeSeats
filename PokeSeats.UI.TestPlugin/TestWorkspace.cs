@@ -12,7 +12,9 @@ namespace PokeSeats.UI.TestPlugin;
 internal sealed class TestWorkspace : IWorkspace
 {
     private readonly Dictionary<string, bool> _panelVisibility = new(StringComparer.Ordinal);
+    private readonly HashSet<string> _pendingFocus = new(StringComparer.Ordinal);
     private IWorkspaceContext? _context;
+    private IDisposable? _viewOpenSubscription;
 
     internal bool IsDisposed { get; private set; }
 
@@ -22,6 +24,7 @@ internal sealed class TestWorkspace : IWorkspace
             throw new ObjectDisposedException(nameof(TestWorkspace));
 
         this._context = _context ?? throw new ArgumentNullException(nameof(_context));
+        _viewOpenSubscription = _context.Events.Subscribe<UiViewOpenRequested>(OnViewOpenRequested);
     }
 
     public void Draw(float deltaSeconds)
@@ -35,26 +38,39 @@ internal sealed class TestWorkspace : IWorkspace
 
         foreach (IUiView view in context.Views)
         {
-            if (IsViewVisible(view.Id))
+            if (IsViewVisible(view))
                 DrawView(view, deltaSeconds);
         }
     }
 
     public void Deactivate()
     {
+        _viewOpenSubscription?.Dispose();
+        _viewOpenSubscription = null;
+        _pendingFocus.Clear();
         // Visible-view choices deliberately survive deactivation.
         _context = null;
     }
 
     public void Dispose()
     {
+        _viewOpenSubscription?.Dispose();
+        _viewOpenSubscription = null;
         _context = null;
         _panelVisibility.Clear();
+        _pendingFocus.Clear();
         IsDisposed = true;
     }
 
     private void DrawView(IUiView view, float deltaSeconds)
     {
+        if (_pendingFocus.Remove(view.Id))
+        {
+            // Reopen a collapsed panel and bring it to the front.
+            ImGui.SetNextWindowCollapsed(false, ImGuiCond.Always);
+            ImGui.SetNextWindowFocus();
+        }
+
         if (view.MinimumSize is { } minimumSize)
             ImGui.SetNextWindowSizeConstraints(minimumSize * UiScale.Current, new Vector2(float.MaxValue, float.MaxValue));
 
@@ -92,7 +108,7 @@ internal sealed class TestWorkspace : IWorkspace
             {
                 foreach (IUiView view in context.Views)
                 {
-                    bool visible = IsViewVisible(view.Id);
+                    bool visible = IsViewVisible(view);
                     ImGui.PushID(view.Id);
                     bool clicked = ImGui.MenuItem(view.DisplayName, null, visible, true);
                     ImGui.PopID();
@@ -123,10 +139,27 @@ internal sealed class TestWorkspace : IWorkspace
         pendingCommand?.Execute();
     }
 
-    /// <summary>Views a workspace has not seen yet start visible; explicit choices stick.</summary>
-    private bool IsViewVisible(string viewId)
-        => !_panelVisibility.TryGetValue(viewId, out bool visible) || visible;
+    /// <summary>Views follow InitiallyVisible until the user makes an explicit choice, which sticks.</summary>
+    private bool IsViewVisible(IUiView view)
+        => _panelVisibility.TryGetValue(view.Id, out bool visible) ? visible : view.InitiallyVisible;
 
     private void SetViewVisible(string viewId, bool visible)
         => _panelVisibility[viewId] = visible;
+
+    private void OnViewOpenRequested(UiViewOpenRequested request)
+    {
+        IWorkspaceContext? context = _context;
+        if (context is null)
+            return;
+
+        foreach (IUiView view in context.Views)
+        {
+            if (!string.Equals(view.Id, request.ViewId, StringComparison.Ordinal))
+                continue;
+
+            SetViewVisible(view.Id, true);
+            _pendingFocus.Add(view.Id);
+            return;
+        }
+    }
 }

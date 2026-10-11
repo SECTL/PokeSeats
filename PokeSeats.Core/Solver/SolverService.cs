@@ -19,14 +19,24 @@ public sealed class SolverService
         ArgumentNullException.ThrowIfNull(request.Rules);
 
         var preCheck = PreChecker.Run(request.Rules, request.Roster, request.Layout);
+        // 预检查错误直接返回对应规则 ID，不冒充 Z3 核心；也不展开规则集，避免悬空引用在展开时抛错。
+        // 仅全局错误（如人数超过座位数）时列表为空，不归咎任何规则。
+        var rejectedRuleIds = preCheck.PerRule
+            .Where(report => report.Mark == PreCheckErrorMark.Error)
+            .Select(report => report.Id)
+            .Distinct()
+            .ToArray();
         if (preCheck.Global.Any(report => report.Mark == PreCheckErrorMark.Error)
-            || preCheck.PerRule.Any(report => report.Mark == PreCheckErrorMark.Error))
+            || rejectedRuleIds.Length > 0)
         {
             return new SolverResult(
                 SolveStatus.Rejected,
                 Array.Empty<SeatAssignment>(),
                 preCheck,
-                "预检查发现错误，未创建求解模型。");
+                "排座规则预检查未通过，存在逻辑冲突或无效参数，已中止求解。")
+            {
+                ConflictingRuleIds = rejectedRuleIds
+            };
         }
 
         try
@@ -40,7 +50,7 @@ public sealed class SolverService
                     SolveStatus.Rejected,
                     Array.Empty<SeatAssignment>(),
                     preCheck,
-                    $"不支持的求解后端：{request.Backend}")
+                    $"不支持的排座求解器后端：{request.Backend}")
             };
         }
         catch (Exception exception) when (exception is KeyNotFoundException or InvalidOperationException or NotSupportedException)
@@ -49,7 +59,7 @@ public sealed class SolverService
                 SolveStatus.Rejected,
                 Array.Empty<SeatAssignment>(),
                 preCheck,
-                $"规则展开失败：{exception.Message}");
+                $"排座规则解析与模型构建失败：{exception.Message}");
         }
     }
 
@@ -69,12 +79,15 @@ public sealed class SolverService
                     SolveStatus.Unsatisfiable,
                     Array.Empty<SeatAssignment>(),
                     preCheck,
-                    "Z3 证明规则集合无解。"),
+                    "Z3 求解器已证明当前规则组合在逻辑上无解。")
+                {
+                    ConflictingRuleIds = expansion.GetConflictingRuleIds()
+                },
                 _ => new SolverResult(
                     SolveStatus.Unknown,
                     Array.Empty<SeatAssignment>(),
                     preCheck,
-                    "Z3 未能确定可满足性。")
+                    "Z3 求解器在规定限度内未能确定是否存在可行解。")
             };
         }
         finally
@@ -98,13 +111,35 @@ public sealed class SolverService
                 SolveStatus.Unsatisfiable,
                 Array.Empty<SeatAssignment>(),
                 preCheck,
-                "CP-SAT 证明规则集合无解。"),
+                "CP-SAT 求解器已证明当前规则组合在逻辑上无解。")
+            {
+                ConflictingRuleIds = diagnoseZ3Conflicts(plan)
+            },
             _ => new SolverResult(
                 SolveStatus.Unknown,
                 Array.Empty<SeatAssignment>(),
                 preCheck,
-                $"CP-SAT 未能确定可满足性：{status}。")
+                $"CP-SAT 求解器未能确定可行性：{status}。")
         };
+    }
+
+    /// <summary>
+    /// CP-SAT 判无解后，用同一份与后端无关的展开计划补跑一次 Z3 诊断，把 UNSAT 核心映射成规则 ID。
+    /// Z3 无法确认无解时返回空集合，不归咎任何规则。
+    /// </summary>
+    private static IReadOnlyList<RuleId> diagnoseZ3Conflicts(RuleExpansionPlan plan)
+    {
+        var expansion = new Z3RuleExpander().Expand(plan);
+        try
+        {
+            return expansion.Solver.Check() == Status.UNSATISFIABLE
+                ? expansion.GetConflictingRuleIds()
+                : Array.Empty<RuleId>();
+        }
+        finally
+        {
+            expansion.Context.Dispose();
+        }
     }
 
     private static IReadOnlyList<SeatAssignment> decodeZ3(Z3Expansion expansion, RuleExpansionPlan plan)
@@ -113,7 +148,7 @@ public sealed class SolverService
         foreach (var (person, variable) in expansion.Variables)
         {
             if (expansion.Solver.Model.Eval(variable, true) is not IntNum value)
-                throw new InvalidOperationException($"Z3 未返回人员 {person} 的整数座位值。");
+                throw new InvalidOperationException($"Z3 求解器未返回学生 {person} 的有效座位序号。");
             result.Add(new SeatAssignment(person, plan.Seats[checked((int)value.Int64)]));
         }
         return result;

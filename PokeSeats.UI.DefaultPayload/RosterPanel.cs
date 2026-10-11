@@ -2,6 +2,7 @@ using System.Numerics;
 using System.Runtime.InteropServices;
 using ImGuiNET;
 using PokeSeats.UI.PluginContracts;
+using PokeSeats.IR.Base;
 namespace PokeSeats.UI.DefaultPayload;
 
 internal sealed class RosterPanel : IUiView
@@ -12,7 +13,7 @@ internal sealed class RosterPanel : IUiView
     private SpreadsheetPreview? _preview;
     private int _nameColumn;
     private int _studentNumberColumn;
-    private string _status = "请选择 .xls 或 .xlsx 文件。";
+    private string _status = "请选取学生花名册 Excel 文件（.xlsx 或 .xls）。";
 
     public RosterPanel(StudentRoster roster, string storageDirectory)
     {
@@ -28,13 +29,13 @@ internal sealed class RosterPanel : IUiView
 
     public void DrawContent(float deltaSeconds)
     {
-        ImGui.Text("从 Excel 导入学生名单");
-        ImGui.TextDisabled("首个工作表的第一行会作为列名。导入后名单保存到 PokeSeats 数据目录。");
+        ImGui.Text("导入学生花名册（Excel）");
+        ImGui.TextDisabled("将读取第一张工作表首行的列标题。导入成功后，名单将自动同步至本地缓存。");
 
         ImGui.SetNextItemWidth(UiScale.Pixels(-110));
         ImGui.InputText("##roster-file-path", ref _filePath, 2048);
         ImGui.SameLine();
-        if (ImGui.Button("浏览..."))
+        if (ImGui.Button("浏览文件..."))
         {
             string? selected = WindowsFilePicker.SelectExcelFile();
             if (selected is not null)
@@ -44,39 +45,79 @@ internal sealed class RosterPanel : IUiView
             }
         }
 
-        if (ImGui.Button("读取表头"))
+        if (ImGui.Button("解析表头"))
             TryPreview();
 
         if (_preview is not null)
         {
             ImGui.Separator();
-            ImGui.Text($"文件：{Path.GetFileName(_preview.FilePath)}");
-            ImGui.Text("请选择姓名列和学号列（学号可选）：");
+            ImGui.Text($"已选文件：{Path.GetFileName(_preview.FilePath)}");
+            ImGui.Text("请指定学生姓名与学号对应的列（学号非必填）：");
             DrawColumnSelector("姓名列", ref _nameColumn, false);
-            DrawColumnSelector("学号列", ref _studentNumberColumn, true);
+            DrawColumnSelector("学号列（可选）", ref _studentNumberColumn, true);
 
-            if (ImGui.Button("导入名单"))
+            if (ImGui.Button("确认导入名单"))
                 TryImport();
 
             ImGui.SameLine();
-            ImGui.TextDisabled($"预览 {_preview.Rows.Count} 行");
+            ImGui.TextDisabled($"共识别到 {_preview.Rows.Count} 行学生记录");
         }
 
         ImGui.Separator();
-        ImGui.Text($"当前学生：{_roster.Students.Count} 人");
+        ImGui.Text($"当前班级人数：{_roster.Students.Count} 人");
+        ImGui.SameLine();
+        ImGui.BeginDisabled(_roster.Students.Count == 0);
+        if (ImGui.Button("清空名单"))
+            ImGui.OpenPopup("确认清空名单###roster-clear-confirm");
+        ImGui.EndDisabled();
+        DrawClearConfirmation();
         ImGui.TextDisabled(_status);
         DrawRosterTable();
     }
+
+    private void DrawClearConfirmation()
+    {
+        if (!ImGui.BeginPopupModal("确认清空名单###roster-clear-confirm", ImGuiWindowFlags.AlwaysAutoResize))
+            return;
+
+        ImGui.Text($"确认清空当前名单中的 {_roster.Students.Count} 名学生？");
+        ImGui.Text("清空后将保存为空名单，可重新从 Excel 导入。");
+        ImGui.Text("已有排座规则会保留，涉及原名单学生的规则需重新设置。");
+        if (ImGui.Button("确认清空") && TryClearRoster())
+            ImGui.CloseCurrentPopup();
+        ImGui.SameLine();
+        if (ImGui.Button("取消") || ImGui.IsKeyPressed(ImGuiKey.Escape))
+            ImGui.CloseCurrentPopup();
+        ImGui.EndPopup();
+    }
+
+    private bool TryClearRoster()
+    {
+        try
+        {
+            var empty = Array.Empty<Person>();
+            _roster.Save(_storagePath, empty);
+            _roster.Replace(empty);
+            _status = "学生名单已清空并保存，可重新导入名单。";
+            return true;
+        }
+        catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
+        {
+            _status = $"清空失败，当前名单未更改：{exception.Message}";
+            return false;
+        }
+    }
+
 
     private void DrawColumnSelector(string label, ref int selectedColumn, bool allowNone)
     {
         SpreadsheetPreview previewData = _preview!;
         string preview = selectedColumn >= 0 && selectedColumn < previewData.Headers.Count
             ? previewData.Headers[selectedColumn]
-            : allowNone ? "不导入" : "请选择";
+            : allowNone ? "（不导入此项）" : "（请选择匹配列）";
         if (ImGui.BeginCombo(label, preview))
         {
-            if (allowNone && ImGui.Selectable($"不导入##{label}-none", selectedColumn < 0))
+            if (allowNone && ImGui.Selectable($"（不导入此项）##{label}-none", selectedColumn < 0))
                 selectedColumn = -1;
             for (int index = 0; index < previewData.Headers.Count; index++)
             {
@@ -96,7 +137,7 @@ internal sealed class RosterPanel : IUiView
         if (_roster.Students.Count == 0 || !ImGui.BeginTable("##student-roster", 2, ImGuiTableFlags.Borders | ImGuiTableFlags.RowBg | ImGuiTableFlags.ScrollY, new Vector2(0, UiScale.Pixels(180))))
             return;
 
-        ImGui.TableSetupColumn("姓名");
+        ImGui.TableSetupColumn("学生姓名");
         ImGui.TableSetupColumn("学号");
         ImGui.TableHeadersRow();
         foreach (var student in _roster.Students)
@@ -117,12 +158,12 @@ internal sealed class RosterPanel : IUiView
             _preview = ExcelRosterImporter.Preview(_filePath.Trim());
             _nameColumn = FindHeader(_preview.Headers, "姓名", 0);
             _studentNumberColumn = FindHeader(_preview.Headers, "学号", -1);
-            _status = "已读取表头，请确认列映射后导入。";
+            _status = "表头解析成功，请核对“姓名列”与“学号列”匹配关系后点击导入。";
         }
         catch (Exception exception) when (exception is IOException or InvalidDataException or UnauthorizedAccessException or ArgumentException)
         {
             _preview = null;
-            _status = $"读取失败：{exception.Message}";
+            _status = $"表格读取失败：{exception.Message}";
         }
     }
 
@@ -133,7 +174,7 @@ internal sealed class RosterPanel : IUiView
             ImportResult result = ExcelRosterImporter.Import(_preview!, _nameColumn, _studentNumberColumn);
             _roster.Save(_storagePath, result.Students);
             _roster.Replace(result.Students);
-            _status = $"导入完成：{result.Students.Count} 人，跳过 {result.SkippedRows} 行。";
+            _status = $"导入成功：已录入 {result.Students.Count} 名学生（跳过空白或无效行 {result.SkippedRows} 行）。";
         }
         catch (Exception exception) when (exception is IOException or InvalidDataException or UnauthorizedAccessException or ArgumentException)
         {

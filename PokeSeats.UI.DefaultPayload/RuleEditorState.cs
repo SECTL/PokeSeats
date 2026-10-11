@@ -17,7 +17,7 @@ internal sealed class RuleEditorState
     public RelationKind Relation = RelationKind.ExactOffset;
     public int Dx;
     public int Dy = 1;
-    public bool DiagonalAdjacent;
+    public AdjacencyMode Adjacency = AdjacencyMode.FourWay;
     public GridPos? First;
     public GridPos? Last;
     public AxisType AxisType;
@@ -47,8 +47,8 @@ internal sealed class RuleEditorState
                 Math.Min(start.Row, end.Row), Math.Max(start.Row, end.Row), Math.Min(start.Col, end.Col), Math.Max(start.Col, end.Col)),
             // UI: B = A + (Dx, Dy). IR: model A is the relative person and model B is the center.
             2 when Person is { } center && Reference is { } relative && center != relative => new RelationRule(id, "", relative, center,
-                Relation, polarity, DiagonalAdjacent ? DistanceMetric.Chebyshev : DistanceMetric.Manhattan,
-                Relation == RelationKind.Proximity ? 1 : null, Dx, Dy),
+                Relation, polarity, DistanceMetric.Manhattan,
+                Relation == RelationKind.Proximity ? 1 : null, Dx, Dy, Adjacency),
             3 when (UseMin || UseMax) && (!UseMin || Min >= 0) && (!UseMax || Max >= 0) && (!UseMin || !UseMax || Min <= Max)
                 => new CapacityRule(id, "", new Axis(AxisType, AxisIndex), UseMin ? Min : null, UseMax ? Max : null),
             _ => null
@@ -64,9 +64,9 @@ internal sealed class RuleEditorState
             Editing ?? new RuleId(Guid.Empty), "",
             PreviewRelativePerson, PreviewCenterPerson, kind,
             Negated ? RulePolarity.Forbidden : RulePolarity.Required,
-            DiagonalAdjacent ? DistanceMetric.Chebyshev : DistanceMetric.Manhattan,
+            DistanceMetric.Manhattan,
             kind == RelationKind.Proximity ? 1 : null,
-            Dx, Dy);
+            Dx, Dy, Adjacency);
     }
 
     public void Load(Rule rule)
@@ -84,7 +84,7 @@ internal sealed class RuleEditorState
                 // Stored IR is A relative to B; expose it as B (center A) and A (relative B).
                 Category = 2; Person = relation.B; Reference = relation.A; Relation = relation.Kind;
                 Negated = relation.Polarity == RulePolarity.Forbidden; Dx = relation.OffsetDx; Dy = relation.OffsetDy;
-                DiagonalAdjacent = relation.Metric == DistanceMetric.Chebyshev; PreviewCenter = null; break;
+                Adjacency = relation.Adjacency; PreviewCenter = null; break;
             case CapacityRule capacity:
                 Category = 3; AxisType = capacity.Axis.Type; AxisIndex = capacity.Axis.Index;
                 UseMin = capacity.Min.HasValue; UseMax = capacity.Max.HasValue; Min = capacity.Min ?? 0; Max = capacity.Max ?? 0; break;
@@ -140,7 +140,14 @@ internal sealed class RuleEditorState
     public bool MatchesOffset(int row, int col, RelationKind? preview = null)
     {
         if (row == 0 && col == 0) return false;
-        bool matches = (preview ?? Relation) switch
+        bool matches = MatchesBaseOffset(row, col, preview ?? Relation);
+        return Negated ? !matches : matches;
+    }
+
+    public bool MatchesBaseOffset(int row, int col, RelationKind kind)
+    {
+        if (row == 0 && col == 0) return false;
+        return kind switch
         {
             RelationKind.ExactOffset => row == Dy && col == Dx,
             RelationKind.Behind => row > 0,
@@ -149,9 +156,8 @@ internal sealed class RuleEditorState
             RelationKind.RightOf => col > 0,
             RelationKind.SameRow => row == 0,
             RelationKind.SameColumn => col == 0,
-            RelationKind.Proximity => DiagonalAdjacent ? Math.Max(Math.Abs(row), Math.Abs(col)) == 1 : Math.Abs(row) + Math.Abs(col) == 1,
+            RelationKind.Proximity => AdjacencyGeometry.Matches(Adjacency, row, col),
             _ => false
         };
-        return Negated ? !matches : matches;
     }
 }

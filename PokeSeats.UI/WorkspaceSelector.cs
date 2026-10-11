@@ -49,23 +49,23 @@ internal sealed class WorkspaceSelector
 
         if (_requestOpen)
         {
-            ImGui.OpenPopup("选择工作区###pokeseats.host.workspace-selector");
+            ImGui.OpenPopup("切换工作区###pokeseats.host.workspace-selector");
             _requestOpen = false;
         }
         ImGuiViewportPtr viewport = ImGui.GetMainViewport();
         ImGui.SetNextWindowPos(viewport.Pos + viewport.Size * 0.5f, ImGuiCond.Appearing, new Vector2(0.5f));
         bool open = _open;
-        if (ImGui.BeginPopupModal("选择工作区###pokeseats.host.workspace-selector", ref open,
+        if (ImGui.BeginPopupModal("切换工作区###pokeseats.host.workspace-selector", ref open,
                 ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoDocking))
         {
-            ImGui.Text("选择负责整个应用区域的工作区。");
-            ImGui.TextDisabled("安装或更新插件后，请重启应用。");
+            ImGui.Text("请选择要在当前窗口中呈现的工作区布局模式。");
+            ImGui.TextDisabled("提示：安装、移除或更新插件后，需重启软件方可生效。");
             ImGui.Separator();
 
             if (_manager.Workspaces.Count == 0)
             {
-                ImGui.Text("没有加载工作区插件。");
-                ImGui.TextDisabled("安装工作区插件后重启应用。");
+                ImGui.Text("未检测到已安装的工作区插件。");
+                ImGui.TextDisabled("请将工作区插件放置于 plugins 目录后重启软件。");
             }
             else
             {
@@ -113,7 +113,7 @@ internal sealed class WorkspaceSelector
             return;
 
         ImGui.Separator();
-        ImGui.TextDisabled("插件诊断");
+        ImGui.TextDisabled("插件加载诊断与日志");
         foreach (string diagnostic in _manager.PluginDiagnostics)
             ImGui.TextWrapped(diagnostic);
         foreach (string diagnostic in _manager.Diagnostics)

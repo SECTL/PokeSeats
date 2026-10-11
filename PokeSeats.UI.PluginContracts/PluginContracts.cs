@@ -11,6 +11,9 @@ public static class PluginApi
 /// <summary>Published to request a graceful shutdown of the host application.</summary>
 public sealed record ApplicationExitRequested;
 
+/// <summary>Published to ask the active workspace to reveal and focus a registered view.</summary>
+public sealed record UiViewOpenRequested(string ViewId);
+
 /// <summary>One entry point per plugin manifest. All callbacks run on the UI thread.</summary>
 public interface IUiPlugin : IDisposable
 {
@@ -68,6 +71,12 @@ public interface IUiView
     /// <summary>Stable for the lifetime of this registration.</summary>
     string Id { get; }
     string DisplayName { get; }
+
+    /// <summary>
+    /// Whether the view starts visible the first time a workspace presents it. An explicit
+    /// show or hide choice made by the user takes precedence over this value.
+    /// </summary>
+    bool InitiallyVisible => true;
 
     /// <summary>
     /// Minimum window size in reference pixels; workspaces multiply by UiScale.Current.

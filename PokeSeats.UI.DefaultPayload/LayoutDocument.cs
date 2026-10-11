@@ -95,11 +95,11 @@ internal sealed class LayoutDocument
         {
             var stored = JsonSerializer.Deserialize<StoredLayout>(File.ReadAllText(path));
             if (stored is null)
-                throw new InvalidDataException("布局文件为空。");
+                throw new InvalidDataException("教室布局文件内容为空。");
             ValidateDimension(stored.Rows, nameof(stored.Rows));
             ValidateDimension(stored.Cols, nameof(stored.Cols));
             if (stored.Cells is null || stored.Cells.Length != checked(stored.Rows * stored.Cols))
-                throw new InvalidDataException("布局格子数量与行列尺寸不一致。");
+                throw new InvalidDataException("教室布局数据损坏：单元格总数与行列尺寸不匹配。");
 
             var document = new LayoutDocument(stored.Rows, stored.Cols);
             for (int row = 0; row < document.Rows; row++)
@@ -107,14 +107,14 @@ internal sealed class LayoutDocument
                 {
                     int value = stored.Cells[row * document.Cols + col];
                     if (value < (int)CellType.Desk || value > (int)CellType.Empty)
-                        throw new InvalidDataException($"布局包含未知格子类型：{value}。");
+                        throw new InvalidDataException($"布局包含未识别的区域类型编号：{value}。");
                     document._cells[row, col] = (CellType)value;
                 }
             return document;
         }
         catch (Exception exception) when (exception is IOException or UnauthorizedAccessException or JsonException or InvalidDataException or OverflowException)
         {
-            loadMessage = $"布局文件读取失败，已使用空白布局：{exception.Message}";
+            loadMessage = $"布局文件加载异常，已重置为空白教室：{exception.Message}";
             return CreateDefault();
         }
     }
@@ -152,7 +152,7 @@ internal sealed class LayoutDocument
     private static void ValidateDimension(int value, string parameterName)
     {
         if (value is < MinimumDimension or > MaximumDimension)
-            throw new InvalidDataException($"{parameterName} 必须在 {MinimumDimension} 到 {MaximumDimension} 之间。");
+            throw new InvalidDataException($"教室{(parameterName == "Rows" ? "排数" : "列数")}必须在 {MinimumDimension} 至 {MaximumDimension} 之间。");
     }
 
     private sealed record StoredLayout(int Rows, int Cols, int[] Cells);

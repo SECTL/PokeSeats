@@ -23,7 +23,7 @@ internal static class RuleText
 
         return rule switch
         {
-            PinnedRule pinned => $"{Name(pinned.Person, people)} 必须坐在第{pinned.Pos.Row + 1}排第{pinned.Pos.Col + 1}列",
+            PinnedRule pinned => $"{Name(pinned.Person, people)} 必须固定在第 {pinned.Pos.Row + 1} 排、第 {pinned.Pos.Col + 1} 列",
             RegionRule region => DescribeRegion(region, people),
             RelationRule relation => DescribeRelation(relation, people),
             CapacityRule capacity => DescribeCapacity(capacity),
@@ -38,12 +38,12 @@ internal static class RuleText
 
         if (region.Length == 0)
             return rule.Polarity == RulePolarity.Required
-                ? $"{person} 的座位不限区域"
-                : $"{person} 不能坐在任何座位（该限制无解）";
+                ? $"{person} 的就座区域不设限制"
+                : $"{person} 禁止在教室内任何座位就座（此限制导致无解）";
 
         return rule.Polarity == RulePolarity.Required
-            ? $"{person} 必须坐在{region}内的座位"
-            : $"{person} 不能坐在{region}内的座位";
+            ? $"{person} 必须坐在 {region} 区域内的课桌"
+            : $"{person} 禁止坐在 {region} 区域内的课桌";
     }
 
     private static string RegionText(RegionRule rule)
@@ -63,32 +63,32 @@ internal static class RuleText
         if (minimum is int lower && maximum is int upper)
         {
             if (lower > upper)
-                return $"第{lower + 1}{unit}至第{upper + 1}{unit}（空区间）";
-            return lower == upper ? $"第{lower + 1}{unit}" : $"第{lower + 1}至{upper + 1}{unit}";
+                return $"第 {lower + 1} {unit}至第 {upper + 1} {unit}（空区间，不可达成）";
+            return lower == upper ? $"第 {lower + 1} {unit}" : $"第 {lower + 1} 至 {upper + 1} {unit}";
         }
         if (minimum is int from)
-            return $"第{from + 1}{unit}及以后";
+            return $"第 {from + 1} {unit}及以后排列";
         if (maximum is int to)
-            return $"第{to + 1}{unit}及以前";
+            return $"第 {to + 1} {unit}及以前排列";
         return string.Empty;
     }
 
     private static string DescribeCapacity(CapacityRule rule)
     {
         string target = rule.Axis.Type == AxisType.Row
-            ? $"第{rule.Axis.Index + 1}排"
-            : $"第{rule.Axis.Index + 1}列";
+            ? $"第 {rule.Axis.Index + 1} 排（横向）"
+            : $"第 {rule.Axis.Index + 1} 列（纵向）";
 
         string limit = (rule.Min, rule.Max) switch
         {
-            (null, null) => "不限",
-            (int atLeast, null) => $"至少 {atLeast} 人",
-            (null, int atMost) => $"至多 {atMost} 人",
-            (int atLeast, int atMost) when atLeast == atMost => $"恰好 {atLeast} 人",
-            (int atLeast, int atMost) => $"至少 {atLeast} 人且至多 {atMost} 人",
+            (null, null) => "不限人数",
+            (int atLeast, null) => $"至少安排 {atLeast} 人",
+            (null, int atMost) => $"最多允许 {atMost} 人",
+            (int atLeast, int atMost) when atLeast == atMost => $"精确安排 {atLeast} 人",
+            (int atLeast, int atMost) => $"安排 {atLeast} 至 {atMost} 人",
         };
 
-        return $"{target}的占座人数：{limit}";
+        return $"{target}容纳人数：{limit}";
     }
 
     private static string DescribeRelation(RelationRule rule, StudentSearchIndex people)
@@ -100,11 +100,11 @@ internal static class RuleText
         if (rule.Kind == RelationKind.ExactOffset)
         {
             if (rule.OffsetDx == 0 && rule.OffsetDy == 0)
-                return required ? $"{a} 必须坐在 {b} 的同一座位（偏移为 0）" : $"{a} 不能坐在 {b} 的同一座位";
+                return required ? $"{a} 必须与 {b} 同座（偏移量为 0）" : $"{a} 不得与 {b} 坐在同一张课桌";
 
             return required
-                ? $"{a} 必须坐在 {b} {OffsetText(rule.OffsetDx, rule.OffsetDy)}的座位"
-                : $"{a} 不能坐在 {b} {OffsetText(rule.OffsetDx, rule.OffsetDy)}的座位";
+                ? $"{a} 必须坐在 {b} {OffsetText(rule.OffsetDx, rule.OffsetDy)}的课桌"
+                : $"{a} 禁止坐在 {b} {OffsetText(rule.OffsetDx, rule.OffsetDy)}的课桌";
         }
 
         if (rule.Kind == RelationKind.Proximity)
@@ -112,8 +112,8 @@ internal static class RuleText
 
         string place = DirectionText(rule);
         return required
-            ? $"{a} 必须坐在 {b} {place}"
-            : $"{a} 不能坐在 {b} {place}";
+            ? $"{a} 必须坐在 {b} 的{place}"
+            : $"{a} 禁止坐在 {b} 的{place}";
     }
 
     private static string ProximityText(string a, string b, RelationRule rule, bool required)
@@ -122,21 +122,21 @@ internal static class RuleText
         {
             case null:
                 return required
-                    ? $"{a} 与 {b} 的距离不限（该规则无实际约束）"
-                    : $"{a} 与 {b} 的距离不限（该禁止无法满足）";
+                    ? $"{a} 与 {b} 的相对距离不限（无约束效果）"
+                    : $"{a} 与 {b} 不限距离（与排座逻辑冲突，无法满足）";
             case < 0:
-                return $"{a} 与 {b} 的距离上限为负（无解）";
+                return $"{a} 与 {b} 的最大距离上限为负数（不可达成）";
             case 0:
-                return required ? $"{a} 必须与 {b} 坐在同一座位" : $"{a} 不能与 {b} 坐在同一座位";
+                return required ? $"{a} 必须与 {b} 安排在同一张课桌" : $"{a} 禁止与 {b} 坐在同一张课桌";
             case 1:
-                string adjacency = AdjacencyHint(rule.Metric);
+                string adjacency = AdjacencyHint(rule.Adjacency);
                 return required
-                    ? $"{a} 必须与 {b} 相邻（{adjacency}）"
-                    : $"{a} 不能与 {b} 相邻（{adjacency}）";
+                    ? $"{a} 必须与 {b} 相邻就座（{adjacency}）"
+                    : $"{a} 禁止与 {b} 相邻就座（{adjacency}）";
             case int steps:
                 return required
-                    ? $"{a} 与 {b} 的距离必须不超过 {steps} 步"
-                    : $"{a} 与 {b} 的距离必须大于 {steps} 步";
+                    ? $"{a} 与 {b} 之间的座位间距不得超过 {steps} 步"
+                    : $"{a} 与 {b} 之间的座位间距必须大于 {steps} 步";
             default:
                 throw new NotSupportedException($"不支持的距离取值：{rule.Distance}");
         }
@@ -146,35 +146,39 @@ internal static class RuleText
     {
         string side = rule.Kind switch
         {
-            RelationKind.Behind => "后面",
-            RelationKind.InFrontOf => "前面",
-            RelationKind.LeftOf => "左边",
-            RelationKind.RightOf => "右边",
-            RelationKind.SameRow => "同一排",
-            RelationKind.SameColumn => "同一列",
+            RelationKind.Behind => "正后方",
+            RelationKind.InFrontOf => "正前方",
+            RelationKind.LeftOf => "正左侧",
+            RelationKind.RightOf => "正右侧",
+            RelationKind.SameRow => "同一排座位",
+            RelationKind.SameColumn => "同一列座位",
             _ => throw new NotSupportedException($"不支持的关系类型：{rule.Kind}"),
         };
 
         switch (rule.Distance)
         {
             case 1:
-                return $"{side}相邻的座位{ChebyshevSuffix(rule.Metric)}";
+                return $"{side}相邻课桌{ChebyshevSuffix(rule.Metric)}";
             case null:
-                return $"{side}的座位";
+                return $"{side}课桌";
             case < 0:
-                return $"{side}的座位（距离上限为负，无解）";
+                return $"{side}课桌（距离上限为负数，无法达成）";
             case 0:
-                return $"{side}的座位（距离为 0，即同一座位）";
+                return $"{side}同一课桌（距离为 0）";
             case int steps:
-                return $"{side} {steps} 步以内的座位";
+                return $"{side} {steps} 步以内的课桌";
             default:
                 throw new NotSupportedException($"不支持的距离取值：{rule.Distance}");
         }
     }
 
-    /// <summary>Proximity 相邻时的范围说明：曼哈顿只算上下左右，切比雪夫含斜角。</summary>
-    private static string AdjacencyHint(DistanceMetric metric)
-        => metric == DistanceMetric.Chebyshev ? "含斜角相邻" : "上下左右紧挨";
+    private static string AdjacencyHint(AdjacencyMode mode) => mode switch
+    {
+        AdjacencyMode.Horizontal => "横向：同排左右，含跨窄过道",
+        AdjacencyMode.FourWay => "四向：前后左右，含跨窄过道",
+        AdjacencyMode.EightWay => "八向：前后左右及斜角，含正交跨窄过道",
+        _ => throw new NotSupportedException($"不支持的相邻模式：{mode}")
+    };
 
     private static string ChebyshevSuffix(DistanceMetric metric)
         => metric == DistanceMetric.Chebyshev ? "（含斜角）" : string.Empty;
@@ -183,16 +187,16 @@ internal static class RuleText
     {
         var parts = new List<string>(2);
         if (dx > 0)
-            parts.Add($"向右 {dx} 列");
+            parts.Add($"向窗侧（右）偏 {dx} 列");
         else if (dx < 0)
-            parts.Add($"向左 {-(long)dx} 列");
+            parts.Add($"向门侧（左）偏 {-(long)dx} 列");
         if (dy > 0)
-            parts.Add($"向下 {dy} 排");
+            parts.Add($"向教室后偏 {dy} 排");
         else if (dy < 0)
-            parts.Add($"向上 {-(long)dy} 排");
+            parts.Add($"向讲台前偏 {-(long)dy} 排");
         return string.Join("、", parts);
     }
 
     private static string Name(PersonId id, StudentSearchIndex people)
-        => people.Get(id)?.Name ?? $"未知学生({id})";
+        => people.Get(id)?.Name ?? $"[未知学生:{id}]";
 }

@@ -14,22 +14,22 @@ internal static class ExcelRosterImporter
     public static SpreadsheetPreview Preview(string path)
     {
         if (!File.Exists(path))
-            throw new FileNotFoundException("找不到 Excel 文件。", path);
+            throw new FileNotFoundException("未找到指定的 Excel 表格文件。", path);
         if (!string.Equals(Path.GetExtension(path), ".xls", StringComparison.OrdinalIgnoreCase)
             && !string.Equals(Path.GetExtension(path), ".xlsx", StringComparison.OrdinalIgnoreCase))
-            throw new InvalidDataException("只支持 .xls 和 .xlsx 文件。");
+            throw new InvalidDataException("仅支持导入 Excel 工作簿格式（.xlsx 或 .xls）。");
 
         using FileStream stream = File.OpenRead(path);
         IWorkbook workbook = IsXlsx(path) ? new XSSFWorkbook(stream) : new HSSFWorkbook(stream);
         try
         {
             if (workbook.NumberOfSheets == 0)
-                throw new InvalidDataException("Excel 文件没有工作表。");
+            throw new InvalidDataException("所选 Excel 工作簿中没有任何工作表。");
 
             ISheet sheet = workbook.GetSheetAt(0);
             IRow? headerRow = sheet.GetRow(sheet.FirstRowNum);
             if (headerRow is null || headerRow.LastCellNum <= 0)
-                throw new InvalidDataException("首个工作表没有表头行。");
+            throw new InvalidDataException("工作表中缺少表头列标题行。");
 
             var headers = new List<string>();
             for (int column = 0; column < headerRow.LastCellNum; column++)
@@ -68,7 +68,7 @@ internal static class ExcelRosterImporter
             ISheet sheet = workbook.GetSheetAt(0);
             IRow? headerRow = sheet.GetRow(sheet.FirstRowNum);
             if (headerRow is null)
-                throw new InvalidDataException("首个工作表没有表头行。");
+            throw new InvalidDataException("工作表中缺少有效的数据表头行。");
 
             var students = new List<Person>();
             var numbers = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
@@ -86,7 +86,7 @@ internal static class ExcelRosterImporter
                     continue;
                 }
                 if (!string.IsNullOrWhiteSpace(number) && !numbers.Add(number))
-                    throw new InvalidDataException($"学号“{number}”重复，导入已取消。");
+                    throw new InvalidDataException($"检测到重复学号“{number}”，请核对表格后重试。");
 
                 students.Add(new Person(PersonId.New(), name, string.IsNullOrWhiteSpace(number) ? null : number, null));
             }

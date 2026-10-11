@@ -9,8 +9,10 @@ public class DefaultWorkspace : IWorkspace
     internal bool               IsDisposed { get; private set; }
     private IWorkspaceContext? context;
     private bool openAboutPopup;
+    private IDisposable? _viewOpenSubscription;
     private readonly Dictionary<string, bool> _viewVisibility = new(StringComparer.Ordinal);
     private readonly Dictionary<string, ViewGeometry> _viewGeometry = new(StringComparer.Ordinal);
+    private readonly HashSet<string> _pendingFocus = new(StringComparer.Ordinal);
 
     private readonly record struct ViewGeometry(Vector2 Position, Vector2 Size, float Scale, bool Docked);
     public void Activate(IWorkspaceContext _context)
@@ -19,6 +21,7 @@ public class DefaultWorkspace : IWorkspace
             throw new ObjectDisposedException(nameof(DefaultWorkspace));
 
         this.context = _context ?? throw new ArgumentNullException(nameof(_context));
+        _viewOpenSubscription = _context.Events.Subscribe<UiViewOpenRequested>(OnViewOpenRequested);
         
         ImGui.StyleColorsLight();
         ImGuiStylePtr style = ImGui.GetStyle();
@@ -28,11 +31,28 @@ public class DefaultWorkspace : IWorkspace
         style.TabRounding = 6.0f;
     }
 
-    private bool IsViewVisible(string viewId)
-        => !_viewVisibility.TryGetValue(viewId, out bool visible) || visible;
+    private bool IsViewVisible(IUiView view)
+        => _viewVisibility.TryGetValue(view.Id, out bool visible) ? visible : view.InitiallyVisible;
 
     private void SetViewVisible(string viewId, bool visible)
         => _viewVisibility[viewId] = visible;
+
+    private void OnViewOpenRequested(UiViewOpenRequested request)
+    {
+        IWorkspaceContext? current = context;
+        if (current is null)
+            return;
+
+        foreach (IUiView view in current.Views)
+        {
+            if (!string.Equals(view.Id, request.ViewId, StringComparison.Ordinal))
+                continue;
+
+            SetViewVisible(view.Id, true);
+            _pendingFocus.Add(view.Id);
+            return;
+        }
+    }
     private void DrawMainMenuBar(IReadOnlyList<IUiCommand> uiCommands, IReadOnlyList<IUiView> uiViews)
     {
         ImGui.PushStyleColor(ImGuiCol.MenuBarBg, new Vector4(1f, 1f, 1f, 0.6f)); // 半透明白色
@@ -42,28 +62,28 @@ public class DefaultWorkspace : IWorkspace
             return;
         }
 
-        if (ImGui.BeginMenu("应用"))
+        if (ImGui.BeginMenu("系统"))
         {
-            if (ImGui.MenuItem("关于 PokeSeats"))
+            if (ImGui.MenuItem("关于 PokeSeats 戳座"))
                 openAboutPopup = true;
 
-            if (ImGui.MenuItem("退出"))
+            if (ImGui.MenuItem("退出程序"))
                 context!.Events.Publish(new ApplicationExitRequested());
 
             ImGui.EndMenu();
         }
 
-        if (ImGui.BeginMenu("面板"))
+        if (ImGui.BeginMenu("功能面板"))
         {
             if (uiViews.Count == 0)
             {
-                ImGui.MenuItem("（无面板）", null, false, false);
+                ImGui.MenuItem("（当前无可用面板）", null, false, false);
             }
             else
             {
                 foreach (IUiView view in uiViews)
                 {
-                    bool visible = IsViewVisible(view.Id);
+                    bool visible = IsViewVisible(view);
                     ImGui.PushID(view.Id);
                     bool clicked = ImGui.MenuItem(view.DisplayName, null, visible, true);
                     ImGui.PopID();
@@ -94,6 +114,13 @@ public class DefaultWorkspace : IWorkspace
     private void DrawView(IUiView view, Vector2 initialPosition, Vector2 initialSize, float deltaSeconds)
     {
         float scale = UiScale.Current;
+        if (_pendingFocus.Remove(view.Id))
+        {
+            // Reopen a collapsed window and bring it to the front.
+            ImGui.SetNextWindowCollapsed(false, ImGuiCond.Always);
+            ImGui.SetNextWindowFocus();
+        }
+
         Vector2 viewportOrigin = ImGui.GetMainViewport().Pos;
         if (!_viewGeometry.TryGetValue(view.Id, out ViewGeometry previous))
         {
@@ -131,7 +158,7 @@ public class DefaultWorkspace : IWorkspace
         float rowHeight = 0f;
         foreach (IUiView view in context!.Views)
         {
-            if (!IsViewVisible(view.Id))
+            if (!IsViewVisible(view))
                 continue;
             Vector2 size = (view.MinimumSize ?? new Vector2(520, 360)) * scale;
             if (offset.X > margin && offset.X + size.X > viewport.Size.X - margin)
@@ -187,7 +214,7 @@ public class DefaultWorkspace : IWorkspace
 
     private void DrawAboutPopup()
     {
-        const string popupId = "关于 PokeSeats###pokeseats.defaultworkspace.about";
+        const string popupId = "关于 PokeSeats 戳座###pokeseats.defaultworkspace.about";
         if (openAboutPopup)
         {
             ImGui.OpenPopup(popupId);
@@ -197,13 +224,13 @@ public class DefaultWorkspace : IWorkspace
         bool open = true;
         if (ImGui.BeginPopupModal(popupId, ref open, ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoSavedSettings))
         {
-            ImGui.Text("PokeSeats 戳座");
-            ImGui.TextDisabled("Copyright (c) chenjintang-shrimp 2026");
+            ImGui.Text("PokeSeats 戳座 - 智能教室排座系统");
+            ImGui.TextDisabled("版本 1.0 · Copyright (c) chenjintang-shrimp 2026");
             ImGui.Separator();
-            ImGui.Text("本软件使用 HarmonyOS Sans 作为用户界面字体。");
-            ImGui.TextDisabled("版权所有 2021 Huawei Device Co., Ltd.");
-            
-            if (ImGui.Button("关闭"))
+            ImGui.Text("界面字体：HarmonyOS Sans SC");
+            ImGui.TextDisabled("字体版权所有 2021 Huawei Device Co., Ltd. 根据字体许可协议分发。");
+            ImGui.Separator();
+            if (ImGui.Button("确定"))
                 ImGui.CloseCurrentPopup();
             
             ImGui.EndPopup();
@@ -212,6 +239,9 @@ public class DefaultWorkspace : IWorkspace
 
     public void Deactivate()
     {
+        _viewOpenSubscription?.Dispose();
+        _viewOpenSubscription = null;
+        _pendingFocus.Clear();
         // Visible-view choices deliberately survive deactivation.
         openAboutPopup = false;
         context = null;
@@ -219,10 +249,13 @@ public class DefaultWorkspace : IWorkspace
 
     public void Dispose()
     {
+        _viewOpenSubscription?.Dispose();
+        _viewOpenSubscription = null;
         context = null;
         // _panelVisibility.Clear();
         _viewVisibility.Clear();
         _viewGeometry.Clear();
+        _pendingFocus.Clear();
         IsDisposed = true;
     }
 }

@@ -5,11 +5,13 @@ namespace PokeSeats.IR.Rules;
 public abstract record Rule(RuleId Id, string DisplayName);
 
 /// <summary>
-/// A 相对于 B 的基础关系；Required 要求谓词为真，Forbidden 要求为假。
-/// 方向只约束对应轴：上为前、下为后；SameRow/SameColumn 锁定相应轴。
-/// 除 ExactOffset 外，还要求加权图距离不超过 Distance；null 取消距离及连通性限制。
-/// 不同人的合法座位必须互异；同一人的关系在 (p,p) 上判断。
+/// A 相对于 B 的基础关系；Required 要求谓词为真，Forbidden 要求谓词为假。
+/// Proximity 且 Distance=1 使用 Adjacency 指定横向、四向或八向；其他距离值保留加权图距离。
 /// </summary>
+/// <remarks>
+/// 方向只约束对应轴：上为前、下为后；SameRow/SameColumn 锁定相应轴。
+/// 不同人的合法座位必须互异；同一人的关系在 (p,p) 上判断。
+/// </remarks>
 public sealed record RelationRule(
     RuleId         Id,
     string         DisplayName,
@@ -18,9 +20,10 @@ public sealed record RelationRule(
     RelationKind   Kind,
     RulePolarity   Polarity,
     DistanceMetric Metric          = DistanceMetric.Manhattan,
-    int?           Distance        = 1, // 加权距离上限；null 不限，负值空支持；ExactOffset 忽略此值
-    int            OffsetDx        = 0, // ExactOffset: A.Col = B.Col + OffsetDx（右为正）
-    int            OffsetDy        = 0  // ExactOffset: A.Row = B.Row + OffsetDy（下为正）
+    int?           Distance        = 1,
+    int            OffsetDx        = 0,
+    int            OffsetDy        = 0,
+    AdjacencyMode  Adjacency       = AdjacencyMode.FourWay
 ) : Rule(Id, DisplayName);
 public sealed record PinnedRule(
     RuleId   Id,
