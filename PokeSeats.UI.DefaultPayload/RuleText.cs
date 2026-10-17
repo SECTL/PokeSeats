@@ -135,7 +135,7 @@ internal static class RuleText
                     ? string.Format(RulesStrings.ProximitySameSeatRequiredFormat, a, b)
                     : string.Format(RulesStrings.ProximitySameSeatForbiddenFormat, a, b);
             case 1:
-                string adjacency = AdjacencyHint(rule.Adjacency);
+                string adjacency = AdjacencyHint(rule);
                 return required
                     ? string.Format(RulesStrings.ProximityAdjacentRequiredFormat, a, b, adjacency)
                     : string.Format(RulesStrings.ProximityAdjacentForbiddenFormat, a, b, adjacency);
@@ -178,12 +178,14 @@ internal static class RuleText
         }
     }
 
-    private static string AdjacencyHint(AdjacencyMode mode) => mode switch
+    private static string AdjacencyHint(RelationRule rule) => rule.Adjacency switch
     {
-        AdjacencyMode.Horizontal => RulesStrings.AdjacencyHorizontalHint,
+        AdjacencyMode.Horizontal => rule.AllowNarrowAisle
+            ? RulesStrings.AdjacencyHorizontalHint
+            : RulesStrings.AdjacencyHorizontalStrictHint,
         AdjacencyMode.FourWay => RulesStrings.AdjacencyFourWayHint,
         AdjacencyMode.EightWay => RulesStrings.AdjacencyEightWayHint,
-        _ => throw new NotSupportedException(string.Format(RulesStrings.UnsupportedAdjacencyFormat, mode))
+        _ => throw new NotSupportedException(string.Format(RulesStrings.UnsupportedAdjacencyFormat, rule.Adjacency))
     };
 
     private static string ChebyshevSuffix(DistanceMetric metric)

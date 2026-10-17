@@ -6,7 +6,9 @@ public abstract record Rule(RuleId Id, string DisplayName);
 
 /// <summary>
 /// A 相对于 B 的基础关系；Required 要求谓词为真，Forbidden 要求谓词为假。
-/// Proximity 且 Distance=1 使用 Adjacency 指定横向、四向或八向；其他距离值保留加权图距离。
+/// Proximity 且 Distance=1 使用 Adjacency 指定横向、四向或八向；横向模式下
+/// AllowNarrowAisle 控制是否把只隔一条窄过道的课桌算作相邻。
+/// 其他距离值保留加权图距离。
 /// </summary>
 /// <remarks>
 /// 方向只约束对应轴：上为前、下为后；SameRow/SameColumn 锁定相应轴。
@@ -23,7 +25,8 @@ public sealed record RelationRule(
     int?           Distance        = 1,
     int            OffsetDx        = 0,
     int            OffsetDy        = 0,
-    AdjacencyMode  Adjacency       = AdjacencyMode.FourWay
+    AdjacencyMode  Adjacency       = AdjacencyMode.FourWay,
+    bool           AllowNarrowAisle = true
 ) : Rule(Id, DisplayName);
 public sealed record PinnedRule(
     RuleId   Id,

@@ -131,7 +131,8 @@ internal sealed class RuleDocument
                 relation.Distance,
                 relation.Adjacency,
                 relation.OffsetDx,
-                relation.OffsetDy),
+                relation.OffsetDy,
+                relation.AllowNarrowAisle),
             null,
             null,
             null),
@@ -194,7 +195,8 @@ internal sealed class RuleDocument
                     relation.Distance,
                     relation.OffsetDx,
                     relation.OffsetDy,
-                    relation.Adjacency ?? (relation.Metric == DistanceMetric.Chebyshev ? AdjacencyMode.EightWay : AdjacencyMode.FourWay));
+                    relation.Adjacency ?? (relation.Metric == DistanceMetric.Chebyshev ? AdjacencyMode.EightWay : AdjacencyMode.FourWay),
+                    relation.AllowNarrowAisle ?? true);
             }
             case PinnedType:
             {
@@ -248,7 +250,8 @@ internal sealed class RuleDocument
         int? Distance,
         AdjacencyMode? Adjacency = null,
         int OffsetDx = 0,
-        int OffsetDy = 0);
+        int OffsetDy = 0,
+        bool? AllowNarrowAisle = null);
 
     private sealed record StoredPinned(Guid Person, int Row, int Col);
 

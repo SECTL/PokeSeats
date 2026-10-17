@@ -25,7 +25,8 @@ public readonly record struct RuleSupportSummary(long UniverseCount, long Matchi
 /// 空宇宙（没有座位、或互异有序对不存在）表示没有任何合法指派。
 /// </para>
 /// <para>
-/// Proximity 且 Distance=1 使用 Adjacency 的座位邻接，包含单格正交窄过道桥接，不含自座位。
+/// Proximity 且 Distance=1 使用 Adjacency 的座位邻接；横向模式按 AllowNarrowAisle
+/// 决定是否桥接单格正交窄过道，四向/八向沿用桥接行为；不含自座位。
 /// 其他情况保留以下距离语义。
 /// 距离语义（<see cref="RelationRule.Distance"/>）：加权图距离的上界（≤ d），
 /// 普通邻接边权重 1、窄过道桥边权重 2，宽过道不建桥边；<c>null</c> 表示既不限距离也不要求连通；
@@ -150,7 +151,7 @@ public sealed class RuleSupport
     private bool matches(RelationRule rule, GridPos a, GridPos b) => rule.Kind switch
     {
         RelationKind.Proximity => rule.Distance == 1
-            ? AdjacencyGeometry.Matches(rule.Adjacency, layout, a, b)
+            ? AdjacencyGeometry.Matches(rule.Adjacency, layout, a, b, rule.AllowNarrowAisle)
             : distanceSatisfied(rule, a, b),
         RelationKind.LeftOf => a.Col < b.Col && distanceSatisfied(rule, a, b),
         RelationKind.RightOf => a.Col > b.Col && distanceSatisfied(rule, a, b),

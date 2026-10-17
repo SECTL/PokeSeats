@@ -185,6 +185,21 @@ internal sealed class RuleEditorView : IUiView
                     if (ImGui.Selectable(AdjacencyLabels[index], (int)state.Adjacency == index)) state.Adjacency = (AdjacencyMode)index;
                 ImGui.EndCombo();
             }
+            if (state.Adjacency == AdjacencyMode.Horizontal)
+            {
+                string aisleLabel = state.AllowNarrowAisle
+                    ? RulesStrings.AdjacencyAllowNarrowAisle
+                    : RulesStrings.AdjacencySameDeskOnly;
+                ImGui.SetNextItemWidth(UiScale.Pixels(200));
+                if (ImGui.BeginCombo(RulesStrings.AdjacencyAisleLabel, aisleLabel))
+                {
+                    if (ImGui.Selectable(RulesStrings.AdjacencySameDeskOnly, !state.AllowNarrowAisle))
+                        state.AllowNarrowAisle = false;
+                    if (ImGui.Selectable(RulesStrings.AdjacencyAllowNarrowAisle, state.AllowNarrowAisle))
+                        state.AllowNarrowAisle = true;
+                    ImGui.EndCombo();
+                }
+            }
         }
         if (ImGui.Button(RulesStrings.ResetViewportButton)) { pan = Vector2.Zero; zoom = 1; }
         ImGui.SameLine(); ImGui.TextWrapped(RulesStrings.RelationCanvasHelp);

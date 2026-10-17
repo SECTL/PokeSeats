@@ -25,7 +25,16 @@ public static class AdjacencyGeometry
     }
 
     /// <summary>Desk neighbours, including a single orthogonal narrow-aisle bridge.</summary>
-    public static bool Matches(AdjacencyMode mode, LayoutGrid layout, GridPos a, GridPos b)
+    /// <param name="allowNarrowAisle">
+    /// Horizontal mode only: true treats desks separated by one narrow aisle as adjacent;
+    /// false requires immediately adjacent desks. FourWay/EightWay keep their bridge behaviour.
+    /// </param>
+    public static bool Matches(
+        AdjacencyMode mode,
+        LayoutGrid layout,
+        GridPos a,
+        GridPos b,
+        bool allowNarrowAisle = true)
     {
         if (!layout.IsDesk(a) || !layout.IsDesk(b))
             return false;
@@ -35,9 +44,13 @@ public static class AdjacencyGeometry
         if (Matches(mode, row, col))
             return true;
 
-        bool bridge = mode == AdjacencyMode.Horizontal
-            ? row == 0 && Math.Abs(col) == 2
-            : row == 0 && Math.Abs(col) == 2 || col == 0 && Math.Abs(row) == 2;
+        bool bridge = mode switch
+        {
+            AdjacencyMode.Horizontal => allowNarrowAisle && row == 0 && Math.Abs(col) == 2,
+            AdjacencyMode.FourWay or AdjacencyMode.EightWay =>
+                row == 0 && Math.Abs(col) == 2 || col == 0 && Math.Abs(row) == 2,
+            _ => false
+        };
         return bridge && layout.TypeAt(new GridPos(
             (int)(((long)a.Row + b.Row) / 2),
             (int)(((long)a.Col + b.Col) / 2))) == CellType.NarrowAisle;

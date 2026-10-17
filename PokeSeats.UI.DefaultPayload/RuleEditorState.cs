@@ -18,6 +18,7 @@ internal sealed class RuleEditorState
     public int Dx;
     public int Dy = 1;
     public AdjacencyMode Adjacency = AdjacencyMode.FourWay;
+    public bool AllowNarrowAisle = true;
     public GridPos? First;
     public GridPos? Last;
     public AxisType AxisType;
@@ -48,7 +49,7 @@ internal sealed class RuleEditorState
             // UI: B = A + (Dx, Dy). IR: model A is the relative person and model B is the center.
             2 when Person is { } center && Reference is { } relative && center != relative => new RelationRule(id, "", relative, center,
                 Relation, polarity, DistanceMetric.Manhattan,
-                Relation == RelationKind.Proximity ? 1 : null, Dx, Dy, Adjacency),
+                Relation == RelationKind.Proximity ? 1 : null, Dx, Dy, Adjacency, AllowNarrowAisle),
             3 when (UseMin || UseMax) && (!UseMin || Min >= 0) && (!UseMax || Max >= 0) && (!UseMin || !UseMax || Min <= Max)
                 => new CapacityRule(id, "", new Axis(AxisType, AxisIndex), UseMin ? Min : null, UseMax ? Max : null),
             _ => null
@@ -66,7 +67,7 @@ internal sealed class RuleEditorState
             Negated ? RulePolarity.Forbidden : RulePolarity.Required,
             DistanceMetric.Manhattan,
             kind == RelationKind.Proximity ? 1 : null,
-            Dx, Dy, Adjacency);
+            Dx, Dy, Adjacency, AllowNarrowAisle);
     }
 
     public void Load(Rule rule)
@@ -84,7 +85,8 @@ internal sealed class RuleEditorState
                 // Stored IR is A relative to B; expose it as B (center A) and A (relative B).
                 Category = 2; Person = relation.B; Reference = relation.A; Relation = relation.Kind;
                 Negated = relation.Polarity == RulePolarity.Forbidden; Dx = relation.OffsetDx; Dy = relation.OffsetDy;
-                Adjacency = relation.Adjacency; PreviewCenter = null; break;
+                Adjacency = relation.Adjacency; AllowNarrowAisle = relation.AllowNarrowAisle;
+                PreviewCenter = null; break;
             case CapacityRule capacity:
                 Category = 3; AxisType = capacity.Axis.Type; AxisIndex = capacity.Axis.Index;
                 UseMin = capacity.Min.HasValue; UseMax = capacity.Max.HasValue; Min = capacity.Min ?? 0; Max = capacity.Max ?? 0; break;

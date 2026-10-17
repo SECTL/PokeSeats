@@ -162,6 +162,15 @@
   <data name="AdjacencyRangeLabel" xml:space="preserve">
     <value>相邻范围</value>
   </data>
+  <data name="AdjacencyAisleLabel" xml:space="preserve">
+    <value>同桌方式</value>
+  </data>
+  <data name="AdjacencySameDeskOnly" xml:space="preserve">
+    <value>必须同桌（紧挨着）</value>
+  </data>
+  <data name="AdjacencyAllowNarrowAisle" xml:space="preserve">
+    <value>可隔一条窄走道</value>
+  </data>
   <data name="ResetViewportButton" xml:space="preserve">
     <value>视口复位至 A</value>
   </data>
@@ -536,7 +545,10 @@
     <comment>{0}：方位说明；{1}：距离步数。</comment>
   </data>
   <data name="AdjacencyHorizontalHint" xml:space="preserve">
-    <value>横向：同排左右，含跨窄过道</value>
+    <value>横向：同排左右，可跨窄走道</value>
+  </data>
+  <data name="AdjacencyHorizontalStrictHint" xml:space="preserve">
+    <value>横向：同排左右，必须同桌</value>
   </data>
   <data name="AdjacencyFourWayHint" xml:space="preserve">
     <value>四向：前后左右，含跨窄过道</value>
