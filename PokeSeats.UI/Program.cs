@@ -1,30 +1,29 @@
 using ImGuiNET;
 using Silk.NET.Input;
 using Silk.NET.Maths;
-using Silk.NET.OpenGL;
-using Silk.NET.OpenGL.Extensions.ImGui;
 using Silk.NET.Windowing;
 using PokeSeats.UI;
 using PokeSeats.UI.Fonts;
 using PokeSeats.UI.Plugins;
 using PokeSeats.UI.PluginContracts;
+using PokeSeats.UI.Rendering;
 
 
 var options = WindowOptions.Default with
 {
     Size = new Vector2D<int>((int)UiScale.ReferenceWidth, (int)UiScale.ReferenceHeight),
     Title = "PokeSeats 戳座",
-    API = GraphicsAPI.Default,
+    API = OperatingSystem.IsWindows() ? GraphicsAPI.None : GraphicsAPI.Default,
     VSync = true,
+    ShouldSwapAutomatically = !OperatingSystem.IsWindows(),
     FramesPerSecond = 60,
     UpdatesPerSecond = 60
 };
 
 using var window = Window.Create(options);
 
-GL? gl = null;
 IInputContext? input = null;
-ImGuiController? imGui = null;
+IUiRenderer? renderer = null;
 FontAtlasScaling? fontAtlasScaling = null;
 PluginCatalog? catalog = null;
 WorkspaceManager? workspaces = null;
@@ -34,8 +33,6 @@ var scaling = new UiScaling();
 
 window.Load += () =>
 {
-    gl = GL.GetApi(window);
-    gl.Viewport(window.FramebufferSize);
     input = window.CreateInput();
 
     string applicationDirectory = AppContext.BaseDirectory;
@@ -48,15 +45,16 @@ window.Load += () =>
 
     catalog = new PluginCatalog(builtinsDirectory, pluginsDirectory, dataDirectory);
     IReadOnlyList<PluginFontRequest> fontRequests = catalog.FontRequests;
-    imGui = new ImGuiController(gl, window, input, () =>
+    void configureIo()
     {
         var io = ImGui.GetIO();
         io.ConfigFlags |= ImGuiConfigFlags.DockingEnable;
         PluginFontLoader.AddRequestedFonts(io.Fonts, fontRequests);
-    });
-    // The controller starts a frame in its constructor; unlock the atlas before resizing it.
-    imGui.Render();
-    fontAtlasScaling = new FontAtlasScaling(gl);
+    }
+    renderer = OperatingSystem.IsWindows()
+        ? new Direct3D11ImGuiController(window, input, configureIo)
+        : new OpenGlImGuiRenderer(window, input, configureIo);
+    fontAtlasScaling = new FontAtlasScaling(renderer.UpdateFontTexture);
 
     scaling.CaptureStyle();
     workspaces = new WorkspaceManager(catalog, new WorkspaceSelectionStore(), scaling);
@@ -72,12 +70,13 @@ window.FramebufferResize += size =>
 
 window.Render += delta =>
 {
-    if (gl is null || window.Size.X <= 0 || window.Size.Y <= 0)
+    if (renderer is null || window.Size.X <= 0 || window.Size.Y <= 0
+        || window.FramebufferSize.X <= 0 || window.FramebufferSize.Y <= 0)
         return;
 
     if (pendingFramebufferSize is { } framebufferSize)
     {
-        gl.Viewport(framebufferSize);
+        renderer.Resize(framebufferSize);
         pendingFramebufferSize = null;
     }
 
@@ -85,19 +84,17 @@ window.Render += delta =>
     var viewportSize = new System.Numerics.Vector2(window.Size.X, window.Size.Y);
     scaling.HandleShortcut(input!, viewportSize);
 
-    gl.ClearColor(0.08f, 0.08f, 0.08f, 1.0f);
-    gl.Clear(ClearBufferMask.ColorBufferBit);
     scaling.Apply(viewportSize);
     float pixelDensity = MathF.Max(
         window.FramebufferSize.X / (float)window.Size.X,
         window.FramebufferSize.Y / (float)window.Size.Y);
     fontAtlasScaling!.Apply(UiScale.Current, pixelDensity);
-    imGui!.Update((float)delta);
+    renderer.Update((float)delta);
     selector!.HandleShortcut(input!);
     workspaces!.Draw((float)delta);
     selector.Draw();
     scaling.DrawScaleIndicator();
-    imGui.Render();
+    renderer.Render();
     selector.ApplyPendingSwitch();
 };
 
@@ -105,10 +102,8 @@ window.Closing += () =>
 {
     workspaces?.Dispose();
     catalog?.Dispose();
-    fontAtlasScaling?.Dispose();
-    imGui?.Dispose();
+    renderer?.Dispose();
     input?.Dispose();
-    gl?.Dispose();
 };
 
 window.Run();
