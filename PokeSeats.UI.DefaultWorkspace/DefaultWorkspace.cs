@@ -29,7 +29,7 @@ public class DefaultWorkspace : IWorkspace
     private readonly Dictionary<string, ViewGeometry> _viewGeometry = new(StringComparer.Ordinal);
     private readonly HashSet<string> _pendingFocus = new(StringComparer.Ordinal);
 
-    private readonly record struct ViewGeometry(Vector2 Position, Vector2 Size, float Scale, bool Docked);
+    private readonly record struct ViewGeometry(Vector2 Position, Vector2 Size, float Scale);
 
     public DefaultWorkspace(string settingsPath)
     {
@@ -135,36 +135,74 @@ public class DefaultWorkspace : IWorkspace
     }
 
 
-    private void DrawView(IUiView view, Vector2 initialPosition, Vector2 initialSize, float deltaSeconds)
+    private void DrawTiledView(IUiView view, Vector2 position, Vector2 size, float deltaSeconds)
+    {
+        ImGui.SetCursorScreenPos(position);
+        bool visible = ImGui.BeginChild(view.Id, size,
+            ImGuiChildFlags.Borders | ImGuiChildFlags.AlwaysUseWindowPadding,
+            ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse);
+        if (_pendingFocus.Remove(view.Id))
+            ImGui.SetWindowFocus();
+        if (visible)
+        {
+            ImGui.TextUnformatted(view.DisplayName);
+            ImGui.SameLine();
+            ImGui.SetCursorPosX(ImGui.GetWindowWidth() - ImGui.GetStyle().WindowPadding.X
+                - ImGui.CalcTextSize("x").X - ImGui.GetStyle().FramePadding.X * 2f);
+            if (ImGui.SmallButton("x##close"))
+                SetViewVisible(view.Id, false);
+            ImGui.Separator();
+            if (view.MinimumSize is { } minimum)
+                ImGui.SetNextWindowContentSize(new Vector2(
+                    Math.Max(ImGui.GetContentRegionAvail().X,
+                        minimum.X * UiScale.Current - ImGui.GetStyle().WindowPadding.X * 2f), 0f));
+            if (ImGui.BeginChild("##content", Vector2.Zero, ImGuiChildFlags.None,
+                    ImGuiWindowFlags.HorizontalScrollbar))
+                view.DrawContent(deltaSeconds, DesignTokens);
+            ImGui.EndChild();
+        }
+        ImGui.EndChild();
+    }
+
+    private void DrawFloatingView(IUiView view, Vector2 position, Vector2 size, float deltaSeconds)
     {
         float scale = UiScale.Current;
         if (_pendingFocus.Remove(view.Id))
         {
-            // Reopen a collapsed window and bring it to the front.
             ImGui.SetNextWindowCollapsed(false, ImGuiCond.Always);
             ImGui.SetNextWindowFocus();
         }
 
         Vector2 viewportOrigin = ImGui.GetMainViewport().Pos;
+        ImGui.SetNextWindowDockID(0, ImGuiCond.Always);
         if (!_viewGeometry.TryGetValue(view.Id, out ViewGeometry previous))
         {
-            ImGui.SetNextWindowPos(initialPosition, ImGuiCond.Always);
-            ImGui.SetNextWindowSize(initialSize, ImGuiCond.Always);
+            ImGui.SetNextWindowPos(position, ImGuiCond.Always);
+            ImGui.SetNextWindowSize(size, ImGuiCond.Always);
         }
-        else if (previous.Scale != scale && !previous.Docked)
+        else
         {
-            ImGui.SetNextWindowPos(viewportOrigin + previous.Position * scale, ImGuiCond.Always);
-            ImGui.SetNextWindowSize(previous.Size * scale, ImGuiCond.Always);
+            Vector2 workSize = ImGui.GetMainViewport().WorkSize;
+            Vector2 windowSize = Vector2.Min(previous.Size * scale, workSize);
+            Vector2 windowPosition = Vector2.Clamp(viewportOrigin + previous.Position * scale,
+                ImGui.GetMainViewport().WorkPos, ImGui.GetMainViewport().WorkPos + workSize - windowSize);
+            if (previous.Scale != scale || previous.Size * scale != windowSize
+                || viewportOrigin + previous.Position * scale != windowPosition)
+            {
+                ImGui.SetNextWindowPos(windowPosition, ImGuiCond.Always);
+                ImGui.SetNextWindowSize(windowSize, ImGuiCond.Always);
+            }
         }
-        if (view.MinimumSize is { } minimumSize)
-            ImGui.SetNextWindowSizeConstraints(minimumSize * scale, new Vector2(float.MaxValue, float.MaxValue));
+        if (view.MinimumSize is { } minimum)
+            ImGui.SetNextWindowSizeConstraints(Vector2.Min(minimum * scale, ImGui.GetMainViewport().WorkSize),
+                new Vector2(float.MaxValue, float.MaxValue));
 
         bool open = true;
         string title = $"{view.DisplayName}###{view.Id}";
-        bool visible = ImGui.Begin(title, ref open);
+        bool visible = ImGui.Begin(title, ref open, ImGuiWindowFlags.NoDocking);
         _viewGeometry[view.Id] = new ViewGeometry(
             (ImGui.GetWindowPos() - viewportOrigin) / scale,
-            ImGui.GetWindowSize() / scale, scale, ImGui.IsWindowDocked());
+            ImGui.GetWindowSize() / scale, scale);
         if (visible)
             view.DrawContent(deltaSeconds, DesignTokens);
         ImGui.End();
@@ -175,36 +213,51 @@ public class DefaultWorkspace : IWorkspace
 
     private void DrawViews(float deltaSeconds)
     {
-        ImGuiViewportPtr viewport = ImGui.GetMainViewport();
-        float scale = UiScale.Current;
         float margin = UiScale.Pixels(DesignTokens.Metrics.SpaceLarge);
-        Vector2 offset = new(margin, 40f * scale);
-        float rowHeight = 0f;
+        Vector2 origin = ImGui.GetWindowPos() + new Vector2(margin);
+        Vector2 available = Vector2.Max(Vector2.One, ImGui.GetWindowSize() - new Vector2(margin * 2f));
+        int tiledCount = 0;
         foreach (IUiView view in context!.Views)
+            if (view.InitiallyVisible && IsViewVisible(view))
+                tiledCount++;
+
+        int index = 0;
+        int leftCount = (tiledCount + 1) / 2;
+        foreach (IUiView view in context.Views)
         {
-            if (!IsViewVisible(view))
+            if (!view.InitiallyVisible || !IsViewVisible(view))
                 continue;
-            Vector2 size = (view.MinimumSize ?? new Vector2(520, 360)) * scale;
-            if (offset.X > margin && offset.X + size.X > viewport.Size.X - margin)
-            {
-                offset.X = margin;
-                offset.Y += rowHeight + margin;
-                rowHeight = 0f;
-            }
-            // Additional views must remain reachable even when the tiled rows exceed the viewport.
-            Vector2 position = new(offset.X, Math.Min(offset.Y, Math.Max(40f * scale, viewport.Size.Y - size.Y - margin)));
-            DrawView(view, viewport.Pos + position, size, deltaSeconds);
-            offset.X += size.X + margin;
-            rowHeight = Math.Max(rowHeight, size.Y);
+
+            bool left = index < leftCount;
+            int columnCount = left ? leftCount : tiledCount - leftCount;
+            int row = left ? index : index - leftCount;
+            float leftWidth = tiledCount == 1 ? available.X
+                : (available.X - margin) * (tiledCount == 3 ? 0.4f : 0.5f);
+            float width = left ? leftWidth : available.X - leftWidth - margin;
+            float height = (available.Y - margin * (columnCount - 1)) / columnCount;
+            Vector2 position = origin + new Vector2(left ? 0f : leftWidth + margin,
+                row * (height + margin));
+            DrawTiledView(view, position, Vector2.Max(Vector2.One, new Vector2(width, height)), deltaSeconds);
+            index++;
+        }
+
+        // On-demand views, including seating results, stay above the tiled workspace.
+        foreach (IUiView view in context.Views)
+        {
+            if (view.InitiallyVisible || !IsViewVisible(view))
+                continue;
+            Vector2 size = Vector2.Min((view.MinimumSize ?? new Vector2(800, 560)) * UiScale.Current, available);
+            DrawFloatingView(view, origin + (available - size) * 0.5f, size, deltaSeconds);
         }
     }
 
     public void Draw(float deltaSeconds)
     {
         ArgumentNullException.ThrowIfNull(context);
+        DrawMainMenuBar(context.Commands, context.Views);
         ImGuiViewportPtr viewport = ImGui.GetMainViewport();
-        ImGui.SetNextWindowPos(viewport.Pos);
-        ImGui.SetNextWindowSize(viewport.Size);
+        ImGui.SetNextWindowPos(viewport.WorkPos);
+        ImGui.SetNextWindowSize(viewport.WorkSize);
         ImGui.SetNextWindowViewport(viewport.ID);
 
         const ImGuiWindowFlags flags = ImGuiWindowFlags.NoDecoration
@@ -222,10 +275,7 @@ public class DefaultWorkspace : IWorkspace
         {
             if (visible)
             {
-                uint dockspaceId = ImGui.GetID("pokeseats.defaultworkspace.dockspace");
-                ImGui.DockSpace(dockspaceId, Vector2.Zero, ImGuiDockNodeFlags.PassthruCentralNode);
                 DrawViews(deltaSeconds);
-                DrawMainMenuBar(context.Commands, context.Views);
                 DrawAboutPopup();
                 DrawSettingsPopup();
 
