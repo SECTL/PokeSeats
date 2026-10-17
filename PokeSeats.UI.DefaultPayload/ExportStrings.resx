@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms</value></resheader>
+  <data name="Open" xml:space="preserve"><value>导出图片…</value></data>
+  <data name="Title" xml:space="preserve"><value>导出座位表图片</value></data>
+  <data name="ImageTitle" xml:space="preserve"><value>图片标题</value></data>
+  <data name="PodiumTop" xml:space="preserve"><value>讲台在上（学生视角）</value></data>
+  <data name="PodiumBottom" xml:space="preserve"><value>讲台在下（教师视角）</value></data>
+  <data name="OrientationHint" xml:space="preserve"><value>布局前方默认在上；教师视角旋转座位位置 180°，文字保持正向，编号仍对应原座位。</value></data>
+  <data name="Contents" xml:space="preserve"><value>格子内容</value></data>
+  <data name="Name" xml:space="preserve"><value>姓名</value></data>
+  <data name="StudentNumber" xml:space="preserve"><value>学号</value></data>
+  <data name="Group" xml:space="preserve"><value>小组</value></data>
+  <data name="Coordinates" xml:space="preserve"><value>座位坐标</value></data>
+  <data name="RowNumbers" xml:space="preserve"><value>显示行号</value></data>
+  <data name="ColumnNumbers" xml:space="preserve"><value>显示列号</value></data>
+  <data name="Colors" xml:space="preserve"><value>默认配色</value></data>
+  <data name="Background" xml:space="preserve"><value>图片背景</value></data>
+  <data name="TextColor" xml:space="preserve"><value>文字颜色</value></data>
+  <data name="Border" xml:space="preserve"><value>格子边框</value></data>
+  <data name="Occupied" xml:space="preserve"><value>已坐人的课桌</value></data>
+  <data name="Vacant" xml:space="preserve"><value>空课桌</value></data>
+  <data name="Podium" xml:space="preserve"><value>讲台</value></data>
+  <data name="Aisle" xml:space="preserve"><value>宽过道</value></data>
+  <data name="NarrowAisle" xml:space="preserve"><value>窄过道</value></data>
+  <data name="Empty" xml:space="preserve"><value>空白格</value></data>
+  <data name="PreviewHint" xml:space="preserve"><value>点击预览中的格子可单独设置文字和底色；PNG 始终导出完整网格。</value></data>
+  <data name="SelectedCell" xml:space="preserve"><value>单格设置：第 {0} 排 第 {1} 列</value></data>
+  <data name="CustomText" xml:space="preserve"><value>自定义文字（可换行，留空则不显示）</value></data>
+  <data name="CustomColor" xml:space="preserve"><value>自定义底色</value></data>
+  <data name="ResetCell" xml:space="preserve"><value>恢复此格默认值</value></data>
+  <data name="Path" xml:space="preserve"><value>PNG 保存路径</value></data>
+  <data name="Browse" xml:space="preserve"><value>选择位置…</value></data>
+  <data name="Save" xml:space="preserve"><value>保存 PNG</value></data>
+  <data name="Close" xml:space="preserve"><value>关闭</value></data>
+  <data name="Success" xml:space="preserve"><value>图片已保存：{0}</value></data>
+  <data name="Failure" xml:space="preserve"><value>图片导出失败：{0}</value></data>
+  <data name="PathRequired" xml:space="preserve"><value>请填写 PNG 保存路径。</value></data>
+  <data name="PngOnly" xml:space="preserve"><value>请使用 .png 扩展名。</value></data>
+  <data name="OverwriteTitle" xml:space="preserve"><value>覆盖图片？</value></data>
+  <data name="OverwritePrompt" xml:space="preserve"><value>文件已存在，是否覆盖？</value></data>
+  <data name="Overwrite" xml:space="preserve"><value>覆盖</value></data>
+  <data name="Cancel" xml:space="preserve"><value>取消</value></data>
+  <data name="PngFilter" xml:space="preserve"><value>PNG 图片 (*.png)</value></data>
+</root>

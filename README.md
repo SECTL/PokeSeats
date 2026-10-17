@@ -33,8 +33,11 @@ Windows 使用 Direct3D 11（DX11）渲染；Linux 保持 OpenGL 后端，完整
 2. **教室布局** —— 按住左键拖出一个矩形，松开后选择这片区域是什么（课桌、讲台、宽过道、窄过道、空白）；右键可以单独改一格。教室前方朝上。
 3. **规则编辑** —— 先在左上角选规则类型，再挑学生、填条件。右侧列出已保存的规则，点一下就能改；也可以删除选中规则，或通过“清空所有规则”一次移除全部规则。
 4. **开始自动排座** —— 菜单栏里的命令，会打开"排座结果"面板。求解在后台进行，期间可以继续操作。
+5. **导出座位表图片** —— 在排座结果面板点击「导出图片」，可以选择讲台在上或在下；勾选姓名、学号、小组、座位坐标以及行号和列号，调整图片背景、文字、边框和各类格子颜色后保存为 PNG。预览中点击任意格子可以单独设置文字和底色，适合标注值日生、特殊座位等信息。
 
 改完名单、布局或规则之后需要重新排一次；结果面板会提示你当前显示的是旧结果。
+
+导出图片使用随程序打包的 HarmonyOS Sans SC 字体，支持中文和多行内容。讲台在下时只旋转座位表位置 180°，格子里的文字保持正向，行列编号仍对应原教室座位；导出的 PNG 包含完整网格，不受当前窗口大小影响。
 
 规则编辑中的教室预览使用紧凑格子：格子宽高为原铺满尺寸的 37.5%，格内标记会按需缩小，点击选座和区域框选仍按实际格子位置定位。
 
@@ -107,7 +110,9 @@ Windows 使用 Direct3D 11（DX11）渲染；Linux 保持 OpenGL 后端，完整
 
 `config.json` 里的 `deviceId` 由当前设备的系统机器标识派生（Windows `MachineGuid`、Linux `/etc/machine-id`、macOS `IOPlatformUUID`），重启和升级都不变。把整个 `data` 目录复制到另一台设备后，那台设备会按自己的机器标识重新生成 UUID，不会两台机器共用一个身份。
 
-名单、布局和规则都是明文 JSON，可以直接备份、复制到另一台机器，或者手工改。删掉文件等于恢复空白状态。排座结果不会写入磁盘，关掉程序就没了——需要留档的话自己截图或抄下来。
+`config.json` 会保存 SECTL 平台 ID `sectlPlatformId`（`platform_5d216a8e4424effc`）和 Client ID `sectlClientId`（`6ad35e32003196df861c`）。程序启动后会向 `https://appwrite.sectl.cn` 上报一次版本使用情况，并立即、每 5 分钟上报一次在线状态。版本接口使用平台 ID，在线接口使用 Client ID（平台文档 ID）；两类请求均携带设备 UUID，另分别携带版本号或设备类型。网络失败不会阻塞启动或排座。可用环境变量 `POKESEATS_SECTL_PLATFORM_ID` 覆盖版本上报的平台 ID；在线上报使用配置中的 `sectlClientId`。
+
+名单、布局和规则都是明文 JSON，可以直接备份、复制到另一台机器，或者手工改。删掉文件等于恢复空白状态。排座结果不会自动写入磁盘，关掉程序就没了；需要留档时可以在结果面板导出 PNG 座位表。
 
 旧版本把数据放在 `%LOCALAPPDATA%\PokeSeats`。首次运行时会复制缺失的文件到新位置，旧文件保留不动。
 
@@ -156,4 +161,4 @@ Copyright (c) 2025-2026 SECTL Studio & chenjintang-shrimp
 
 本项目以 GNU General Public License 第 3 版或更高版本（`GPL-3.0-or-later`）发布，完整协议文本见 [LICENSE](LICENSE)。你可以自由使用、修改和分发，包括商用；分发修改后的版本时需要一并提供源码，并保留版权声明。
 
-第三方依赖的许可证：Z3、Dear ImGui／ImGui.NET、Silk.NET、pinyin4net 为 MIT；OR-Tools、NPOI、SixLabors.Fonts 为 Apache-2.0。HarmonyOS Sans 字体单独适用字体许可，见上一节。
+第三方依赖的许可证：Z3、Dear ImGui／ImGui.NET、Silk.NET、pinyin4net 为 MIT；OR-Tools、NPOI、SixLabors.Fonts、SixLabors.ImageSharp 2.1.10、SixLabors.ImageSharp.Drawing 1.0.0 为 Apache-2.0。HarmonyOS Sans 字体单独适用字体许可，见上一节。

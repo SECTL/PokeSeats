@@ -23,7 +23,7 @@ public sealed class DefaultPayloadPlugin : IUiPlugin
         var rules = RuleDocument.LoadOrCreate(rulesPath, out string? rulesMessage);
         seating = new SeatingSession(roster, layout, rules, context.Events);
         context.RegisterView(new RuleEditorView(roster, layout, rules, rulesPath, rulesMessage, seating));
-        context.RegisterView(new SeatingResultView(seating));
+        context.RegisterView(new SeatingResultView(seating, context.DataDirectory));
         context.RegisterCommand(seating);
     }
 

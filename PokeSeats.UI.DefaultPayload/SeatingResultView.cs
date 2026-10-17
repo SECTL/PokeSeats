@@ -12,11 +12,16 @@ internal sealed class SeatingResultView : IUiView
     public const string ViewId = "pokeseats.defaultpayload.seating-result";
     private readonly SeatingSession session;
     private readonly Dictionary<GridPos, Person> occupants = new();
+    private readonly SeatingImageExportDialog imageExport;
     private UiDesignTokens _designTokens = UiDesignTokens.Light;
     private int displayedRun = -1;
     private float elapsed;
 
-    public SeatingResultView(SeatingSession session) => this.session = session;
+    public SeatingResultView(SeatingSession session, string dataDirectory)
+    {
+        this.session = session;
+        imageExport = new SeatingImageExportDialog(dataDirectory);
+    }
     public string Id => ViewId;
     public string DisplayName => PayloadStrings.SeatingResultViewTitle;
     public bool InitiallyVisible => false;
@@ -29,6 +34,7 @@ internal sealed class SeatingResultView : IUiView
         if (displayedRun != session.RunNumber)
         {
             displayedRun = session.RunNumber; elapsed = 0; occupants.Clear();
+            imageExport.ResetResult();
         }
         if (session.IsRunning)
         {
@@ -73,6 +79,8 @@ internal sealed class SeatingResultView : IUiView
         }
         ImGui.Text(string.Format(PayloadStrings.SeatingAssignedFormat, result.Assignments.Count, request.Layout.GetDeskCount() - result.Assignments.Count));
         ImGui.TextWrapped(PayloadStrings.SeatingChartHint);
+        if (ImGui.Button(ExportStrings.Open)) imageExport.Open();
+        imageExport.Draw(request.Layout, occupants);
         DrawChart(request.Layout);
     }
 

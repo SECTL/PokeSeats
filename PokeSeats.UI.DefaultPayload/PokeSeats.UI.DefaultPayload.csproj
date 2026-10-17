@@ -14,9 +14,15 @@
     <PackageReference Include="hyjiacan.pinyin4net" Version="4.1.1" />
     <PackageReference Include="ImGui.NET" Version="1.91.6.1" />
     <PackageReference Include="NPOI" Version="2.7.3" />
+    <PackageReference Include="SixLabors.ImageSharp.Drawing" Version="1.0.0" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Update="PayloadStrings.resx;RulesStrings.resx">
+    <EmbeddedResource Include="..\PokeSeats.UI\Fonts\Assets\HarmonyOS_Sans_SC_Regular.ttf"
+                      Link="Fonts\HarmonyOS_Sans_SC_Regular.ttf"
+                      LogicalName="PokeSeats.UI.DefaultPayload.Fonts.HarmonyOS_Sans_SC_Regular.ttf" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Update="PayloadStrings.resx;RulesStrings.resx;ExportStrings.resx">
       <StronglyTypedLanguage>CSharp</StronglyTypedLanguage>
       <StronglyTypedClassName>%(Filename)</StronglyTypedClassName>
       <StronglyTypedNamespace>$(RootNamespace)</StronglyTypedNamespace>
