@@ -1,0 +1,13 @@
+<Project>
+
+  <!--
+    `dotnet build` 通过 PrepareResources → ResGen 调用 GenerateResource 生成强类型资源访问类
+    （WorkspaceStrings / PayloadStrings / RulesStrings），并把生成文件加入 Compile 项。
+    但设计时构建（Roslyn 语言服务、VS 设计时构建）只跑 CompileDependsOn，
+    不经过 PrepareResources，因此编辑器里这些符号永远无法解析（CS0103），
+    而命令行构建是成功的。这里把 ResGen 拉进编译链，让设计时构建同样生成并注册生成文件。
+    正常构建中 ResGen 已在 PrepareResources 中执行过，MSBuild 不会重复执行该目标。
+  -->
+  <Target Name="GenerateStronglyTypedResources" BeforeTargets="CoreCompile" DependsOnTargets="ResGen" />
+
+</Project>

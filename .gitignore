@@ -1,5 +1,7 @@
 bin/
 obj/
 /packages/
+imgui.ini
+*.DotSettings.user
 riderModule.iml
 /_ReSharper.Caches/
