@@ -8,7 +8,7 @@ public sealed class DefaultUIPlugin : IUiPlugin
     public void Initialize(IPluginContext context)
     {
         ArgumentNullException.ThrowIfNull(context);
-        context.RegisterWorkspace(id: WORKSPACE_ID, displayName: "标准工作区", static () => new DefaultWorkspace());
+        context.RegisterWorkspace(id: WORKSPACE_ID, displayName: WorkspaceStrings.WorkspaceName, static () => new DefaultWorkspace());
     }
 
     public void Dispose()

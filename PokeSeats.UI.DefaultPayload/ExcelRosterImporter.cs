@@ -11,28 +11,28 @@ internal static class ExcelRosterImporter
     public static SpreadsheetPreview Preview(string path)
     {
         if (!File.Exists(path))
-            throw new FileNotFoundException("未找到指定的 Excel 表格文件。", path);
+            throw new FileNotFoundException(PayloadStrings.ExcelFileNotFound, path);
         if (!string.Equals(Path.GetExtension(path), ".xls", StringComparison.OrdinalIgnoreCase)
             && !string.Equals(Path.GetExtension(path), ".xlsx", StringComparison.OrdinalIgnoreCase))
-            throw new InvalidDataException("仅支持导入 Excel 工作簿格式（.xlsx 或 .xls）。");
+            throw new InvalidDataException(PayloadStrings.ExcelUnsupportedFormat);
 
         using FileStream stream = File.OpenRead(path);
         IWorkbook workbook = IsXlsx(path) ? new XSSFWorkbook(stream) : new HSSFWorkbook(stream);
         try
         {
             if (workbook.NumberOfSheets == 0)
-            throw new InvalidDataException("所选 Excel 工作簿中没有任何工作表。");
+            throw new InvalidDataException(PayloadStrings.ExcelNoWorksheets);
 
             ISheet sheet = workbook.GetSheetAt(0);
             IRow? headerRow = sheet.GetRow(sheet.FirstRowNum);
             if (headerRow is null || headerRow.LastCellNum <= 0)
-            throw new InvalidDataException("工作表中缺少表头列标题行。");
+            throw new InvalidDataException(PayloadStrings.ExcelMissingHeader);
 
             var headers = new List<string>();
             for (int column = 0; column < headerRow.LastCellNum; column++)
             {
                 string value = ReadCell(headerRow.GetCell(column));
-                headers.Add(string.IsNullOrWhiteSpace(value) ? $"第 {column + 1} 列" : value.Trim());
+                headers.Add(string.IsNullOrWhiteSpace(value) ? string.Format(PayloadStrings.SpreadsheetColumnFallbackHeaderFormat, column + 1) : value.Trim());
             }
 
             var rows = new List<IReadOnlyList<string>>();

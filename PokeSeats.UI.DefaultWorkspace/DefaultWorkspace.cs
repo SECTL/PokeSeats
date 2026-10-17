@@ -58,22 +58,22 @@ public class DefaultWorkspace : IWorkspace
             return;
         }
 
-        if (ImGui.BeginMenu("系统"))
+        if (ImGui.BeginMenu(WorkspaceStrings.SystemMenu))
         {
-            if (ImGui.MenuItem("关于 PokeSeats 戳座"))
+            if (ImGui.MenuItem(WorkspaceStrings.AboutTitle))
                 openAboutPopup = true;
 
-            if (ImGui.MenuItem("退出程序"))
+            if (ImGui.MenuItem(WorkspaceStrings.Exit))
                 context!.Events.Publish(new ApplicationExitRequested());
 
             ImGui.EndMenu();
         }
 
-        if (ImGui.BeginMenu("功能面板"))
+        if (ImGui.BeginMenu(WorkspaceStrings.PanelsMenu))
         {
             if (uiViews.Count == 0)
             {
-                ImGui.MenuItem("（当前无可用面板）", null, false, false);
+                ImGui.MenuItem(WorkspaceStrings.NoPanels, null, false, false);
             }
             else
             {
@@ -210,7 +210,7 @@ public class DefaultWorkspace : IWorkspace
 
     private void DrawAboutPopup()
     {
-        const string popupId = "关于 PokeSeats 戳座###pokeseats.defaultworkspace.about";
+        string popupId = WorkspaceStrings.AboutTitle + "###pokeseats.defaultworkspace.about";
         if (openAboutPopup)
         {
             ImGui.OpenPopup(popupId);
@@ -220,14 +220,14 @@ public class DefaultWorkspace : IWorkspace
         bool open = true;
         if (ImGui.BeginPopupModal(popupId, ref open, ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoSavedSettings))
         {
-            ImGui.Text("PokeSeats 戳座 - 智能教室排座系统");
-            ImGui.TextDisabled("版本 1.0 · Copyright (c) 2025-2026 SECTL Studio & chenjintang-shrimp");
-            ImGui.TextDisabled("本项目以 GPL-3.0-or-later 发布，源码见项目仓库。");
+            ImGui.Text(WorkspaceStrings.ProductDescription);
+            ImGui.TextDisabled(WorkspaceStrings.VersionCopyright);
+            ImGui.TextDisabled(WorkspaceStrings.LicenseNotice);
             ImGui.Separator();
-            ImGui.Text("界面字体：HarmonyOS Sans SC");
-            ImGui.TextDisabled("字体版权所有 2021 Huawei Device Co., Ltd. 根据字体许可协议分发。");
+            ImGui.Text(WorkspaceStrings.FontDescription);
+            ImGui.TextDisabled(WorkspaceStrings.FontLicenseNotice);
             ImGui.Separator();
-            if (ImGui.Button("确定"))
+            if (ImGui.Button(WorkspaceStrings.Confirm))
                 ImGui.CloseCurrentPopup();
             
             ImGui.EndPopup();

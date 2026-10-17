@@ -23,11 +23,11 @@ internal static class RuleText
 
         return rule switch
         {
-            PinnedRule pinned => $"{Name(pinned.Person, people)} 必须固定在第 {pinned.Pos.Row + 1} 排、第 {pinned.Pos.Col + 1} 列",
+            PinnedRule pinned => string.Format(RulesStrings.PinnedRuleFormat, Name(pinned.Person, people), pinned.Pos.Row + 1, pinned.Pos.Col + 1),
             RegionRule region => DescribeRegion(region, people),
             RelationRule relation => DescribeRelation(relation, people),
             CapacityRule capacity => DescribeCapacity(capacity),
-            _ => throw new NotSupportedException($"不支持的规则类型：{rule.GetType().Name}"),
+            _ => throw new NotSupportedException(string.Format(RulesStrings.UnsupportedRuleTypeFormat, rule.GetType().Name)),
         };
     }
 
@@ -38,24 +38,24 @@ internal static class RuleText
 
         if (region.Length == 0)
             return rule.Polarity == RulePolarity.Required
-                ? $"{person} 的就座区域不设限制"
-                : $"{person} 禁止在教室内任何座位就座（此限制导致无解）";
+                ? string.Format(RulesStrings.RegionUnrestrictedFormat, person)
+                : string.Format(RulesStrings.RegionForbiddenAllFormat, person);
 
         return rule.Polarity == RulePolarity.Required
-            ? $"{person} 必须坐在 {region} 区域内的课桌"
-            : $"{person} 禁止坐在 {region} 区域内的课桌";
+            ? string.Format(RulesStrings.RegionRequiredFormat, person, region)
+            : string.Format(RulesStrings.RegionForbiddenFormat, person, region);
     }
 
     private static string RegionText(RegionRule rule)
     {
         var parts = new List<string>(2);
-        string rows = RangeText(rule.RowMin, rule.RowMax, "排");
+        string rows = RangeText(rule.RowMin, rule.RowMax, RulesStrings.RowUnit);
         if (rows.Length > 0)
             parts.Add(rows);
-        string cols = RangeText(rule.ColMin, rule.ColMax, "列");
+        string cols = RangeText(rule.ColMin, rule.ColMax, RulesStrings.ColumnUnit);
         if (cols.Length > 0)
             parts.Add(cols);
-        return string.Join("、", parts);
+        return string.Join(RulesStrings.RegionPartSeparator, parts);
     }
 
     private static string RangeText(int? minimum, int? maximum, string unit)
@@ -63,32 +63,34 @@ internal static class RuleText
         if (minimum is int lower && maximum is int upper)
         {
             if (lower > upper)
-                return $"第 {lower + 1} {unit}至第 {upper + 1} {unit}（空区间，不可达成）";
-            return lower == upper ? $"第 {lower + 1} {unit}" : $"第 {lower + 1} 至 {upper + 1} {unit}";
+                return string.Format(RulesStrings.RangeEmptyFormat, lower + 1, unit, upper + 1);
+            return lower == upper
+                ? string.Format(RulesStrings.RangeSingleFormat, lower + 1, unit)
+                : string.Format(RulesStrings.RangeSpanFormat, lower + 1, upper + 1, unit);
         }
         if (minimum is int from)
-            return $"第 {from + 1} {unit}及以后排列";
+            return string.Format(RulesStrings.RangeMinimumFormat, from + 1, unit);
         if (maximum is int to)
-            return $"第 {to + 1} {unit}及以前排列";
+            return string.Format(RulesStrings.RangeMaximumFormat, to + 1, unit);
         return string.Empty;
     }
 
     private static string DescribeCapacity(CapacityRule rule)
     {
         string target = rule.Axis.Type == AxisType.Row
-            ? $"第 {rule.Axis.Index + 1} 排（横向）"
-            : $"第 {rule.Axis.Index + 1} 列（纵向）";
+            ? string.Format(RulesStrings.CapacityRowTargetFormat, rule.Axis.Index + 1)
+            : string.Format(RulesStrings.CapacityColumnTargetFormat, rule.Axis.Index + 1);
 
         string limit = (rule.Min, rule.Max) switch
         {
-            (null, null) => "不限人数",
-            (int atLeast, null) => $"至少安排 {atLeast} 人",
-            (null, int atMost) => $"最多允许 {atMost} 人",
-            (int atLeast, int atMost) when atLeast == atMost => $"精确安排 {atLeast} 人",
-            (int atLeast, int atMost) => $"安排 {atLeast} 至 {atMost} 人",
+            (null, null) => RulesStrings.CapacityUnlimited,
+            (int atLeast, null) => string.Format(RulesStrings.CapacityAtLeastFormat, atLeast),
+            (null, int atMost) => string.Format(RulesStrings.CapacityAtMostFormat, atMost),
+            (int atLeast, int atMost) when atLeast == atMost => string.Format(RulesStrings.CapacityExactFormat, atLeast),
+            (int atLeast, int atMost) => string.Format(RulesStrings.CapacityRangeFormat, atLeast, atMost),
         };
 
-        return $"{target}容纳人数：{limit}";
+        return string.Format(RulesStrings.CapacitySummaryFormat, target, limit);
     }
 
     private static string DescribeRelation(RelationRule rule, StudentSearchIndex people)
@@ -100,11 +102,13 @@ internal static class RuleText
         if (rule.Kind == RelationKind.ExactOffset)
         {
             if (rule.OffsetDx == 0 && rule.OffsetDy == 0)
-                return required ? $"{a} 必须与 {b} 同座（偏移量为 0）" : $"{a} 不得与 {b} 坐在同一张课桌";
+                return required
+                    ? string.Format(RulesStrings.SameSeatRequiredFormat, a, b)
+                    : string.Format(RulesStrings.SameSeatForbiddenFormat, a, b);
 
             return required
-                ? $"{a} 必须坐在 {b} {OffsetText(rule.OffsetDx, rule.OffsetDy)}的课桌"
-                : $"{a} 禁止坐在 {b} {OffsetText(rule.OffsetDx, rule.OffsetDy)}的课桌";
+                ? string.Format(RulesStrings.OffsetSeatRequiredFormat, a, b, OffsetText(rule.OffsetDx, rule.OffsetDy))
+                : string.Format(RulesStrings.OffsetSeatForbiddenFormat, a, b, OffsetText(rule.OffsetDx, rule.OffsetDy));
         }
 
         if (rule.Kind == RelationKind.Proximity)
@@ -112,8 +116,8 @@ internal static class RuleText
 
         string place = DirectionText(rule);
         return required
-            ? $"{a} 必须坐在 {b} 的{place}"
-            : $"{a} 禁止坐在 {b} 的{place}";
+            ? string.Format(RulesStrings.DirectionRequiredFormat, a, b, place)
+            : string.Format(RulesStrings.DirectionForbiddenFormat, a, b, place);
     }
 
     private static string ProximityText(string a, string b, RelationRule rule, bool required)
@@ -122,23 +126,25 @@ internal static class RuleText
         {
             case null:
                 return required
-                    ? $"{a} 与 {b} 的相对距离不限（无约束效果）"
-                    : $"{a} 与 {b} 不限距离（与排座逻辑冲突，无法满足）";
+                    ? string.Format(RulesStrings.ProximityDistanceUnlimitedFormat, a, b)
+                    : string.Format(RulesStrings.ProximityNoLimitConflictFormat, a, b);
             case < 0:
-                return $"{a} 与 {b} 的最大距离上限为负数（不可达成）";
+                return string.Format(RulesStrings.ProximityNegativeFormat, a, b);
             case 0:
-                return required ? $"{a} 必须与 {b} 安排在同一张课桌" : $"{a} 禁止与 {b} 坐在同一张课桌";
+                return required
+                    ? string.Format(RulesStrings.ProximitySameSeatRequiredFormat, a, b)
+                    : string.Format(RulesStrings.ProximitySameSeatForbiddenFormat, a, b);
             case 1:
                 string adjacency = AdjacencyHint(rule.Adjacency);
                 return required
-                    ? $"{a} 必须与 {b} 相邻就座（{adjacency}）"
-                    : $"{a} 禁止与 {b} 相邻就座（{adjacency}）";
+                    ? string.Format(RulesStrings.ProximityAdjacentRequiredFormat, a, b, adjacency)
+                    : string.Format(RulesStrings.ProximityAdjacentForbiddenFormat, a, b, adjacency);
             case int steps:
                 return required
-                    ? $"{a} 与 {b} 之间的座位间距不得超过 {steps} 步"
-                    : $"{a} 与 {b} 之间的座位间距必须大于 {steps} 步";
+                    ? string.Format(RulesStrings.ProximityMaxDistanceFormat, a, b, steps)
+                    : string.Format(RulesStrings.ProximityMinDistanceFormat, a, b, steps);
             default:
-                throw new NotSupportedException($"不支持的距离取值：{rule.Distance}");
+                throw new NotSupportedException(string.Format(RulesStrings.UnsupportedDistanceFormat, rule.Distance));
         }
     }
 
@@ -146,57 +152,57 @@ internal static class RuleText
     {
         string side = rule.Kind switch
         {
-            RelationKind.Behind => "正后方",
-            RelationKind.InFrontOf => "正前方",
-            RelationKind.LeftOf => "正左侧",
-            RelationKind.RightOf => "正右侧",
-            RelationKind.SameRow => "同一排座位",
-            RelationKind.SameColumn => "同一列座位",
-            _ => throw new NotSupportedException($"不支持的关系类型：{rule.Kind}"),
+            RelationKind.Behind => RulesStrings.DirectionBehind,
+            RelationKind.InFrontOf => RulesStrings.DirectionInFront,
+            RelationKind.LeftOf => RulesStrings.DirectionLeft,
+            RelationKind.RightOf => RulesStrings.DirectionRight,
+            RelationKind.SameRow => RulesStrings.DirectionSameRow,
+            RelationKind.SameColumn => RulesStrings.DirectionSameColumn,
+            _ => throw new NotSupportedException(string.Format(RulesStrings.UnsupportedRelationKindFormat, rule.Kind)),
         };
 
         switch (rule.Distance)
         {
             case 1:
-                return $"{side}相邻课桌{ChebyshevSuffix(rule.Metric)}";
+                return string.Format(RulesStrings.AdjacentDeskFormat, side, ChebyshevSuffix(rule.Metric));
             case null:
-                return $"{side}课桌";
+                return string.Format(RulesStrings.DirectionDeskFormat, side);
             case < 0:
-                return $"{side}课桌（距离上限为负数，无法达成）";
+                return string.Format(RulesStrings.DirectionNegativeDistanceFormat, side);
             case 0:
-                return $"{side}同一课桌（距离为 0）";
+                return string.Format(RulesStrings.DirectionSameDeskFormat, side);
             case int steps:
-                return $"{side} {steps} 步以内的课桌";
+                return string.Format(RulesStrings.DirectionWithinStepsFormat, side, steps);
             default:
-                throw new NotSupportedException($"不支持的距离取值：{rule.Distance}");
+                throw new NotSupportedException(string.Format(RulesStrings.UnsupportedDistanceFormat, rule.Distance));
         }
     }
 
     private static string AdjacencyHint(AdjacencyMode mode) => mode switch
     {
-        AdjacencyMode.Horizontal => "横向：同排左右，含跨窄过道",
-        AdjacencyMode.FourWay => "四向：前后左右，含跨窄过道",
-        AdjacencyMode.EightWay => "八向：前后左右及斜角，含正交跨窄过道",
-        _ => throw new NotSupportedException($"不支持的相邻模式：{mode}")
+        AdjacencyMode.Horizontal => RulesStrings.AdjacencyHorizontalHint,
+        AdjacencyMode.FourWay => RulesStrings.AdjacencyFourWayHint,
+        AdjacencyMode.EightWay => RulesStrings.AdjacencyEightWayHint,
+        _ => throw new NotSupportedException(string.Format(RulesStrings.UnsupportedAdjacencyFormat, mode))
     };
 
     private static string ChebyshevSuffix(DistanceMetric metric)
-        => metric == DistanceMetric.Chebyshev ? "（含斜角）" : string.Empty;
+        => metric == DistanceMetric.Chebyshev ? RulesStrings.ChebyshevSuffix : string.Empty;
 
     private static string OffsetText(int dx, int dy)
     {
         var parts = new List<string>(2);
         if (dx > 0)
-            parts.Add($"向窗侧（右）偏 {dx} 列");
+            parts.Add(string.Format(RulesStrings.OffsetWindowFormat, dx));
         else if (dx < 0)
-            parts.Add($"向门侧（左）偏 {-(long)dx} 列");
+            parts.Add(string.Format(RulesStrings.OffsetDoorFormat, -(long)dx));
         if (dy > 0)
-            parts.Add($"向教室后偏 {dy} 排");
+            parts.Add(string.Format(RulesStrings.OffsetBackFormat, dy));
         else if (dy < 0)
-            parts.Add($"向讲台前偏 {-(long)dy} 排");
-        return string.Join("、", parts);
+            parts.Add(string.Format(RulesStrings.OffsetFrontFormat, -(long)dy));
+        return string.Join(RulesStrings.RegionPartSeparator, parts);
     }
 
     private static string Name(PersonId id, StudentSearchIndex people)
-        => people.Get(id)?.Name ?? $"[未知学生:{id}]";
+        => people.Get(id)?.Name ?? string.Format(RulesStrings.UnknownStudentFormat, id);
 }

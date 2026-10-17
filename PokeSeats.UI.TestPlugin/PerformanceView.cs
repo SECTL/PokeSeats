@@ -8,13 +8,13 @@ internal sealed class PerformancePanel : IUiView
 {
     public string Id => TestPlugin.PerformancePanelId;
 
-    public string DisplayName => "性能";
+    public string DisplayName => WorkspaceStrings.PerformanceName;
 
     public void DrawContent(float deltaSeconds, UiDesignTokens designTokens)
     {
-        ImGui.Text($"帧时间：{deltaSeconds * 1000.0f:F1} ms");
+        ImGui.Text(string.Format(WorkspaceStrings.FrameTime, deltaSeconds * 1000.0f));
 
         ImGui.Separator();
-        ImGui.TextDisabled("工作区切换：Ctrl+Alt+Shift+X");
+        ImGui.TextDisabled(WorkspaceStrings.WorkspaceShortcut);
     }
 }

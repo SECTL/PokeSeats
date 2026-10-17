@@ -15,4 +15,12 @@
     <PackageReference Include="ImGui.NET" Version="1.91.6.1" />
     <PackageReference Include="NPOI" Version="2.7.3" />
   </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Update="PayloadStrings.resx;RulesStrings.resx">
+      <StronglyTypedLanguage>CSharp</StronglyTypedLanguage>
+      <StronglyTypedClassName>%(Filename)</StronglyTypedClassName>
+      <StronglyTypedNamespace>$(RootNamespace)</StronglyTypedNamespace>
+      <StronglyTypedFileName>$(IntermediateOutputPath)%(Filename).Designer.cs</StronglyTypedFileName>
+    </EmbeddedResource>
+  </ItemGroup>
 </Project>

@@ -11,14 +11,14 @@ internal static class RosterImporter
     public static SpreadsheetPreview Preview(string path)
     {
         if (!File.Exists(path))
-            throw new FileNotFoundException("未找到指定的名单文件。", path);
+            throw new FileNotFoundException(PayloadStrings.RosterFileNotFound, path);
 
         return Path.GetExtension(path).ToLowerInvariant() switch
         {
             ".xls" or ".xlsx" => ExcelRosterImporter.Preview(path),
             ".csv" => PreviewCsv(path),
             ".json" => PreviewSecRandom(path),
-            _ => throw new InvalidDataException("支持 Excel（.xlsx、.xls）、CSV 和 SecRandom JSON 名单。")
+            _ => throw new InvalidDataException(PayloadStrings.RosterUnsupportedFormat)
         };
     }
 
@@ -45,7 +45,7 @@ internal static class RosterImporter
             string number = ReadColumn(row, studentNumberColumn);
             string group = ReadColumn(row, groupColumn);
             if (number.Length > 0 && !numbers.Add(number))
-                throw new InvalidDataException($"检测到重复学号“{number}”，请核对名单后重试。");
+                throw new InvalidDataException(string.Format(PayloadStrings.RosterDuplicateStudentNumberFormat, number));
             students.Add(new Person(PersonId.New(), name, number.Length == 0 ? null : number, group.Length == 0 ? null : group));
         }
         return new ImportResult(students, skippedRows);
@@ -67,8 +67,8 @@ internal static class RosterImporter
         {
             string[]? header = parser.ReadFields();
             if (header is null || header.Length == 0)
-                throw new InvalidDataException("CSV 文件中缺少表头列标题行。");
-            string[] headers = header.Select((value, index) => string.IsNullOrWhiteSpace(value) ? $"第 {index + 1} 列" : value.Trim()).ToArray();
+                throw new InvalidDataException(PayloadStrings.CsvMissingHeader);
+            string[] headers = header.Select((value, index) => string.IsNullOrWhiteSpace(value) ? string.Format(PayloadStrings.SpreadsheetColumnFallbackHeaderFormat, index + 1) : value.Trim()).ToArray();
             var rows = new List<IReadOnlyList<string>>();
             while (!parser.EndOfData)
             {
@@ -79,7 +79,7 @@ internal static class RosterImporter
         }
         catch (MalformedLineException exception)
         {
-            throw new InvalidDataException($"CSV 第 {parser.ErrorLineNumber} 行格式无效：{exception.Message}", exception);
+            throw new InvalidDataException(string.Format(PayloadStrings.CsvMalformedLineFormat, parser.ErrorLineNumber, exception.Message), exception);
         }
     }
 
@@ -89,26 +89,26 @@ internal static class RosterImporter
         using JsonDocument document = JsonDocument.Parse(reader.ReadToEnd());
         JsonElement root = document.RootElement;
         if (root.ValueKind != JsonValueKind.Object)
-            throw new InvalidDataException("SecRandom 名单必须是包含 students 或 rows 的 JSON 对象。");
+            throw new InvalidDataException(PayloadStrings.SecRandomRootObjectRequired);
 
         bool transfer = root.TryGetProperty("rows", out JsonElement entries);
         if (transfer)
         {
             if (!root.TryGetProperty("version", out JsonElement version) || version.ValueKind != JsonValueKind.Number || !version.TryGetInt32(out int value) || value != 1)
-                throw new InvalidDataException("仅支持 SecRandom version 为 1 的名单传输文档。");
+                throw new InvalidDataException(PayloadStrings.SecRandomUnsupportedVersion);
             if (!root.TryGetProperty("kind", out JsonElement kind) || kind.ValueKind != JsonValueKind.Number || !kind.TryGetInt32(out int kindValue) || kindValue != 0)
-                throw new InvalidDataException("所选 SecRandom 传输文档不是学生名单（kind 必须为 0）。");
+                throw new InvalidDataException(PayloadStrings.SecRandomWrongKind);
         }
         else if (!root.TryGetProperty("students", out entries))
-            throw new InvalidDataException("未识别到 SecRandom students 名单或 rows 传输文档。");
+            throw new InvalidDataException(PayloadStrings.SecRandomMissingEntries);
         if (entries.ValueKind != JsonValueKind.Array)
-            throw new InvalidDataException("SecRandom 名单记录必须是数组。");
+            throw new InvalidDataException(PayloadStrings.SecRandomEntriesArrayRequired);
 
         var rows = new List<IReadOnlyList<string>>();
         foreach (JsonElement entry in entries.EnumerateArray())
         {
             if (entry.ValueKind != JsonValueKind.Object)
-                throw new InvalidDataException($"SecRandom 第 {rows.Count + 1} 条记录必须是对象。");
+                throw new InvalidDataException(string.Format(PayloadStrings.SecRandomEntryObjectFormat, rows.Count + 1));
             rows.Add(new[] { ReadText(entry, "name"), ReadText(entry, "id"), ReadText(entry, transfer ? "detailTwo" : "group") });
         }
         return new SpreadsheetPreview(path, new[] { "姓名", "学号", "小组" }, rows);
@@ -119,7 +119,7 @@ internal static class RosterImporter
         if (!entry.TryGetProperty(name, out JsonElement value) || value.ValueKind == JsonValueKind.Null)
             return string.Empty;
         if (value.ValueKind != JsonValueKind.String)
-            throw new InvalidDataException($"SecRandom 字段 {name} 必须为字符串或 null。");
+            throw new InvalidDataException(string.Format(PayloadStrings.SecRandomFieldTypeFormat, name));
         return value.GetString()!;
     }
 }

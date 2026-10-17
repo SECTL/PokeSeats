@@ -1,0 +1,465 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="CommonCancel" xml:space="preserve">
+    <value>取消</value>
+  </data>
+  <data name="CsvMalformedLineFormat" xml:space="preserve">
+    <value>CSV 第 {0} 行格式无效：{1}</value>
+    <comment>{0} = CSV 行号；{1} = 解析异常信息。</comment>
+  </data>
+  <data name="CsvMissingHeader" xml:space="preserve">
+    <value>CSV 文件中缺少表头列标题行。</value>
+  </data>
+  <data name="ExcelFileNotFound" xml:space="preserve">
+    <value>未找到指定的 Excel 表格文件。</value>
+  </data>
+  <data name="ExcelMissingHeader" xml:space="preserve">
+    <value>工作表中缺少表头列标题行。</value>
+  </data>
+  <data name="ExcelNoWorksheets" xml:space="preserve">
+    <value>所选 Excel 工作簿中没有任何工作表。</value>
+  </data>
+  <data name="ExcelUnsupportedFormat" xml:space="preserve">
+    <value>仅支持导入 Excel 工作簿格式（.xlsx 或 .xls）。</value>
+  </data>
+  <data name="FilePickerAllFilesFilter" xml:space="preserve">
+    <value>所有文件 (*.*)</value>
+  </data>
+  <data name="FilePickerCsvFilter" xml:space="preserve">
+    <value>CSV 文件 (*.csv)</value>
+  </data>
+  <data name="FilePickerExcelFilter" xml:space="preserve">
+    <value>Excel 文件 (*.xlsx;*.xls)</value>
+  </data>
+  <data name="FilePickerRosterFilter" xml:space="preserve">
+    <value>名单文件 (*.xlsx;*.xls;*.csv;*.json)</value>
+  </data>
+  <data name="FilePickerSecRandomJsonFilter" xml:space="preserve">
+    <value>SecRandom JSON (*.json)</value>
+  </data>
+  <data name="FilePickerSelectRosterTitle" xml:space="preserve">
+    <value>选择学生名单文件</value>
+  </data>
+  <data name="LayoutApplySizeButton" xml:space="preserve">
+    <value>调整规格</value>
+  </data>
+  <data name="LayoutAssignedStatusFormat" xml:space="preserve">
+    <value>已将选中的 {0} 处位置设为：{1}。</value>
+    <comment>{0} = 单元格数量；{1} = 区域类型名称。</comment>
+  </data>
+  <data name="LayoutAssignTypeHeading" xml:space="preserve">
+    <value>设置选中区域为：</value>
+  </data>
+  <data name="LayoutCellCountMismatch" xml:space="preserve">
+    <value>教室布局数据损坏：单元格总数与行列尺寸不匹配。</value>
+  </data>
+  <data name="LayoutCellShortAisle" xml:space="preserve">
+    <value>宽</value>
+  </data>
+  <data name="LayoutCellShortDesk" xml:space="preserve">
+    <value>桌</value>
+  </data>
+  <data name="LayoutCellShortNarrowAisle" xml:space="preserve">
+    <value>窄</value>
+  </data>
+  <data name="LayoutCellShortPodium" xml:space="preserve">
+    <value>讲</value>
+  </data>
+  <data name="LayoutCellTypeAisle" xml:space="preserve">
+    <value>主走道（宽过道）</value>
+  </data>
+  <data name="LayoutCellTypeDesk" xml:space="preserve">
+    <value>学生座位（课桌）</value>
+  </data>
+  <data name="LayoutCellTypeEmpty" xml:space="preserve">
+    <value>空白区域（无设施）</value>
+  </data>
+  <data name="LayoutCellTypeNarrowAisle" xml:space="preserve">
+    <value>行间过道（窄过道）</value>
+  </data>
+  <data name="LayoutCellTypePodium" xml:space="preserve">
+    <value>讲台区域</value>
+  </data>
+  <data name="LayoutClassroomSpecLabel" xml:space="preserve">
+    <value>教室规格：</value>
+  </data>
+  <data name="LayoutClearButton" xml:space="preserve">
+    <value>清空教室</value>
+  </data>
+  <data name="LayoutColumnCountLabel" xml:space="preserve">
+    <value>列数</value>
+  </data>
+  <data name="LayoutColumnInputLabel" xml:space="preserve">
+    <value>列</value>
+  </data>
+  <data name="LayoutCurrentSpecFormat" xml:space="preserve">
+    <value>当前规格：{0} 排 × {1} 列 · 可用座位 {2} 个</value>
+    <comment>{0} = 排数；{1} = 列数；{2} = 可用座位数。</comment>
+  </data>
+  <data name="LayoutDimensionErrorFormat" xml:space="preserve">
+    <value>教室{0}必须在 {1} 至 {2} 之间。</value>
+    <comment>{0} = “排数”或“列数”；{1} = 最小尺寸；{2} = 最大尺寸。</comment>
+  </data>
+  <data name="LayoutDimensionRangeError" xml:space="preserve">
+    <value>教室排数和列数必须在 1 至 32 之间。</value>
+  </data>
+  <data name="LayoutFileEmpty" xml:space="preserve">
+    <value>教室布局文件内容为空。</value>
+  </data>
+  <data name="LayoutLoadFailedFormat" xml:space="preserve">
+    <value>布局文件加载异常，已重置为空白教室：{0}</value>
+    <comment>{0} = 异常信息。</comment>
+  </data>
+  <data name="LayoutResetStatus" xml:space="preserve">
+    <value>教室布局已重置为空白并自动保存。</value>
+  </data>
+  <data name="LayoutResizeConfirmButton" xml:space="preserve">
+    <value>确认调整</value>
+  </data>
+  <data name="LayoutResizeConfirmQuestionFormat" xml:space="preserve">
+    <value>确认将教室规格缩减为 {0} 排 × {1} 列？</value>
+    <comment>{0} = 目标排数；{1} = 目标列数。</comment>
+  </data>
+  <data name="LayoutResizeConfirmTitle" xml:space="preserve">
+    <value>确认缩减教室尺寸</value>
+  </data>
+  <data name="LayoutResizeConfirmWarning" xml:space="preserve">
+    <value>注意：超出新范围的座位和走道设置将被永久裁剪。</value>
+  </data>
+  <data name="LayoutResizedStatusFormat" xml:space="preserve">
+    <value>教室规格已更新为 {0} 排 × {1} 列。</value>
+    <comment>{0} = 排数；{1} = 列数。</comment>
+  </data>
+  <data name="LayoutRowCountLabel" xml:space="preserve">
+    <value>排数</value>
+  </data>
+  <data name="LayoutRowInputLabel" xml:space="preserve">
+    <value>排</value>
+  </data>
+  <data name="LayoutSaveButton" xml:space="preserve">
+    <value>保存布局</value>
+  </data>
+  <data name="LayoutSaveFailedFormat" xml:space="preserve">
+    <value>布局保存失败：{0}</value>
+    <comment>{0} = 异常信息。</comment>
+  </data>
+  <data name="LayoutSavedStatus" xml:space="preserve">
+    <value>教室布局已保存。</value>
+  </data>
+  <data name="LayoutSizeInvalidFormat" xml:space="preserve">
+    <value>尺寸设置无效：{0}</value>
+    <comment>{0} = 异常信息。</comment>
+  </data>
+  <data name="LayoutUnknownCellTypeFormat" xml:space="preserve">
+    <value>布局包含未识别的区域类型编号：{0}。</value>
+    <comment>{0} = 未识别的区域类型编号。</comment>
+  </data>
+  <data name="LayoutViewTitle" xml:space="preserve">
+    <value>教室布局</value>
+  </data>
+  <data name="RosterBrowseButton" xml:space="preserve">
+    <value>浏览文件...</value>
+  </data>
+  <data name="RosterClearButton" xml:space="preserve">
+    <value>清空名单</value>
+  </data>
+  <data name="RosterClearConfirmBody" xml:space="preserve">
+    <value>清空后将保存为空名单，可重新导入名单文件。</value>
+  </data>
+  <data name="RosterClearConfirmButton" xml:space="preserve">
+    <value>确认清空</value>
+  </data>
+  <data name="RosterClearConfirmQuestionFormat" xml:space="preserve">
+    <value>确认清空当前名单中的 {0} 名学生？</value>
+    <comment>{0} = 当前名单学生人数。</comment>
+  </data>
+  <data name="RosterClearConfirmRulesNote" xml:space="preserve">
+    <value>已有排座规则会保留，涉及原名单学生的规则需重新设置。</value>
+  </data>
+  <data name="RosterClearConfirmTitle" xml:space="preserve">
+    <value>确认清空名单</value>
+  </data>
+  <data name="RosterClearedStatus" xml:space="preserve">
+    <value>学生名单已清空并保存，可重新导入名单。</value>
+  </data>
+  <data name="RosterClearFailedFormat" xml:space="preserve">
+    <value>清空失败，当前名单未更改：{0}</value>
+    <comment>{0} = 异常信息。</comment>
+  </data>
+  <data name="RosterColumnNoneOption" xml:space="preserve">
+    <value>（不导入此项）</value>
+  </data>
+  <data name="RosterColumnPrompt" xml:space="preserve">
+    <value>请指定姓名、学号和小组对应的列（学号和小组非必填）：</value>
+  </data>
+  <data name="RosterColumnUnsetOption" xml:space="preserve">
+    <value>（请选择匹配列）</value>
+  </data>
+  <data name="RosterCurrentCountFormat" xml:space="preserve">
+    <value>当前班级人数：{0} 人</value>
+    <comment>{0} = 当前班级人数。</comment>
+  </data>
+  <data name="RosterDuplicateStudentNumberFormat" xml:space="preserve">
+    <value>检测到重复学号“{0}”，请核对名单后重试。</value>
+    <comment>{0} = 重复学号。</comment>
+  </data>
+  <data name="RosterFileNotFound" xml:space="preserve">
+    <value>未找到指定的名单文件。</value>
+  </data>
+  <data name="RosterGroupColumnLabel" xml:space="preserve">
+    <value>小组列（可选）</value>
+  </data>
+  <data name="RosterGroupHeader" xml:space="preserve">
+    <value>小组</value>
+  </data>
+  <data name="RosterImportConfirmButton" xml:space="preserve">
+    <value>确认导入名单</value>
+  </data>
+  <data name="RosterImportFailedFormat" xml:space="preserve">
+    <value>导入失败：{0}</value>
+    <comment>{0} = 异常信息。</comment>
+  </data>
+  <data name="RosterImportHeading" xml:space="preserve">
+    <value>导入学生花名册（Excel / CSV / SecRandom JSON）</value>
+  </data>
+  <data name="RosterImportHint" xml:space="preserve">
+    <value>表格使用首行列标题；SecRandom JSON 自动对应姓名、学号和小组。</value>
+  </data>
+  <data name="RosterImportNote" xml:space="preserve">
+    <value>确认导入会替换当前名单并保存；姓名为空的记录会跳过。</value>
+  </data>
+  <data name="RosterImportSuccessFormat" xml:space="preserve">
+    <value>导入成功：已录入 {0} 名学生（跳过空白或无效行 {1} 行）。</value>
+    <comment>{0} = 导入学生数；{1} = 跳过的空白或无效行数。</comment>
+  </data>
+  <data name="RosterInitialStatus" xml:space="preserve">
+    <value>请选择 Excel、CSV 或 SecRandom JSON 名单文件。</value>
+  </data>
+  <data name="RosterNameColumnLabel" xml:space="preserve">
+    <value>姓名列</value>
+  </data>
+  <data name="RosterNameHeader" xml:space="preserve">
+    <value>学生姓名</value>
+  </data>
+  <data name="RosterPreviewFailedFormat" xml:space="preserve">
+    <value>名单读取失败：{0}</value>
+    <comment>{0} = 异常信息。</comment>
+  </data>
+  <data name="RosterPreviewSuccessStatus" xml:space="preserve">
+    <value>名单读取成功，请核对姓名、学号和小组列后点击导入。</value>
+  </data>
+  <data name="RosterReadButton" xml:space="preserve">
+    <value>读取名单</value>
+  </data>
+  <data name="RosterRecordCountFormat" xml:space="preserve">
+    <value>共读取 {0} 条记录</value>
+    <comment>{0} = 读取到的记录条数。</comment>
+  </data>
+  <data name="RosterSelectedFileFormat" xml:space="preserve">
+    <value>已选文件：{0}</value>
+    <comment>{0} = 已选文件名。</comment>
+  </data>
+  <data name="RosterStudentNumberColumnLabel" xml:space="preserve">
+    <value>学号列（可选）</value>
+  </data>
+  <data name="RosterStudentNumberHeader" xml:space="preserve">
+    <value>学号</value>
+  </data>
+  <data name="RosterUnsupportedFormat" xml:space="preserve">
+    <value>支持 Excel（.xlsx、.xls）、CSV 和 SecRandom JSON 名单。</value>
+  </data>
+  <data name="RosterViewTitle" xml:space="preserve">
+    <value>学生名单</value>
+  </data>
+  <data name="SeatingAssignedFormat" xml:space="preserve">
+    <value>成功安排学生：{0} 人 · 教室剩余空座：{1} 个</value>
+    <comment>{0} = 已安排学生数；{1} = 教室剩余空座数。</comment>
+  </data>
+  <data name="SeatingChartHint" xml:space="preserve">
+    <value>方位说明：讲台及教室前方位于上方；行列编号从 1 起算。每个格子均完整显示学生姓名及精确座次，超出显示范围可滚动浏览。</value>
+  </data>
+  <data name="SeatingColumnHeaderFormat" xml:space="preserve">
+    <value>第{0}列</value>
+    <comment>{0} = 列号（从 1 起算）。</comment>
+  </data>
+  <data name="SeatingConflictRulesFormat" xml:space="preserve">
+    <value>已在“规则编辑”面板高亮标红 {0} 条核心冲突规则。上述规则共同导致了无解，请检查并调整其约束。</value>
+    <comment>{0} = 冲突规则条数。</comment>
+  </data>
+  <data name="SeatingConflictUnresolvedHint" xml:space="preserve">
+    <value>未能收敛至特定的单条冲突规则；请重点核查班级总人数、教室可用课桌总数或单排容量上限。</value>
+  </data>
+  <data name="SeatingElapsedFormat" xml:space="preserve">
+    <value>已耗时 {0:0.0} 秒</value>
+    <comment>{0} = 已耗时秒数，按 0.0 格式保留一位小数。</comment>
+  </data>
+  <data name="SeatingEmptyRosterError" xml:space="preserve">
+    <value>学生花名册当前为空，请先在“学生名单”面板导入班级名单。</value>
+  </data>
+  <data name="SeatingEmptySeatLabel" xml:space="preserve">
+    <value>（空座）</value>
+  </data>
+  <data name="SeatingEngineErrorFormat" xml:space="preserve">
+    <value>排座引擎执行异常：{0}</value>
+    <comment>{0} = 异常信息。</comment>
+  </data>
+  <data name="SeatingErrorAlwaysFalse" xml:space="preserve">
+    <value>该规则在此教室布局下在数学上无法达成。</value>
+  </data>
+  <data name="SeatingErrorAlwaysTrue" xml:space="preserve">
+    <value>该规则在当前教室布局下已自然满足。</value>
+  </data>
+  <data name="SeatingErrorDanglingRef" xml:space="preserve">
+    <value>规则关联的学生不存在于当前班级花名册中。</value>
+  </data>
+  <data name="SeatingErrorDuplicatePin" xml:space="preserve">
+    <value>多个学生被同时固定在同一个课桌座位上。</value>
+  </data>
+  <data name="SeatingErrorOutOfBound" xml:space="preserve">
+    <value>座位的排号或列号已超出当前教室设定的网格范围。</value>
+  </data>
+  <data name="SeatingErrorOverCapacity" xml:space="preserve">
+    <value>班级学生总人数超出了教室课桌容量，或某一行列人数超出限制。</value>
+  </data>
+  <data name="SeatingErrorPinnedSeatCollision" xml:space="preserve">
+    <value>固定座位的坐标并非学生课桌（例如被设置为讲台或走道）。</value>
+  </data>
+  <data name="SeatingGlobalErrorFormat" xml:space="preserve">
+    <value>全局异常：{0}</value>
+    <comment>{0} = 预检查错误说明。</comment>
+  </data>
+  <data name="SeatingIdleHint" xml:space="preserve">
+    <value>点击顶部导航栏中的“开始自动排座”后，在此查看求解进度与可视化座位表。</value>
+  </data>
+  <data name="SeatingMainAisleLabel" xml:space="preserve">
+    <value>主走道</value>
+  </data>
+  <data name="SeatingPlanningFormat" xml:space="preserve">
+    <value>正在智能规划座位方案{0}</value>
+    <comment>{0} = 动态省略号（空字符串、“.”、“..”或“...”）。</comment>
+  </data>
+  <data name="SeatingPlanningHint" xml:space="preserve">
+    <value>求解引擎正在分析规则约束并生成最优指派方案，请稍候；在此期间可正常进行其他操作。</value>
+  </data>
+  <data name="SeatingPodiumLabel" xml:space="preserve">
+    <value>【讲台】</value>
+  </data>
+  <data name="SeatingResultViewTitle" xml:space="preserve">
+    <value>排座结果与座位表</value>
+  </data>
+  <data name="SeatingRowAisleLabel" xml:space="preserve">
+    <value>行间走道</value>
+  </data>
+  <data name="SeatingRowHeaderFormat" xml:space="preserve">
+    <value>第{0}排</value>
+    <comment>{0} = 排号（从 1 起算）。</comment>
+  </data>
+  <data name="SeatingRuleErrorFormat" xml:space="preserve">
+    <value>规则异常：{0}</value>
+    <comment>{0} = 预检查错误说明。</comment>
+  </data>
+  <data name="SeatingSeatCoordinateFormat" xml:space="preserve">
+    <value>第 {0} 排 第 {1} 列</value>
+    <comment>{0} = 排号（从 1 起算）；{1} = 列号（从 1 起算）。</comment>
+  </data>
+  <data name="SeatingStaleHint" xml:space="preserve">
+    <value>提示：班级名单、教室布局或排座规则已发生变更；当前展示的是上一次的排座结果，请重新点击“开始自动排座”。</value>
+  </data>
+  <data name="SeatingStartCommandTitle" xml:space="preserve">
+    <value>开始自动排座</value>
+  </data>
+  <data name="SeatingStatusRejected" xml:space="preserve">
+    <value>【预检查未通过】规则配置中存在基础逻辑错误（如越界、重复固定等），已阻止求解。</value>
+  </data>
+  <data name="SeatingStatusUndetermined" xml:space="preserve">
+    <value>【求解未决】在当前时限或资源内未能确定是否存在可行座位分配方案。</value>
+  </data>
+  <data name="SeatingStatusUnsatisfiable" xml:space="preserve">
+    <value>【排座无解】当前设置的规则组合在逻辑上存在不可调和的冲突，无法排出有效方案。</value>
+  </data>
+  <data name="SecRandomEntriesArrayRequired" xml:space="preserve">
+    <value>SecRandom 名单记录必须是数组。</value>
+  </data>
+  <data name="SecRandomEntryObjectFormat" xml:space="preserve">
+    <value>SecRandom 第 {0} 条记录必须是对象。</value>
+    <comment>{0} = 名单记录序号（从 1 起算）。</comment>
+  </data>
+  <data name="SecRandomFieldTypeFormat" xml:space="preserve">
+    <value>SecRandom 字段 {0} 必须为字符串或 null。</value>
+    <comment>{0} = JSON 字段名。</comment>
+  </data>
+  <data name="SecRandomMissingEntries" xml:space="preserve">
+    <value>未识别到 SecRandom students 名单或 rows 传输文档。</value>
+  </data>
+  <data name="SecRandomRootObjectRequired" xml:space="preserve">
+    <value>SecRandom 名单必须是包含 students 或 rows 的 JSON 对象。</value>
+  </data>
+  <data name="SecRandomUnsupportedVersion" xml:space="preserve">
+    <value>仅支持 SecRandom version 为 1 的名单传输文档。</value>
+  </data>
+  <data name="SecRandomWrongKind" xml:space="preserve">
+    <value>所选 SecRandom 传输文档不是学生名单（kind 必须为 0）。</value>
+  </data>
+  <data name="SpreadsheetColumnFallbackHeaderFormat" xml:space="preserve">
+    <value>第 {0} 列</value>
+    <comment>{0} = 列号（从 1 起算）。</comment>
+  </data>
+</root>

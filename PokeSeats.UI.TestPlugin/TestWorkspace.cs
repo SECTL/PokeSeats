@@ -93,18 +93,18 @@ internal sealed class TestWorkspace : IWorkspace
 
         IWorkspaceContext? context = _context;
 
-        if (ImGui.BeginMenu("帮助"))
+        if (ImGui.BeginMenu(WorkspaceStrings.HelpMenu))
         {
-            ImGui.MenuItem("已内置 HarmonyOS Sans 中文字体", null, false, false);
-            ImGui.TextDisabled("版权所有 2021 Huawei Device Co., Ltd.");
+            ImGui.MenuItem(WorkspaceStrings.FontDescription, null, false, false);
+            ImGui.TextDisabled(WorkspaceStrings.FontCopyright);
             ImGui.EndMenu();
         }
 
-        if (ImGui.BeginMenu("面板"))
+        if (ImGui.BeginMenu(WorkspaceStrings.PanelsMenu))
         {
             if (context is null || context.Views.Count == 0)
             {
-                ImGui.MenuItem("（未注册面板）", null, false, false);
+                ImGui.MenuItem(WorkspaceStrings.NoPanels, null, false, false);
             }
             else
             {

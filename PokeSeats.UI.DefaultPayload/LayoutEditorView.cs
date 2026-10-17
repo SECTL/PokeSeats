@@ -12,7 +12,7 @@ namespace PokeSeats.UI.DefaultPayload;
 internal sealed class LayoutEditorView : IUiView
 {
     private const string TypePopupId = "##layout-cell-type";
-    private const string ResizePopupId = "确认缩减教室尺寸###layout-resize-confirm";
+    private static readonly string ResizePopupId = PayloadStrings.LayoutResizeConfirmTitle + "###layout-resize-confirm";
     private float _cellSize = 36f;
     private float _gridLineWidth = 1f;
     private UiDesignTokens _designTokens = UiDesignTokens.Light;
@@ -38,7 +38,7 @@ internal sealed class LayoutEditorView : IUiView
 
     public string Id => "pokeseats.defaultpayload.layout";
 
-    public string DisplayName => "教室布局";
+    public string DisplayName => PayloadStrings.LayoutViewTitle;
 
     public Vector2? MinimumSize => new(620, 520);
 
@@ -55,28 +55,28 @@ internal sealed class LayoutEditorView : IUiView
 
     private void DrawToolbar()
     {
-        ImGui.Text("教室规格：");
+        ImGui.Text(PayloadStrings.LayoutClassroomSpecLabel);
         ImGui.SameLine();
         ImGui.SetNextItemWidth(UiScale.Pixels(100));
-        ImGui.InputInt("排##layout-rows", ref _requestedRows, 1, 1);
+        ImGui.InputInt(PayloadStrings.LayoutRowInputLabel + "##layout-rows", ref _requestedRows, 1, 1);
         ImGui.SameLine();
         ImGui.SetNextItemWidth(UiScale.Pixels(100));
-        ImGui.InputInt("列##layout-cols", ref _requestedCols, 1, 1);
+        ImGui.InputInt(PayloadStrings.LayoutColumnInputLabel + "##layout-cols", ref _requestedCols, 1, 1);
         ImGui.SameLine();
-        if (ImGui.Button("调整规格"))
+        if (ImGui.Button(PayloadStrings.LayoutApplySizeButton))
             TryResize();
         ImGui.SameLine();
-        if (ImGui.Button("清空教室"))
+        if (ImGui.Button(PayloadStrings.LayoutClearButton))
         {
             _layout.Clear();
             ClearSelection();
-            SaveLayout("教室布局已重置为空白并自动保存。");
+            SaveLayout(PayloadStrings.LayoutResetStatus);
         }
         ImGui.SameLine();
-        if (ImGui.Button("保存布局"))
-            SaveLayout("教室布局已保存。");
+        if (ImGui.Button(PayloadStrings.LayoutSaveButton))
+            SaveLayout(PayloadStrings.LayoutSavedStatus);
 
-        ImGui.TextDisabled($"当前规格：{_layout.Rows} 排 × {_layout.Cols} 列 · 可用座位 {_layout.DeskCount} 个");
+        ImGui.TextDisabled(string.Format(PayloadStrings.LayoutCurrentSpecFormat, _layout.Rows, _layout.Cols, _layout.DeskCount));
         if (!string.IsNullOrEmpty(_status))
             ImGui.TextWrapped(_status);
     }
@@ -203,15 +203,15 @@ internal sealed class LayoutEditorView : IUiView
             return;
         }
 
-        ImGui.Text("设置选中区域为：");
+        ImGui.Text(PayloadStrings.LayoutAssignTypeHeading);
         ImGui.Separator();
-        DrawTypeMenuItem("学生座位（课桌）", CellType.Desk);
-        DrawTypeMenuItem("主走道（宽过道）", CellType.Aisle);
-        DrawTypeMenuItem("行间过道（窄过道）", CellType.NarrowAisle);
-        DrawTypeMenuItem("讲台区域", CellType.Podium);
-        DrawTypeMenuItem("空白区域（无设施）", CellType.Empty);
+        DrawTypeMenuItem(PayloadStrings.LayoutCellTypeDesk, CellType.Desk);
+        DrawTypeMenuItem(PayloadStrings.LayoutCellTypeAisle, CellType.Aisle);
+        DrawTypeMenuItem(PayloadStrings.LayoutCellTypeNarrowAisle, CellType.NarrowAisle);
+        DrawTypeMenuItem(PayloadStrings.LayoutCellTypePodium, CellType.Podium);
+        DrawTypeMenuItem(PayloadStrings.LayoutCellTypeEmpty, CellType.Empty);
         ImGui.Separator();
-        if (ImGui.MenuItem("取消"))
+        if (ImGui.MenuItem(PayloadStrings.CommonCancel))
             ClearSelection();
         ImGui.EndPopup();
     }
@@ -223,7 +223,7 @@ internal sealed class LayoutEditorView : IUiView
         if (_selectionStart is { } start && _selectionEnd is { } end)
         {
             _layout.SetRectangle(start, end, type);
-            SaveLayout($"已将选中的 {SelectedCellCount(start, end)} 处位置设为：{label}。");
+            SaveLayout(string.Format(PayloadStrings.LayoutAssignedStatusFormat, SelectedCellCount(start, end), label));
         }
         ClearSelection();
     }
@@ -233,7 +233,7 @@ internal sealed class LayoutEditorView : IUiView
         try
         {
             if (_requestedRows is < 1 or > 32 || _requestedCols is < 1 or > 32)
-                throw new InvalidDataException("教室排数和列数必须在 1 至 32 之间。");
+                throw new InvalidDataException(PayloadStrings.LayoutDimensionRangeError);
             if (!confirmed && (_requestedRows < _layout.Rows || _requestedCols < _layout.Cols))
             {
                 _requestResizeConfirmation = true;
@@ -241,13 +241,13 @@ internal sealed class LayoutEditorView : IUiView
             }
             _layout.Resize(_requestedRows, _requestedCols);
             ClearSelection();
-            SaveLayout($"教室规格已更新为 {_layout.Rows} 排 × {_layout.Cols} 列。");
+            SaveLayout(string.Format(PayloadStrings.LayoutResizedStatusFormat, _layout.Rows, _layout.Cols));
         }
         catch (InvalidDataException exception)
         {
             _requestedRows = _layout.Rows;
             _requestedCols = _layout.Cols;
-            _status = $"尺寸设置无效：{exception.Message}";
+            _status = string.Format(PayloadStrings.LayoutSizeInvalidFormat, exception.Message);
         }
     }
 
@@ -260,15 +260,15 @@ internal sealed class LayoutEditorView : IUiView
         }
         if (!ImGui.BeginPopupModal(ResizePopupId, ImGuiWindowFlags.AlwaysAutoResize))
             return;
-        ImGui.Text($"确认将教室规格缩减为 {_requestedRows} 排 × {_requestedCols} 列？");
-        ImGui.Text("注意：超出新范围的座位和走道设置将被永久裁剪。");
-        if (ImGui.Button("确认调整"))
+        ImGui.Text(string.Format(PayloadStrings.LayoutResizeConfirmQuestionFormat, _requestedRows, _requestedCols));
+        ImGui.Text(PayloadStrings.LayoutResizeConfirmWarning);
+        if (ImGui.Button(PayloadStrings.LayoutResizeConfirmButton))
         {
             TryResize(confirmed: true);
             ImGui.CloseCurrentPopup();
         }
         ImGui.SameLine();
-        if (ImGui.Button("取消") || ImGui.IsKeyPressed(ImGuiKey.Escape))
+        if (ImGui.Button(PayloadStrings.CommonCancel) || ImGui.IsKeyPressed(ImGuiKey.Escape))
         {
             _requestedRows = _layout.Rows;
             _requestedCols = _layout.Cols;
@@ -293,11 +293,11 @@ internal sealed class LayoutEditorView : IUiView
         }
         catch (IOException exception)
         {
-            _status = $"布局保存失败：{exception.Message}";
+            _status = string.Format(PayloadStrings.LayoutSaveFailedFormat, exception.Message);
         }
         catch (UnauthorizedAccessException exception)
         {
-            _status = $"布局保存失败：{exception.Message}";
+            _status = string.Format(PayloadStrings.LayoutSaveFailedFormat, exception.Message);
         }
     }
 
@@ -319,10 +319,10 @@ internal sealed class LayoutEditorView : IUiView
     private static string? LabelFor(CellType type)
         => type switch
         {
-            CellType.Desk => "桌",
-            CellType.Aisle => "宽",
-            CellType.NarrowAisle => "窄",
-            CellType.Podium => "讲",
+            CellType.Desk => PayloadStrings.LayoutCellShortDesk,
+            CellType.Aisle => PayloadStrings.LayoutCellShortAisle,
+            CellType.NarrowAisle => PayloadStrings.LayoutCellShortNarrowAisle,
+            CellType.Podium => PayloadStrings.LayoutCellShortPodium,
             _ => null
         };
 

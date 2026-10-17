@@ -12,7 +12,7 @@ public sealed class TestPlugin : IUiPlugin
     {
         ArgumentNullException.ThrowIfNull(context);
 
-        context.RegisterWorkspace(WorkspaceId, "测试工作区", static () => new TestWorkspace());
+        context.RegisterWorkspace(WorkspaceId, WorkspaceStrings.WorkspaceName, static () => new TestWorkspace());
         context.RegisterView(new PerformancePanel());
     }
 

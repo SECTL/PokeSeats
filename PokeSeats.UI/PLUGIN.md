@@ -153,6 +153,18 @@ context.Events.Subscribe<UiViewOpenRequested>(request =>
 
 工作区按显示名称排序（不区分大小写），名称相同时按 ID 排序。上次的选择记在 `%LOCALAPPDATA%/PokeSeats/selected-workspace.txt`。
 
+## 界面文案资源
+
+默认工作区和示例工作区各自使用 `WorkspaceStrings.resx`；默认业务面板使用 `PayloadStrings.resx`（名单、布局和排座）及 `RulesStrings.resx`（规则编辑、说明和诊断）。中文原文保存在中性资源文件中，随插件程序集嵌入，不需要额外安装资源文件。
+
+各插件的 `.csproj` 为资源配置了 `StronglyTypedLanguage`、`StronglyTypedClassName`、`StronglyTypedNamespace` 和 `StronglyTypedFileName`。`dotnet build` 自动在 `obj/` 下生成内部强类型访问类；不要手工维护或提交生成的 `*.Designer.cs`。
+
+新增文案使用有意义的英文资源名，通过 `WorkspaceStrings.Confirm` 这样的属性读取。带变量的句子保留为完整格式模板，例如资源值 `帧时间：{0:F1} ms`，代码使用 `string.Format(WorkspaceStrings.FrameTime, milliseconds)`；在资源注释中说明占位参数含义。不要将一句话拆成多个固定顺序的片段。
+
+ImGui 的 `##`／`###` 内部 ID、JSON 字段名、文件扩展名、导入列名识别别名以及拼音数据不属于界面文案，应继续留在代码中。弹窗标题从资源读取后拼接固定 `###id`，修改标题不会改变对应窗口的持久身份。Windows 文件选择器的筛选说明可放资源中，扩展名和 NUL 分隔符仍由代码组装。
+
+当前只整理现有中文文案，没有增加语言选择器或运行时语言切换。资源使用 .NET 标准 `ResourceManager` 查找与回退；后续添加语言时可按标准 `.resx` 命名提供对应文化资源。
+
 ## 界面缩放
 
 宿主以 `1280 × 720` 为基准算出一个基础比例 `max(1, min(宽/1280, 高/720))`。用户可以用 `Ctrl +`／`Ctrl -` 以 `0.05x` 为步进微调，`Ctrl + 0` 恢复自动值。最终比例限制在 `0.50x` 到 `3.00x`。

@@ -48,9 +48,9 @@ internal sealed class RuleDocument
         {
             StoredDocument? stored = JsonSerializer.Deserialize<StoredDocument>(File.ReadAllText(path), SerializerOptions);
             if (stored is null)
-                throw new InvalidDataException("规则文件为空。");
+                throw new InvalidDataException(RulesStrings.RuleFileEmpty);
             if (stored.Rules is null)
-                throw new InvalidDataException("规则文件缺少规则列表。");
+                throw new InvalidDataException(RulesStrings.RuleFileMissingList);
 
             List<StoredRule> items = stored.Rules;
             var document = new RuleDocument();
@@ -59,14 +59,14 @@ internal sealed class RuleDocument
             {
                 Rule rule = FromStored(item);
                 if (!ids.Add(rule.Id))
-                    throw new InvalidDataException($"规则标识重复：{rule.Id.value}。");
+                    throw new InvalidDataException(string.Format(RulesStrings.DuplicateRuleIdFormat, rule.Id.value));
                 document._rules.Add(rule);
             }
             return document;
         }
         catch (Exception exception) when (exception is IOException or UnauthorizedAccessException or JsonException or InvalidDataException)
         {
-            loadMessage = $"规则文件读取失败，已使用空规则集（原文件未改动）：{exception.Message}";
+            loadMessage = string.Format(RulesStrings.RuleLoadFailedFormat, exception.Message);
             return new RuleDocument();
         }
     }
@@ -165,13 +165,13 @@ internal sealed class RuleDocument
                 region.RowMax,
                 region.ColMin,
                 region.ColMax)),
-        _ => throw new NotSupportedException($"不支持的规则类型：{rule.GetType().Name}"),
+        _ => throw new NotSupportedException(string.Format(RulesStrings.UnsupportedRuleTypeFormat, rule.GetType().Name)),
     };
 
     private static Rule FromStored(StoredRule stored)
     {
         if (stored.Id == Guid.Empty)
-            throw new InvalidDataException("规则缺少标识 Id。");
+            throw new InvalidDataException(RulesStrings.MissingRuleId);
 
         var id = new RuleId(stored.Id);
         string displayName = stored.DisplayName ?? string.Empty;
@@ -180,9 +180,9 @@ internal sealed class RuleDocument
         {
             case RelationType:
             {
-                StoredRelation relation = stored.Relation ?? throw new InvalidDataException("关系规则缺少关系数据。");
+                StoredRelation relation = stored.Relation ?? throw new InvalidDataException(RulesStrings.MissingRelationData);
                 if (relation.A == Guid.Empty || relation.B == Guid.Empty)
-                    throw new InvalidDataException($"关系规则缺少人员标识：{id.value}。");
+                    throw new InvalidDataException(string.Format(RulesStrings.MissingRelationPersonFormat, id.value));
                 return new RelationRule(
                     id,
                     displayName,
@@ -198,21 +198,21 @@ internal sealed class RuleDocument
             }
             case PinnedType:
             {
-                StoredPinned pinned = stored.Pinned ?? throw new InvalidDataException("固定规则缺少固定位置。");
+                StoredPinned pinned = stored.Pinned ?? throw new InvalidDataException(RulesStrings.MissingPinnedPosition);
                 if (pinned.Person == Guid.Empty)
-                    throw new InvalidDataException($"固定规则缺少人员标识：{id.value}。");
+                    throw new InvalidDataException(string.Format(RulesStrings.MissingPinnedPersonFormat, id.value));
                 return new PinnedRule(id, displayName, new PersonId(pinned.Person), new GridPos(pinned.Row, pinned.Col));
             }
             case CapacityType:
             {
-                StoredCapacity capacity = stored.Capacity ?? throw new InvalidDataException("容量规则缺少人数限制。");
+                StoredCapacity capacity = stored.Capacity ?? throw new InvalidDataException(RulesStrings.MissingCapacityLimit);
                 return new CapacityRule(id, displayName, new Axis(capacity.Type, capacity.Index), capacity.Min, capacity.Max);
             }
             case RegionType:
             {
-                StoredRegion region = stored.Region ?? throw new InvalidDataException("区域规则缺少区域数据。");
+                StoredRegion region = stored.Region ?? throw new InvalidDataException(RulesStrings.MissingRegionData);
                 if (region.Person == Guid.Empty)
-                    throw new InvalidDataException($"区域规则缺少人员标识：{id.value}。");
+                    throw new InvalidDataException(string.Format(RulesStrings.MissingRegionPersonFormat, id.value));
                 return new RegionRule(
                     id,
                     displayName,
@@ -224,7 +224,7 @@ internal sealed class RuleDocument
                     region.ColMax);
             }
             default:
-                throw new InvalidDataException($"未知的规则类型：{stored.Type}。");
+                throw new InvalidDataException(string.Format(RulesStrings.UnknownRuleTypeFormat, stored.Type));
         }
     }
 

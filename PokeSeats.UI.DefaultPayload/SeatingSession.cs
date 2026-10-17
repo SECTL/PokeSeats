@@ -28,7 +28,7 @@ internal sealed class SeatingSession : IUiCommand, IDisposable
     }
 
     public string Id => "pokeseats.defaultpayload.start-seating";
-    public string DisplayName => "开始自动排座";
+    public string DisplayName => PayloadStrings.SeatingStartCommandTitle;
     public bool IsRunning => pending || worker is not null;
     public SolverRequest? Request { get; private set; }
     public SolverResult? Result { get; private set; }
@@ -63,12 +63,12 @@ internal sealed class SeatingSession : IUiCommand, IDisposable
             try
             {
                 return request.Roster.Count == 0
-                    ? new Outcome(null, "学生花名册当前为空，请先在“学生名单”面板导入班级名单。")
+                    ? new Outcome(null, PayloadStrings.SeatingEmptyRosterError)
                     : new Outcome(new SolverService().Solve(request), null);
             }
             catch (Exception exception)
             {
-                return new Outcome(null, $"排座引擎执行异常：{exception.Message}");
+                return new Outcome(null, string.Format(PayloadStrings.SeatingEngineErrorFormat, exception.Message));
             }
         });
     }

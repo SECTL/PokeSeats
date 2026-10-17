@@ -14,4 +14,13 @@
       <PackageReference Include="ImGui.NET" Version="1.91.6.1" />
     </ItemGroup>
 
+    <ItemGroup>
+      <EmbeddedResource Update="WorkspaceStrings.resx">
+        <StronglyTypedLanguage>CSharp</StronglyTypedLanguage>
+        <StronglyTypedClassName>WorkspaceStrings</StronglyTypedClassName>
+        <StronglyTypedNamespace>$(RootNamespace)</StronglyTypedNamespace>
+        <StronglyTypedFileName>$(IntermediateOutputPath)WorkspaceStrings.Designer.cs</StronglyTypedFileName>
+      </EmbeddedResource>
+    </ItemGroup>
+
 </Project>

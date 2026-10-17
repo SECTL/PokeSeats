@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms</value></resheader>
+  <data name="WorkspaceName" xml:space="preserve"><value>测试工作区</value></data>
+  <data name="PerformanceName" xml:space="preserve"><value>性能</value></data>
+  <data name="FrameTime" xml:space="preserve"><value>帧时间：{0:F1} ms</value><comment>{0}: frame time in milliseconds.</comment></data>
+  <data name="WorkspaceShortcut" xml:space="preserve"><value>工作区切换：Ctrl+Alt+Shift+X</value></data>
+  <data name="HelpMenu" xml:space="preserve"><value>帮助</value></data>
+  <data name="FontDescription" xml:space="preserve"><value>已内置 HarmonyOS Sans 中文字体</value></data>
+  <data name="FontCopyright" xml:space="preserve"><value>版权所有 2021 Huawei Device Co., Ltd.</value></data>
+  <data name="PanelsMenu" xml:space="preserve"><value>面板</value></data>
+  <data name="NoPanels" xml:space="preserve"><value>（未注册面板）</value></data>
+</root>

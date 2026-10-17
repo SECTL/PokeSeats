@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms</value></resheader>
+  <data name="WorkspaceName" xml:space="preserve"><value>标准工作区</value></data>
+  <data name="SystemMenu" xml:space="preserve"><value>系统</value></data>
+  <data name="AboutTitle" xml:space="preserve"><value>关于 PokeSeats 戳座</value></data>
+  <data name="Exit" xml:space="preserve"><value>退出程序</value></data>
+  <data name="PanelsMenu" xml:space="preserve"><value>功能面板</value></data>
+  <data name="NoPanels" xml:space="preserve"><value>（当前无可用面板）</value></data>
+  <data name="ProductDescription" xml:space="preserve"><value>PokeSeats 戳座 - 智能教室排座系统</value></data>
+  <data name="VersionCopyright" xml:space="preserve"><value>版本 1.0 · Copyright (c) 2025-2026 SECTL Studio &amp; chenjintang-shrimp</value></data>
+  <data name="LicenseNotice" xml:space="preserve"><value>本项目以 GPL-3.0-or-later 发布，源码见项目仓库。</value></data>
+  <data name="FontDescription" xml:space="preserve"><value>界面字体：HarmonyOS Sans SC</value></data>
+  <data name="FontLicenseNotice" xml:space="preserve"><value>字体版权所有 2021 Huawei Device Co., Ltd. 根据字体许可协议分发。</value></data>
+  <data name="Confirm" xml:space="preserve"><value>确定</value></data>
+</root>
