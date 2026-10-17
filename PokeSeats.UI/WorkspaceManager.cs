@@ -13,6 +13,7 @@ internal sealed class WorkspaceManager : IDisposable
     private readonly Dictionary<string, IWorkspace> _instances = new(StringComparer.Ordinal);
     private readonly List<string> _diagnostics = new();
     private WorkspaceContext? _activeContext;
+    private UiDesignTokens? _appliedTokens;
     private bool _disposed;
 
     public WorkspaceManager(PluginCatalog catalog, AppConfigStore config, UiScaling scaling, IUiTextureService textures)
@@ -43,8 +44,12 @@ internal sealed class WorkspaceManager : IDisposable
 
     public void Draw(float deltaSeconds)
     {
-        if (Active is not null)
-            _instances[Active.Id].Draw(deltaSeconds);
+        if (Active is null)
+            return;
+
+        IWorkspace workspace = _instances[Active.Id];
+        workspace.Draw(deltaSeconds);
+        ApplyDesignTokens(workspace);
     }
 
     // Called outside an ImGui frame so an outgoing workspace never draws after deactivation.
@@ -134,10 +139,12 @@ internal sealed class WorkspaceManager : IDisposable
         var context = new WorkspaceContext(_catalog, _catalog.CreateEventScope(), _textures);
         try
         {
+            UiDesignTokens tokens = workspace.DesignTokens;
             _scaling.RestoreStyle();
-            UiTheme.Apply(workspace.DesignTokens);
+            UiTheme.Apply(tokens);
             workspace.Activate(context);
             _scaling.CaptureStyle();
+            _appliedTokens = tokens;
             _activeContext = context;
         }
         catch
@@ -157,6 +164,19 @@ internal sealed class WorkspaceManager : IDisposable
             _activeContext?.Dispose();
             _activeContext = null;
         }
+    }
+
+    private void ApplyDesignTokens(IWorkspace workspace)
+    {
+        UiDesignTokens tokens = workspace.DesignTokens;
+        if (_appliedTokens is { } applied && applied == tokens)
+            return;
+
+        _scaling.RestoreStyle();
+        UiTheme.Apply(tokens);
+        _scaling.CaptureStyle();
+        _scaling.ApplyLast();
+        _appliedTokens = tokens;
     }
 
     private void Restore(WorkspaceRegistration? registration, IWorkspace? workspace)

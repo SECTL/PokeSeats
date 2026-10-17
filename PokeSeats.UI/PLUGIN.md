@@ -230,7 +230,9 @@ public void DrawContent(float deltaSeconds, UiDesignTokens designTokens)
 
 `Metrics` 包含 `SpaceSmall`、`SpaceMedium`、`SpaceLarge`、`WindowRounding`、`ControlRounding` 和 `BorderWidth`，全部是基准像素。自绘时使用 `UiScale.Pixels` 换算一次；ImGui 样式由宿主统一缩放。控件专用尺寸仍由面板决定。默认业务面板已使用这些 tokens 绘制教室网格、规则预览、冲突高亮和座位表。
 
-切换工作区会在下一次绘制时传入新工作区的 tokens；激活失败回退时也会重新应用原工作区的样式。当前契约版本是 **5**。版本 5 在 `IWorkspaceContext` 上增加了 `Textures`，可以把嵌入的 PNG/JPEG 字节解码成 ImGui 可用的纹理：
+切换工作区会在下一次绘制时传入新工作区的 tokens；激活失败回退时也会重新应用原工作区的样式。工作区还可以在运行时替换 `DesignTokens`（例如默认工作区的设置页切换主题）；宿主会在当前帧绘制结束后重新应用 tokens、重算缩放基线，并从下一帧生效，不需要重新激活工作区。
+
+当前契约版本是 **5**。版本 5 在 `IWorkspaceContext` 上增加了 `Textures`，可以把嵌入的 PNG/JPEG 字节解码成 ImGui 可用的纹理：
 
 ```csharp
 using Stream? stream = typeof(MyPlugin).Assembly.GetManifestResourceStream("My.Plugin.Assets.logo.png");

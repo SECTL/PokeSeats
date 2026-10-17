@@ -19,4 +19,19 @@
   <data name="FontDescription" xml:space="preserve"><value>界面字体：HarmonyOS Sans SC</value></data>
   <data name="FontLicenseNotice" xml:space="preserve"><value>字体版权所有 2021 Huawei Device Co., Ltd. 根据字体许可协议分发。</value></data>
   <data name="Confirm" xml:space="preserve"><value>确定</value></data>
+  <data name="SettingsTitle" xml:space="preserve"><value>设置</value></data>
+  <data name="SettingsAppearanceSection" xml:space="preserve"><value>外观</value></data>
+  <data name="SettingsLightMode" xml:space="preserve"><value>亮色</value></data>
+  <data name="SettingsDarkMode" xml:space="preserve"><value>暗色</value></data>
+  <data name="SettingsBackgroundColor" xml:space="preserve"><value>背景色</value></data>
+  <data name="SettingsSurfaceColor" xml:space="preserve"><value>面板色</value></data>
+  <data name="SettingsTextColor" xml:space="preserve"><value>文字色</value></data>
+  <data name="SettingsAccentColor" xml:space="preserve"><value>强调色</value></data>
+  <data name="SettingsReset" xml:space="preserve"><value>恢复当前模式默认</value></data>
+  <data name="SettingsClose" xml:space="preserve"><value>关闭</value></data>
+  <data name="SettingsHint" xml:space="preserve"><value>颜色修改会立即生效并自动保存。切换亮色/暗色会载入该模式的默认配色。</value></data>
+  <data name="SettingsScaleFormat" xml:space="preserve">
+    <value>界面缩放：{0:F2}x（Ctrl + / Ctrl - 微调，Ctrl + 0 恢复自动值）</value>
+    <comment>{0}：当前界面缩放比例。</comment>
+  </data>
 </root>

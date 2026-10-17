@@ -10,9 +10,14 @@ public class DefaultWorkspace : IWorkspace
     private const string AuthorAvatarResource = "PokeSeats.UI.DefaultWorkspace.Assets.chenjintang-shrimp.png";
     private const string SectIconResource = "PokeSeats.UI.DefaultWorkspace.Assets.sectl.jpg";
 
-    public UiDesignTokens DesignTokens { get; } = UiDesignTokens.Light;
+    public UiDesignTokens DesignTokens => _designTokens;
 
     internal bool               IsDisposed { get; private set; }
+    private readonly WorkspaceSettingsStore _settings;
+    private WorkspaceAppearance _appearance;
+    private UiDesignTokens _designTokens;
+    private bool openSettingsPopup;
+    private bool _settingsDirty;
     private IWorkspaceContext? context;
     private IUiTextureService? _textures;
     private IUiTexture? _authorAvatar;
@@ -25,6 +30,17 @@ public class DefaultWorkspace : IWorkspace
     private readonly HashSet<string> _pendingFocus = new(StringComparer.Ordinal);
 
     private readonly record struct ViewGeometry(Vector2 Position, Vector2 Size, float Scale, bool Docked);
+
+    public DefaultWorkspace(string settingsPath)
+    {
+        if (string.IsNullOrWhiteSpace(settingsPath))
+            throw new ArgumentException("A settings path is required.", nameof(settingsPath));
+
+        _settings = new WorkspaceSettingsStore(settingsPath);
+        _appearance = _settings.Load();
+        _designTokens = _appearance.ToTokens();
+    }
+
     public void Activate(IWorkspaceContext _context)
     {
         if (IsDisposed)
@@ -69,6 +85,9 @@ public class DefaultWorkspace : IWorkspace
 
         if (ImGui.BeginMenu(WorkspaceStrings.SystemMenu))
         {
+            if (ImGui.MenuItem(WorkspaceStrings.SettingsTitle))
+                openSettingsPopup = true;
+
             if (ImGui.MenuItem(WorkspaceStrings.AboutTitle))
                 openAboutPopup = true;
 
@@ -208,6 +227,7 @@ public class DefaultWorkspace : IWorkspace
                 DrawViews(deltaSeconds);
                 DrawMainMenuBar(context.Commands, context.Views);
                 DrawAboutPopup();
+                DrawSettingsPopup();
 
             }
         }
@@ -289,18 +309,110 @@ public class DefaultWorkspace : IWorkspace
         return _textures!.Create(buffer.ToArray());
     }
 
+    private void DrawSettingsPopup()
+    {
+        string popupId = WorkspaceStrings.SettingsTitle + "###pokeseats.defaultworkspace.settings";
+        if (openSettingsPopup)
+        {
+            ImGui.OpenPopup(popupId);
+            openSettingsPopup = false;
+        }
+
+        bool open = true;
+        if (ImGui.BeginPopupModal(popupId, ref open, ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoSavedSettings))
+        {
+            ImGui.TextUnformatted(WorkspaceStrings.SettingsAppearanceSection);
+            if (ImGui.RadioButton(WorkspaceStrings.SettingsLightMode, !_appearance.Dark))
+            {
+                SetAppearance(WorkspaceAppearance.FromPreset(dark: false));
+                SaveSettingsIfDirty();
+            }
+            ImGui.SameLine();
+            if (ImGui.RadioButton(WorkspaceStrings.SettingsDarkMode, _appearance.Dark))
+            {
+                SetAppearance(WorkspaceAppearance.FromPreset(dark: true));
+                SaveSettingsIfDirty();
+            }
+
+            ImGui.Separator();
+            DrawColorEdit(WorkspaceStrings.SettingsBackgroundColor, _appearance.Background,
+                color => _appearance with { Background = color });
+            DrawColorEdit(WorkspaceStrings.SettingsSurfaceColor, _appearance.Surface,
+                color => _appearance with { Surface = color });
+            DrawColorEdit(WorkspaceStrings.SettingsTextColor, _appearance.Text,
+                color => _appearance with { Text = color });
+            DrawColorEdit(WorkspaceStrings.SettingsAccentColor, _appearance.Accent,
+                color => _appearance with { Accent = color });
+
+            ImGui.Separator();
+            if (ImGui.Button(WorkspaceStrings.SettingsReset))
+            {
+                SetAppearance(WorkspaceAppearance.FromPreset(_appearance.Dark));
+                SaveSettingsIfDirty();
+            }
+            ImGui.SameLine();
+            if (ImGui.Button(WorkspaceStrings.SettingsClose))
+            {
+                SaveSettingsIfDirty();
+                ImGui.CloseCurrentPopup();
+            }
+
+            ImGui.TextDisabled(WorkspaceStrings.SettingsHint);
+            ImGui.TextDisabled(string.Format(WorkspaceStrings.SettingsScaleFormat, UiScale.Current));
+            ImGui.EndPopup();
+        }
+
+        if (!open)
+            SaveSettingsIfDirty();
+    }
+
+    private void DrawColorEdit(string label, Vector4 current, Func<Vector4, WorkspaceAppearance> update)
+    {
+        Vector4 color = current;
+        if (ImGui.ColorEdit4(label, ref color, ImGuiColorEditFlags.NoAlpha | ImGuiColorEditFlags.NoInputs))
+            SetAppearance(update(color));
+        if (ImGui.IsItemDeactivatedAfterEdit())
+            SaveSettingsIfDirty();
+    }
+
+    private void SetAppearance(WorkspaceAppearance appearance)
+    {
+        _appearance = appearance.Normalize();
+        _designTokens = _appearance.ToTokens();
+        _settingsDirty = true;
+    }
+
+    private void SaveSettingsIfDirty()
+    {
+        if (!_settingsDirty)
+            return;
+
+        try
+        {
+            _settings.Save(_appearance);
+            _settingsDirty = false;
+        }
+        catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
+        {
+            Console.Error.WriteLine($"Unable to save workspace appearance: {exception.Message}");
+        }
+    }
+
     public void Deactivate()
     {
+        SaveSettingsIfDirty();
         _viewOpenSubscription?.Dispose();
         _viewOpenSubscription = null;
         _pendingFocus.Clear();
         // Visible-view choices deliberately survive deactivation.
         openAboutPopup = false;
+        openSettingsPopup = false;
         context = null;
     }
 
     public void Dispose()
     {
+        SaveSettingsIfDirty();
         _viewOpenSubscription?.Dispose();
         _viewOpenSubscription = null;
         _authorAvatar?.Dispose();

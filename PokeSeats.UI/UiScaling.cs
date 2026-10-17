@@ -12,6 +12,7 @@ internal sealed class UiScaling
     private int _adjustmentSteps;
     private int _shortcutWasDown;
     private double _showScaleUntil;
+    private float _lastDisplayScale = 1f;
 
     internal float ScaleForDisplay(float displayScale)
         => Math.Clamp(UiScale.ForDisplayScale(displayScale) + _adjustmentSteps * 0.05f, 0.5f, 3f);
@@ -72,8 +73,11 @@ internal sealed class UiScaling
         _appliedScale = 0f;
     }
 
+    internal void ApplyLast() => Apply(_lastDisplayScale);
+
     internal unsafe void Apply(float displayScale)
     {
+        _lastDisplayScale = displayScale;
         float scale = ScaleForDisplay(displayScale);
         if (scale == _appliedScale)
             return;

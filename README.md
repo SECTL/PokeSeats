@@ -95,7 +95,11 @@ Windows 使用 Direct3D 11（DX11）渲染；Linux 保持 OpenGL 后端，完整
       students.json    花名册
       layout.json      教室布局
       rules.json       排座规则
+    pokeseats.default/
+      workspace-settings.json  外观设置
 ```
+
+外观设置（亮色/暗色、背景色、面板色、文字色、强调色）保存在 `data/plugins/pokeseats.default/workspace-settings.json`，修改后立即生效。
 
 如果程序目录不可写（例如装进系统级目录，或 macOS 应用包受签名保护），宿主会退回到当前用户的数据目录：Windows 是 `%LOCALAPPDATA%\PokeSeats`，Linux 是 `~/.local/share/PokeSeats`，macOS 是 `~/Library/Application Support/PokeSeats`。
 

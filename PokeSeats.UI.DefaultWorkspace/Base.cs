@@ -8,7 +8,9 @@ public sealed class DefaultUIPlugin : IUiPlugin
     public void Initialize(IPluginContext context)
     {
         ArgumentNullException.ThrowIfNull(context);
-        context.RegisterWorkspace(id: WORKSPACE_ID, displayName: WorkspaceStrings.WorkspaceName, static () => new DefaultWorkspace());
+
+        string settingsPath = Path.Combine(context.DataDirectory, "workspace-settings.json");
+        context.RegisterWorkspace(id: WORKSPACE_ID, displayName: WorkspaceStrings.WorkspaceName, () => new DefaultWorkspace(settingsPath));
     }
 
     public void Dispose()
