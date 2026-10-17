@@ -47,7 +47,7 @@ plugins/
 }
 ```
 
-`id` 会作为插件数据目录的名字，必须是安全的单层路径片段。
+`id` 会作为 `data/plugins` 下插件数据目录的名字，必须是安全的单层路径片段。
 
 `entryPoint` 指向一个公共类，需要公共无参构造函数，并实现 `IUiPlugin`。
 
@@ -153,7 +153,7 @@ context.Events.Subscribe<UiViewOpenRequested>(request =>
 
 切换失败时旧工作区会恢复，已保存的选择不变。保存的工作区已经被删掉时，启动时用列表里的第一个。一个工作区都没有时，宿主照样能启动并显示选择器。某个插件加载失败不影响其他插件，加载诊断会显示在选择器里。
 
-工作区按显示名称排序（不区分大小写），名称相同时按 ID 排序。上次的选择记在 `%LOCALAPPDATA%/PokeSeats/selected-workspace.txt`。
+工作区按显示名称排序（不区分大小写），名称相同时按 ID 排序。上次的选择记在数据目录的 `config.json` 中。
 
 ## 界面文案资源
 

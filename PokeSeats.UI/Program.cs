@@ -1,3 +1,4 @@
+using System.Runtime.InteropServices;
 using ImGuiNET;
 using Silk.NET.Input;
 using Silk.NET.Maths;
@@ -38,17 +39,20 @@ window.Load += () =>
     string applicationDirectory = AppContext.BaseDirectory;
     string builtinsDirectory = Path.Combine(applicationDirectory, "builtins");
     string pluginsDirectory = Path.Combine(applicationDirectory, "plugins");
-    string dataRoot = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
-    if (string.IsNullOrWhiteSpace(dataRoot))
-        dataRoot = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".local", "share");
-    string dataDirectory = Path.Combine(dataRoot, "PokeSeats", "plugins");
+    AppData appData = AppData.Resolve();
+    appData.MigrateLegacyData();
+    var config = new AppConfigStore(appData.Root, appData.ReadLegacyWorkspaceSelection());
+    IntPtr iniFilename = Marshal.StringToCoTaskMemUTF8(appData.ImGuiIniPath);
+    Console.WriteLine($"Data directory: {appData.Root}");
+    Console.WriteLine($"Device id: {config.DeviceId}");
 
-    catalog = new PluginCatalog(builtinsDirectory, pluginsDirectory, dataDirectory);
+    catalog = new PluginCatalog(builtinsDirectory, pluginsDirectory, appData.PluginsDirectory);
     IReadOnlyList<PluginFontRequest> fontRequests = catalog.FontRequests;
     void configureIo()
     {
         var io = ImGui.GetIO();
         io.ConfigFlags |= ImGuiConfigFlags.DockingEnable;
+        unsafe { io.NativePtr->IniFilename = (byte*)iniFilename; }
         PluginFontLoader.AddRequestedFonts(io.Fonts, fontRequests);
     }
     renderer = OperatingSystem.IsWindows()
@@ -57,7 +61,7 @@ window.Load += () =>
     fontAtlasScaling = new FontAtlasScaling(renderer.UpdateFontTexture);
 
     scaling.CaptureStyle();
-    workspaces = new WorkspaceManager(catalog, new WorkspaceSelectionStore(), scaling);
+    workspaces = new WorkspaceManager(catalog, config, scaling);
     selector = new WorkspaceSelector(workspaces);
     
     catalog.CreateEventScope().Subscribe<ApplicationExitRequested>(_ => window.Close());

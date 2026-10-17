@@ -79,18 +79,26 @@ Windows 使用 Direct3D 11（DX11）渲染；Linux 保持 OpenGL 后端，完整
 
 ## 数据存放位置
 
-名单、布局和规则都保存在本地：
+数据默认放在程序所在目录的 `data` 下：
 
 ```
-%LOCALAPPDATA%\PokeSeats\plugins\pokeseats.defaultpayload\
-  students.json    花名册
-  layout.json      教室布局
-  rules.json       排座规则
+<程序目录>/data/
+  config.json      设备 UUID、最近使用的工作区
+  imgui.ini        窗口与停靠布局
+  plugins/
+    pokeseats.defaultpayload/
+      students.json    花名册
+      layout.json      教室布局
+      rules.json       排座规则
 ```
 
-都是明文 JSON，可以直接备份、复制到另一台机器，或者手工改。删掉文件等于恢复空白状态。排座结果不会写入磁盘，关掉程序就没了——需要留档的话自己截图或抄下来。
+如果程序目录不可写（例如装进系统级目录，或 macOS 应用包受签名保护），宿主会退回到当前用户的数据目录：Windows 是 `%LOCALAPPDATA%\PokeSeats`，Linux 是 `~/.local/share/PokeSeats`，macOS 是 `~/Library/Application Support/PokeSeats`。
 
-最近一次选择的工作区记录在 `%LOCALAPPDATA%\PokeSeats\selected-workspace.txt`。
+`config.json` 里的 `deviceId` 由当前设备的系统机器标识派生（Windows `MachineGuid`、Linux `/etc/machine-id`、macOS `IOPlatformUUID`），重启和升级都不变。把整个 `data` 目录复制到另一台设备后，那台设备会按自己的机器标识重新生成 UUID，不会两台机器共用一个身份。
+
+名单、布局和规则都是明文 JSON，可以直接备份、复制到另一台机器，或者手工改。删掉文件等于恢复空白状态。排座结果不会写入磁盘，关掉程序就没了——需要留档的话自己截图或抄下来。
+
+旧版本把数据放在 `%LOCALAPPDATA%\PokeSeats`。首次运行时会复制缺失的文件到新位置，旧文件保留不动。
 
 ## 从源码构建
 

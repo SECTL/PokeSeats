@@ -7,19 +7,19 @@ namespace PokeSeats.UI;
 internal sealed class WorkspaceManager : IDisposable
 {
     private readonly PluginCatalog _catalog;
-    private readonly WorkspaceSelectionStore _selection;
+    private readonly AppConfigStore _config;
     private readonly UiScaling _scaling;
     private readonly Dictionary<string, IWorkspace> _instances = new(StringComparer.Ordinal);
     private readonly List<string> _diagnostics = new();
     private WorkspaceContext? _activeContext;
     private bool _disposed;
 
-    public WorkspaceManager(PluginCatalog catalog, WorkspaceSelectionStore selection, UiScaling scaling)
+    public WorkspaceManager(PluginCatalog catalog, AppConfigStore config, UiScaling scaling)
     {
         _catalog = catalog;
-        _selection = selection;
+        _config = config;
         _scaling = scaling;
-        string? preferredId = selection.Read();
+        string? preferredId = config.WorkspaceId;
         if (preferredId is not null)
         {
             WorkspaceRegistration? preferred = Workspaces.FirstOrDefault(item => item.Id == preferredId);
@@ -191,7 +191,7 @@ internal sealed class WorkspaceManager : IDisposable
 
     private void Remember(string id)
     {
-        try { _selection.Write(id); }
+        try { _config.SetWorkspace(id); }
         catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
         {
             Report($"Workspace switched, but selection could not be saved: {exception.Message}");
