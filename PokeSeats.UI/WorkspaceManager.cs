@@ -9,16 +9,18 @@ internal sealed class WorkspaceManager : IDisposable
     private readonly PluginCatalog _catalog;
     private readonly AppConfigStore _config;
     private readonly UiScaling _scaling;
+    private readonly IUiTextureService _textures;
     private readonly Dictionary<string, IWorkspace> _instances = new(StringComparer.Ordinal);
     private readonly List<string> _diagnostics = new();
     private WorkspaceContext? _activeContext;
     private bool _disposed;
 
-    public WorkspaceManager(PluginCatalog catalog, AppConfigStore config, UiScaling scaling)
+    public WorkspaceManager(PluginCatalog catalog, AppConfigStore config, UiScaling scaling, IUiTextureService textures)
     {
         _catalog = catalog;
         _config = config;
         _scaling = scaling;
+        _textures = textures;
         string? preferredId = config.WorkspaceId;
         if (preferredId is not null)
         {
@@ -129,7 +131,7 @@ internal sealed class WorkspaceManager : IDisposable
 
     private void ActivateWorkspace(IWorkspace workspace)
     {
-        var context = new WorkspaceContext(_catalog, _catalog.CreateEventScope());
+        var context = new WorkspaceContext(_catalog, _catalog.CreateEventScope(), _textures);
         try
         {
             _scaling.RestoreStyle();
@@ -176,15 +178,18 @@ internal sealed class WorkspaceManager : IDisposable
     {
         private readonly PluginCatalog _catalog;
         private readonly UiEventBus.Scope _events;
+        private readonly IUiTextureService _textures;
 
-        internal WorkspaceContext(PluginCatalog catalog, UiEventBus.Scope events)
+        internal WorkspaceContext(PluginCatalog catalog, UiEventBus.Scope events, IUiTextureService textures)
         {
             _catalog = catalog;
             _events = events;
+            _textures = textures;
         }
 
         public IReadOnlyList<IUiView> Views => _catalog.Views;
         public IReadOnlyList<IUiCommand> Commands => _catalog.Commands;
+        public IUiTextureService Textures => _textures;
         public IUiEventBus Events => _events;
         public void Dispose() => _events.Dispose();
     }

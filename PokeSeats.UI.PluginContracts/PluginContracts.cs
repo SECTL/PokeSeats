@@ -5,7 +5,7 @@ namespace PokeSeats.UI.PluginContracts;
 /// <summary>The in-process UI contract version understood by this assembly.</summary>
 public static class PluginApi
 {
-    public const int Version = 4;
+    public const int Version = 5;
 }
 
 /// <summary>Published to request a graceful shutdown of the host application.</summary>
@@ -31,6 +31,22 @@ public interface IUiEventBus
     IDisposable Subscribe<TMessage>(Action<TMessage> handler) where TMessage : notnull;
     /// <summary>Publish immutable data; a released scope throws ObjectDisposedException.</summary>
     void Publish<TMessage>(TMessage message) where TMessage : notnull;
+}
+
+/// <summary>A decoded image uploaded by the host renderer. Dispose on the UI thread while the host is alive.</summary>
+public interface IUiTexture : IDisposable
+{
+    /// <summary>Renderer-specific value accepted by <c>ImGui.Image</c> and friends.</summary>
+    IntPtr TextureId { get; }
+    int Width { get; }
+    int Height { get; }
+}
+
+/// <summary>Decodes encoded image bytes (PNG, JPEG) into textures owned by the caller.</summary>
+public interface IUiTextureService
+{
+    /// <summary>Returns null when the bytes are not a supported image or the renderer is unavailable.</summary>
+    IUiTexture? Create(ReadOnlySpan<byte> encodedImage);
 }
 
 /// <summary>Registrations belong to this plugin and are committed only after initialization succeeds.</summary>
@@ -61,6 +77,8 @@ public interface IWorkspaceContext
 {
     IReadOnlyList<IUiView> Views { get; }
     IReadOnlyList<IUiCommand> Commands { get; }
+    /// <summary>Decodes embedded images into textures; textures must be disposed before the host renderer shuts down.</summary>
+    IUiTextureService Textures { get; }
     /// <summary>Valid for this activation only; the host releases it after Deactivate, even on failure.</summary>
     IUiEventBus Events { get; }
 }

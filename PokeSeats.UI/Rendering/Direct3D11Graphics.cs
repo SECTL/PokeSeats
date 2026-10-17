@@ -275,6 +275,73 @@ float4 PSMain(PS_INPUT input) : SV_Target
         atlas.ClearTexData();
     }
 
+    internal IntPtr CreateTexture(ReadOnlySpan<byte> rgba, int width, int height)
+    {
+        ThrowIfDisposed();
+        if (width <= 0 || height <= 0)
+            throw new ArgumentOutOfRangeException(nameof(width), "Texture dimensions must be positive.");
+        int required = checked(width * height * 4);
+        if (rgba.Length < required)
+            throw new ArgumentException("RGBA pixel data is shorter than the texture dimensions.", nameof(rgba));
+
+        Texture2DDesc textureDesc = new()
+        {
+            Width = (uint)width,
+            Height = (uint)height,
+            MipLevels = 1,
+            ArraySize = 1,
+            Format = Format.FormatR8G8B8A8Unorm,
+            SampleDesc = new SampleDesc { Count = 1, Quality = 0 },
+            Usage = Usage.Default,
+            BindFlags = (uint)BindFlag.ShaderResource,
+            CPUAccessFlags = 0,
+            MiscFlags = 0
+        };
+
+        fixed (byte* pixels = rgba)
+        {
+            SubresourceData initialData = new()
+            {
+                PSysMem = pixels,
+                SysMemPitch = (uint)width * 4u,
+                SysMemSlicePitch = 0
+            };
+
+            ID3D11Texture2D* texture = null;
+            ID3D11ShaderResourceView* shaderResourceView = null;
+            try
+            {
+                ThrowIfFailed(
+                    _device.CreateTexture2D(&textureDesc, &initialData, ref texture),
+                    "CreateTexture2D(image)");
+                ThrowIfFailed(
+                    _device.CreateShaderResourceView(
+                        (ID3D11Resource*)texture,
+                        (ShaderResourceViewDesc*)null,
+                        ref shaderResourceView),
+                    "CreateShaderResourceView(image)");
+            }
+            catch
+            {
+                Release(ref shaderResourceView);
+                Release(ref texture);
+                throw;
+            }
+
+            // The view keeps the texture alive; the caller only owns the view handle.
+            Release(ref texture);
+            return (IntPtr)shaderResourceView;
+        }
+    }
+
+    internal void DeleteTexture(IntPtr texture)
+    {
+        if (_disposed || texture == IntPtr.Zero)
+            return;
+        ID3D11ShaderResourceView* shaderResourceView = (ID3D11ShaderResourceView*)(void*)texture;
+        Release(ref shaderResourceView);
+    }
+
     public void Dispose()
     {
         if (_disposed)

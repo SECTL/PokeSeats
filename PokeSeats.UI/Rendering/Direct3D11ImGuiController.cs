@@ -157,6 +157,20 @@ internal sealed unsafe class Direct3D11ImGuiController : IUiRenderer
         _graphics.UpdateFontTexture();
     }
 
+    public IntPtr CreateTexture(ReadOnlySpan<byte> rgba, int width, int height)
+    {
+        EnsureContext();
+        return _graphics.CreateTexture(rgba, width, height);
+    }
+
+    public void DeleteTexture(IntPtr texture)
+    {
+        if (_disposed)
+            return;
+        EnsureContext();
+        _graphics.DeleteTexture(texture);
+    }
+
     public void Dispose()
     {
         if (_disposed)

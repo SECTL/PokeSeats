@@ -82,6 +82,50 @@ internal sealed class OpenGlImGuiRenderer : IUiRenderer
         atlas.ClearTexData();
     }
 
+    public unsafe IntPtr CreateTexture(ReadOnlySpan<byte> rgba, int width, int height)
+    {
+        if (width <= 0 || height <= 0)
+            throw new ArgumentOutOfRangeException(nameof(width), "Texture dimensions must be positive.");
+        int required = checked(width * height * 4);
+        if (rgba.Length < required)
+            throw new ArgumentException("RGBA pixel data is shorter than the texture dimensions.", nameof(rgba));
+
+        _gl.GetInteger(GLEnum.TextureBinding2D, out int previousTexture);
+        _gl.GetInteger(GLEnum.UnpackAlignment, out int previousAlignment);
+        uint texture = _gl.GenTexture();
+        try
+        {
+            _gl.BindTexture(TextureTarget.Texture2D, texture);
+            _gl.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Linear);
+            _gl.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
+            _gl.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.ClampToEdge);
+            _gl.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.ClampToEdge);
+            _gl.PixelStore(PixelStoreParameter.UnpackAlignment, 1);
+            fixed (byte* pixels = rgba)
+            {
+                _gl.TexImage2D(TextureTarget.Texture2D, 0, InternalFormat.Rgba,
+                    (uint)width, (uint)height, 0, PixelFormat.Rgba, PixelType.UnsignedByte, pixels);
+            }
+            return (IntPtr)texture;
+        }
+        catch
+        {
+            _gl.DeleteTexture(texture);
+            throw;
+        }
+        finally
+        {
+            _gl.BindTexture(TextureTarget.Texture2D, (uint)previousTexture);
+            _gl.PixelStore(PixelStoreParameter.UnpackAlignment, previousAlignment);
+        }
+    }
+
+    public void DeleteTexture(IntPtr texture)
+    {
+        if (texture != IntPtr.Zero)
+            _gl.DeleteTexture((uint)texture);
+    }
+
     public void Dispose()
     {
         if (_fontTexture != 0)

@@ -10,8 +10,11 @@
   <data name="Exit" xml:space="preserve"><value>退出程序</value></data>
   <data name="PanelsMenu" xml:space="preserve"><value>功能面板</value></data>
   <data name="NoPanels" xml:space="preserve"><value>（当前无可用面板）</value></data>
-  <data name="ProductDescription" xml:space="preserve"><value>PokeSeats 戳座 - 智能教室排座系统</value></data>
+  <data name="ProductName" xml:space="preserve"><value>PokeSeats 戳座</value></data>
   <data name="VersionCopyright" xml:space="preserve"><value>版本 1.0 · Copyright (c) 2025-2026 SECTL Studio &amp; chenjintang-shrimp</value></data>
+  <data name="MadeBy" xml:space="preserve"><value>Made by</value></data>
+  <data name="SupportsThanks" xml:space="preserve"><value>感谢</value></data>
+  <data name="Supporter" xml:space="preserve"><value>SECTL 思拓创联的大力支持</value></data>
   <data name="LicenseNotice" xml:space="preserve"><value>本项目以 GPL-3.0-or-later 发布，源码见项目仓库。</value></data>
   <data name="FontDescription" xml:space="preserve"><value>界面字体：HarmonyOS Sans SC</value></data>
   <data name="FontLicenseNotice" xml:space="preserve"><value>字体版权所有 2021 Huawei Device Co., Ltd. 根据字体许可协议分发。</value></data>

@@ -15,6 +15,11 @@
     </ItemGroup>
 
     <ItemGroup>
+      <EmbeddedResource Include="Assets\chenjintang-shrimp.png" LogicalName="PokeSeats.UI.DefaultWorkspace.Assets.chenjintang-shrimp.png" />
+      <EmbeddedResource Include="Assets\sectl.jpg" LogicalName="PokeSeats.UI.DefaultWorkspace.Assets.sectl.jpg" />
+    </ItemGroup>
+
+    <ItemGroup>
       <EmbeddedResource Update="WorkspaceStrings.resx">
         <StronglyTypedLanguage>CSharp</StronglyTypedLanguage>
         <StronglyTypedClassName>WorkspaceStrings</StronglyTypedClassName>

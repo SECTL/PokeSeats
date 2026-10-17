@@ -6,10 +6,18 @@ namespace PokeSeats.UI.DefaultWorkspace;
 
 public class DefaultWorkspace : IWorkspace
 {
+    private const string AuthorGitHub = "chenjintang-shrimp";
+    private const string AuthorAvatarResource = "PokeSeats.UI.DefaultWorkspace.Assets.chenjintang-shrimp.png";
+    private const string SectIconResource = "PokeSeats.UI.DefaultWorkspace.Assets.sectl.jpg";
+
     public UiDesignTokens DesignTokens { get; } = UiDesignTokens.Light;
 
     internal bool               IsDisposed { get; private set; }
     private IWorkspaceContext? context;
+    private IUiTextureService? _textures;
+    private IUiTexture? _authorAvatar;
+    private IUiTexture? _sectlIcon;
+    private bool _aboutTexturesLoaded;
     private bool openAboutPopup;
     private IDisposable? _viewOpenSubscription;
     private readonly Dictionary<string, bool> _viewVisibility = new(StringComparer.Ordinal);
@@ -23,6 +31,7 @@ public class DefaultWorkspace : IWorkspace
             throw new ObjectDisposedException(nameof(DefaultWorkspace));
 
         this.context = _context ?? throw new ArgumentNullException(nameof(_context));
+        _textures = _context.Textures;
         _viewOpenSubscription = _context.Events.Subscribe<UiViewOpenRequested>(OnViewOpenRequested);
         
     }
@@ -220,9 +229,18 @@ public class DefaultWorkspace : IWorkspace
         bool open = true;
         if (ImGui.BeginPopupModal(popupId, ref open, ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoSavedSettings))
         {
-            ImGui.Text(WorkspaceStrings.ProductDescription);
+            EnsureAboutTextures();
+
+            ImGui.SetWindowFontScale(1.8f);
+            ImGui.TextUnformatted(WorkspaceStrings.ProductName);
+            ImGui.SetWindowFontScale(1f);
+
             ImGui.TextDisabled(WorkspaceStrings.VersionCopyright);
             ImGui.TextDisabled(WorkspaceStrings.LicenseNotice);
+            ImGui.Spacing();
+            DrawCreditLine(WorkspaceStrings.MadeBy, _authorAvatar, AuthorGitHub);
+            DrawCreditLine(WorkspaceStrings.SupportsThanks, _sectlIcon, WorkspaceStrings.Supporter);
+            ImGui.Spacing();
             ImGui.Separator();
             ImGui.Text(WorkspaceStrings.FontDescription);
             ImGui.TextDisabled(WorkspaceStrings.FontLicenseNotice);
@@ -232,6 +250,43 @@ public class DefaultWorkspace : IWorkspace
             
             ImGui.EndPopup();
         }
+    }
+
+    private static void DrawCreditLine(string prefix, IUiTexture? texture, string suffix)
+    {
+        ImGui.TextUnformatted(prefix);
+        ImGui.SameLine(0f, 6f);
+        if (texture is not null)
+        {
+            float size = ImGui.GetTextLineHeight() * 1.3f;
+            ImGui.Image(texture.TextureId, new Vector2(size, size));
+            ImGui.SameLine(0f, 6f);
+        }
+        ImGui.TextUnformatted(suffix);
+    }
+
+    private void EnsureAboutTextures()
+    {
+        if (_aboutTexturesLoaded || _textures is null)
+            return;
+
+        _aboutTexturesLoaded = true;
+        _authorAvatar = LoadTexture(AuthorAvatarResource);
+        _sectlIcon = LoadTexture(SectIconResource);
+    }
+
+    private IUiTexture? LoadTexture(string resourceName)
+    {
+        using Stream? stream = typeof(DefaultWorkspace).Assembly.GetManifestResourceStream(resourceName);
+        if (stream is null)
+        {
+            Console.Error.WriteLine($"Embedded resource '{resourceName}' was not found.");
+            return null;
+        }
+
+        using var buffer = new MemoryStream();
+        stream.CopyTo(buffer);
+        return _textures!.Create(buffer.ToArray());
     }
 
     public void Deactivate()
@@ -248,6 +303,11 @@ public class DefaultWorkspace : IWorkspace
     {
         _viewOpenSubscription?.Dispose();
         _viewOpenSubscription = null;
+        _authorAvatar?.Dispose();
+        _authorAvatar = null;
+        _sectlIcon?.Dispose();
+        _sectlIcon = null;
+        _textures = null;
         context = null;
         // _panelVisibility.Clear();
         _viewVisibility.Clear();

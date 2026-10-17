@@ -1,6 +1,6 @@
 {
   "id": "pokeseats.default",
-  "apiVersion": 4,
+  "apiVersion": 5,
   "assembly": "PokeSeats.UI.DefaultWorkspace.dll",
   "entryPoint": "PokeSeats.UI.DefaultWorkspace.DefaultUIPlugin",
   "dependencies": [],

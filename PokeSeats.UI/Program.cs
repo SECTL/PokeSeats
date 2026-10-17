@@ -59,9 +59,10 @@ window.Load += () =>
         ? new Direct3D11ImGuiController(window, input, configureIo)
         : new OpenGlImGuiRenderer(window, input, configureIo);
     fontAtlasScaling = new FontAtlasScaling(renderer.UpdateFontTexture);
+    var textures = new UiTextureService(renderer);
 
     scaling.CaptureStyle();
-    workspaces = new WorkspaceManager(catalog, config, scaling);
+    workspaces = new WorkspaceManager(catalog, config, scaling, textures);
     selector = new WorkspaceSelector(workspaces);
     
     catalog.CreateEventScope().Subscribe<ApplicationExitRequested>(_ => window.Close());
