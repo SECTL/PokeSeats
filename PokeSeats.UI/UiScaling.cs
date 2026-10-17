@@ -13,10 +13,10 @@ internal sealed class UiScaling
     private int _shortcutWasDown;
     private double _showScaleUntil;
 
-    internal float ScaleForViewport(Vector2 viewportSize)
-        => Math.Clamp(UiScale.ForViewport(viewportSize) + _adjustmentSteps * 0.05f, 0.5f, 3f);
+    internal float ScaleForDisplay(float displayScale)
+        => Math.Clamp(UiScale.ForDisplayScale(displayScale) + _adjustmentSteps * 0.05f, 0.5f, 3f);
 
-    internal void HandleShortcut(IInputContext input, Vector2 viewportSize)
+    internal void HandleShortcut(IInputContext input, float displayScale)
     {
         int down = 0;
         foreach (IKeyboard keyboard in input.Keyboards)
@@ -35,7 +35,7 @@ internal sealed class UiScaling
         else if ((pressed & 3) is 1 or 2)
         {
             int direction = (pressed & 1) != 0 ? 1 : -1;
-            float scale = ScaleForViewport(viewportSize);
+            float scale = ScaleForDisplay(displayScale);
             if (direction > 0 ? scale >= 3f : scale <= 0.5f)
                 return;
             _adjustmentSteps += direction;
@@ -72,9 +72,9 @@ internal sealed class UiScaling
         _appliedScale = 0f;
     }
 
-    internal unsafe void Apply(Vector2 viewportSize)
+    internal unsafe void Apply(float displayScale)
     {
-        float scale = ScaleForViewport(viewportSize);
+        float scale = ScaleForDisplay(displayScale);
         if (scale == _appliedScale)
             return;
 

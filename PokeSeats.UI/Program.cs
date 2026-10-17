@@ -34,6 +34,27 @@ var scaling = new UiScaling();
 
 window.Load += () =>
 {
+    float initialScale = DisplayScale.ForWindow(window);
+    if (initialScale > 1f)
+    {
+        float width = UiScale.ReferenceWidth * initialScale;
+        float height = UiScale.ReferenceHeight * initialScale;
+        if (window.Monitor is { } monitor)
+        {
+            width = MathF.Min(width, monitor.Bounds.Size.X * 0.9f);
+            height = MathF.Min(height, monitor.Bounds.Size.Y * 0.9f);
+        }
+
+        var initialSize = new Vector2D<int>(
+            Math.Max(320, (int)MathF.Round(width)),
+            Math.Max(240, (int)MathF.Round(height)));
+        if (initialSize != window.Size)
+        {
+            window.Size = initialSize;
+            window.Center(window.Monitor);
+        }
+    }
+
     input = window.CreateInput();
 
     string applicationDirectory = AppContext.BaseDirectory;
@@ -86,10 +107,10 @@ window.Render += delta =>
     }
 
     catalog!.DrainPendingEvents();
-    var viewportSize = new System.Numerics.Vector2(window.Size.X, window.Size.Y);
-    scaling.HandleShortcut(input!, viewportSize);
+    float displayScale = DisplayScale.ForWindow(window);
+    scaling.HandleShortcut(input!, displayScale);
 
-    scaling.Apply(viewportSize);
+    scaling.Apply(displayScale);
     float pixelDensity = MathF.Max(
         window.FramebufferSize.X / (float)window.Size.X,
         window.FramebufferSize.Y / (float)window.Size.Y);
