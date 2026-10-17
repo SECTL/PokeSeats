@@ -118,7 +118,7 @@ dotnet publish PokeSeats.UI -c Release
 ```text
 PokeSeats.IR              规则、人员、网格的数据结构和基础类型
 PokeSeats.Core            预检查、图距离分析、Z3 / CP-SAT 求解
-PokeSeats.UI.PluginContracts  插件接口和共享的界面缩放
+PokeSeats.UI.PluginContracts  插件接口、共享 design tokens 和界面缩放
 PokeSeats.UI              桌面宿主：窗口、渲染、插件发现、工作区切换
 PokeSeats.UI.DefaultWorkspace 默认工作区（菜单栏和面板布局）
 PokeSeats.UI.DefaultPayload   业务面板：名单、布局、规则、排座结果

@@ -31,7 +31,7 @@ plugins/
 ```json
 {
   "id": "example",
-  "apiVersion": 3,
+  "apiVersion": 4,
   "assembly": "Example.Plugin.dll",
   "entryPoint": "Example.Plugin.Plugin",
   "dependencies": [],
@@ -77,6 +77,8 @@ public sealed class Plugin : IUiPlugin
 
 internal sealed class ExampleWorkspace : IWorkspace
 {
+    public UiDesignTokens DesignTokens { get; } = UiDesignTokens.Light;
+
     public void Activate(IWorkspaceContext context) { }
 
     public void Draw(float deltaSeconds)
@@ -163,6 +165,56 @@ context.Events.Subscribe<UiViewOpenRequested>(request =>
 - 自动布局的尺寸（比如 `BeginChild` 传 0 表示占满剩余空间）不需要换算。
 
 字体不需要插件操心。宿主按 `字号 × 窗口比例 × framebuffer 像素密度` 从原始轮廓重新栅格化，所以 18 px 的字在 1.5 倍窗口下是 27 px 的清晰字形，不是拉伸出来的。图集和字体纹理都归宿主所有，插件不要碰。
+
+## 工作区 design tokens
+
+工作区通过 `IWorkspace.DesignTokens` 提供不可变的 `UiDesignTokens`。宿主在每次 `Activate` 前把 tokens 应用到普通 ImGui 控件的颜色、间距、圆角和边框，再交给已有的缩放逻辑处理。工作区仍可在 `Activate` 中补充 ImGui 样式。字体和字号仍由宿主管理。
+
+内置标准工作区使用 `Light`，示例插件的测试工作区使用 `Dark`；两者共用同一组业务面板，可以用于检查插件在不同主题下的表现。测试插件不随程序发布。
+
+从 `UiDesignTokens.Light` 或 `UiDesignTokens.Dark` 开始，用 `with` 定制；为每个工作区保存同一个实例，不要在属性 getter 或绘制循环中创建新对象：
+
+```csharp
+public UiDesignTokens DesignTokens { get; } = UiDesignTokens.Dark with
+{
+    Colors = UiDesignTokens.Dark.Colors with
+    {
+        Accent = new Vector4(.45f, .73f, 1f, 1f)
+    },
+    Metrics = UiDesignTokens.Dark.Metrics with { ControlRounding = 4f }
+};
+```
+
+工作区调用面板时显式传入自己的 tokens：
+
+```csharp
+if (ImGui.Begin(title, ref open))
+    view.DrawContent(deltaSeconds, DesignTokens);
+ImGui.End();
+```
+
+面板实现 `DrawContent(float deltaSeconds, UiDesignTokens designTokens)`。普通控件自动继承样式，自绘内容从参数读取颜色和尺寸；不要把旧工作区的 tokens 缓存到后续绘制中：
+
+```csharp
+public void DrawContent(float deltaSeconds, UiDesignTokens designTokens)
+{
+    Vector2 min = ImGui.GetCursorScreenPos();
+    Vector2 size = new(UiScale.Pixels(160), UiScale.Pixels(48));
+    ImGui.InvisibleButton("##preview", size);
+    ImDrawListPtr draw = ImGui.GetWindowDrawList();
+    draw.AddRectFilled(min, min + size,
+        ImGui.ColorConvertFloat4ToU32(designTokens.Colors.AccentSurface),
+        UiScale.Pixels(designTokens.Metrics.ControlRounding));
+    draw.AddText(min + new Vector2(UiScale.Pixels(designTokens.Metrics.SpaceMedium)),
+        ImGui.ColorConvertFloat4ToU32(designTokens.Colors.Text), "预览");
+}
+```
+
+颜色是归一化 RGBA `Vector4`。`Background`、`Surface`、`Canvas` 是背景层级，`Text`、`TextMuted` 用于这些背景和语义底色；`Accent`、`Success`、`Warning`、`Danger` 是强调／状态前景色，对应的 `*Surface` 是可承载文字的底色。`SecondarySurface` 提供第二类底色，`Border` 用于分隔和网格，`Selection` 是透明选区覆盖色，`SelectionBorder` 是不透明选区边线；`DangerHovered` 用于冲突项悬停底色。定制配色时应一起调整前景和底色，保持可读性。
+
+`Metrics` 包含 `SpaceSmall`、`SpaceMedium`、`SpaceLarge`、`WindowRounding`、`ControlRounding` 和 `BorderWidth`，全部是基准像素。自绘时使用 `UiScale.Pixels` 换算一次；ImGui 样式由宿主统一缩放。控件专用尺寸仍由面板决定。默认业务面板已使用这些 tokens 绘制教室网格、规则预览、冲突高亮和座位表。
+
+切换工作区会在下一次绘制时传入新工作区的 tokens；激活失败回退时也会重新应用原工作区的样式。当前契约版本是 **4**，旧插件需要补充 `DesignTokens` 属性、更新 `DrawContent` 签名、用新版契约重新编译，并将清单的 `apiVersion` 改成 `4`。业务面板不需要引用具体工作区插件，也不需要声明对它的依赖。
 
 ## 插件间消息
 

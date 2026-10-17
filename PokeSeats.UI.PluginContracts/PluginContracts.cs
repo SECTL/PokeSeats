@@ -5,7 +5,7 @@ namespace PokeSeats.UI.PluginContracts;
 /// <summary>The in-process UI contract version understood by this assembly.</summary>
 public static class PluginApi
 {
-    public const int Version = 3;
+    public const int Version = 4;
 }
 
 /// <summary>Published to request a graceful shutdown of the host application.</summary>
@@ -49,6 +49,8 @@ public interface IPluginContext
 /// <summary>Owns the entire application content area, including layout, window chrome, and navigation.</summary>
 public interface IWorkspace : IDisposable
 {
+    /// <summary>Theme for this activation. The host applies it before Activate; views receive it when drawn.</summary>
+    UiDesignTokens DesignTokens { get; }
     void Activate(IWorkspaceContext _context);
     void Draw(float deltaSeconds);
     void Deactivate();
@@ -84,8 +86,8 @@ public interface IUiView
     /// </summary>
     Vector2? MinimumSize => null;
 
-    /// <summary>Draw content between the workspace-owned Begin and End calls.</summary>
-    void DrawContent(float deltaSeconds);
+    /// <summary>Draw content using the active workspace's tokens; do not cache them across draws.</summary>
+    void DrawContent(float deltaSeconds, UiDesignTokens designTokens);
 }
 
 public interface IUiCommand

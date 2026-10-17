@@ -38,6 +38,7 @@ internal sealed class RuleEditorView : IUiView
     private int checkedLayout = -1;
     private int checkedRoster = -1;
     private bool checksDirty = true;
+    private UiDesignTokens _designTokens = UiDesignTokens.Light;
 
     public RuleEditorView(StudentRoster roster, LayoutDocument layout, RuleDocument document, string storagePath, string? loadMessage, SeatingSession seating)
     {
@@ -51,8 +52,9 @@ internal sealed class RuleEditorView : IUiView
     public string DisplayName => "规则编辑";
     public Vector2? MinimumSize => new(920, 620);
 
-    public void DrawContent(float deltaSeconds)
+    public void DrawContent(float deltaSeconds, UiDesignTokens designTokens)
     {
+        _designTokens = designTokens;
         seating.Update();
         if (ImGui.Button("新建规则")) NewDraft();
         ImGui.SameLine();
@@ -225,7 +227,7 @@ internal sealed class RuleEditorView : IUiView
         }
         ImDrawListPtr draw = ImGui.GetWindowDrawList();
         draw.PushClipRect(origin, origin + size, true);
-        draw.AddRectFilled(origin, origin + size, Color(.12f, .14f, .17f));
+        draw.AddRectFilled(origin, origin + size, Color(_designTokens.Colors.Canvas));
         int firstCol = (int)MathF.Floor((origin.X - center.X) / cell - .5f);
         int lastCol = (int)MathF.Ceiling((origin.X + size.X - center.X) / cell + .5f);
         int firstRow = (int)MathF.Floor((origin.Y - center.Y) / cell - .5f);
@@ -235,16 +237,16 @@ internal sealed class RuleEditorView : IUiView
             {
                 Vector2 min = center + new Vector2(col - .5f, row - .5f) * cell;
                 if (state.MatchesOffset(row, col, hoveredRelation))
-                    draw.AddRectFilled(min, min + new Vector2(cell), Color(.15f, .43f, .27f));
-                draw.AddRect(min, min + new Vector2(cell), Color(.34f, .39f, .44f));
+                    draw.AddRectFilled(min, min + new Vector2(cell), Color(_designTokens.Colors.SuccessSurface));
+                draw.AddRect(min, min + new Vector2(cell), Color(_designTokens.Colors.Border), 0, ImDrawFlags.None, UiScale.Pixels(_designTokens.Metrics.BorderWidth));
                 if (row == 0 && col == 0)
                 {
-                    draw.AddRectFilled(min, min + new Vector2(cell), Color(.75f, .48f, .12f));
+                    draw.AddRectFilled(min, min + new Vector2(cell), Color(_designTokens.Colors.WarningSurface));
                     DrawCentered(draw, min, cell, "A");
                 }
                 if (row == state.Dy && col == state.Dx && (row != 0 || col != 0))
                 {
-                    draw.AddRect(min + Vector2.One, min + new Vector2(cell - 1), Color(1, .85f, .25f), 0, ImDrawFlags.None, UiScale.Pixels(2));
+                    draw.AddRect(min + Vector2.One, min + new Vector2(cell - 1), Color(_designTokens.Colors.Warning), 0, ImDrawFlags.None, UiScale.Pixels(_designTokens.Metrics.BorderWidth * 2f));
                     DrawCentered(draw, min, cell, "B");
                 }
             }
@@ -279,7 +281,7 @@ internal sealed class RuleEditorView : IUiView
         { ImGui.EndChild(); return; }
         Vector2 available = ImGui.GetContentRegionAvail();
         Vector2 labelSize = ImGui.CalcTextSize("讲");
-        float minimumCell = Math.Max(labelSize.X, labelSize.Y) + UiScale.Pixels(8);
+        float minimumCell = Math.Max(labelSize.X, labelSize.Y) + UiScale.Pixels(_designTokens.Metrics.SpaceMedium);
         float cell = Math.Max(minimumCell, Math.Max((available.X - 1) / layout.Cols, (available.Y - 1) / layout.Rows)) * .375f;
         Vector2 gridSize = new Vector2(layout.Cols, layout.Rows) * cell;
         Vector2 offset = Vector2.Max(Vector2.Zero, (available - gridSize) / 2);
@@ -314,20 +316,20 @@ internal sealed class RuleEditorView : IUiView
                 CellType type = layout.TypeAt(row, col);
                 uint color = type switch
                 {
-                    CellType.Desk => Color(.18f, .24f, .31f), CellType.Podium => Color(.46f, .23f, .48f),
-                    CellType.NarrowAisle => Color(.45f, .34f, .15f), CellType.Aisle => Color(.35f, .37f, .40f),
-                    _ => Color(.12f, .14f, .17f)
+                    CellType.Desk => Color(_designTokens.Colors.AccentSurface), CellType.Podium => Color(_designTokens.Colors.SecondarySurface),
+                    CellType.NarrowAisle => Color(_designTokens.Colors.WarningSurface), CellType.Aisle => Color(_designTokens.Colors.Surface),
+                    _ => Color(_designTokens.Colors.Canvas)
                 };
-                if (state.Allowed.Contains(p)) color = Color(.16f, .52f, .30f);
+                if (state.Allowed.Contains(p)) color = Color(_designTokens.Colors.SuccessSurface);
                 bool selected = state.Category == 3 ? (state.AxisType == AxisType.Row ? row : col) == state.AxisIndex
                     : state.Category == 1 && state.First is { } start && state.Last is { } end && row >= Math.Min(start.Row, end.Row)
                         && row <= Math.Max(start.Row, end.Row) && col >= Math.Min(start.Col, end.Col) && col <= Math.Max(start.Col, end.Col);
                 draw.AddRectFilled(min, min + new Vector2(cell), color);
-                draw.AddRect(min, min + new Vector2(cell), Color(.5f, .54f, .58f));
-                if (selected) draw.AddRect(min + Vector2.One, min + new Vector2(cell - 1), Color(1, .8f, .2f));
+                draw.AddRect(min, min + new Vector2(cell), Color(_designTokens.Colors.Border), 0, ImDrawFlags.None, UiScale.Pixels(_designTokens.Metrics.BorderWidth));
+                if (selected) draw.AddRect(min + Vector2.One, min + new Vector2(cell - 1), Color(_designTokens.Colors.SelectionBorder), 0, ImDrawFlags.None, UiScale.Pixels(_designTokens.Metrics.BorderWidth));
                 if (state.Category == 2 && state.PreviewAnchor == p)
                 {
-                    draw.AddRectFilled(min, min + new Vector2(cell), Color(.75f, .48f, .12f));
+                    draw.AddRectFilled(min, min + new Vector2(cell), Color(_designTokens.Colors.WarningSurface));
                     DrawCentered(draw, min, cell, "A");
                 }
                 else if (type == CellType.Podium) DrawCentered(draw, min, cell, "讲");
@@ -348,9 +350,9 @@ internal sealed class RuleEditorView : IUiView
                 if (conflicting)
                 {
                     text = $"[冲突规则] {text}";
-                    ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(.80f, .08f, .08f, 1));
-                    ImGui.PushStyleColor(ImGuiCol.Header, new Vector4(1, .74f, .74f, 1));
-                    ImGui.PushStyleColor(ImGuiCol.HeaderHovered, new Vector4(1, .82f, .82f, 1));
+                    ImGui.PushStyleColor(ImGuiCol.Text, _designTokens.Colors.Danger);
+                    ImGui.PushStyleColor(ImGuiCol.Header, _designTokens.Colors.DangerSurface);
+                    ImGui.PushStyleColor(ImGuiCol.HeaderHovered, _designTokens.Colors.DangerHovered);
                 }
                 if (ImGui.Selectable(text, state.Editing == rule.Id))
                 {
@@ -470,12 +472,12 @@ internal sealed class RuleEditorView : IUiView
         state.PreviewCenter = null; regionDragging = relationDragging = false; checksDirty = true;
     }
 
-    private static uint Color(float r, float g, float b) => ImGui.ColorConvertFloat4ToU32(new Vector4(r, g, b, 1));
-    private static void DrawCentered(ImDrawListPtr draw, Vector2 min, float cell, string text)
+    private static uint Color(Vector4 color) => ImGui.ColorConvertFloat4ToU32(color);
+    private void DrawCentered(ImDrawListPtr draw, Vector2 min, float cell, string text)
     {
         Vector2 size = ImGui.CalcTextSize(text);
-        float scale = Math.Min(1, Math.Max(1, cell - UiScale.Pixels(4)) / Math.Max(size.X, size.Y));
+        float scale = Math.Min(1, Math.Max(1, cell - UiScale.Pixels(_designTokens.Metrics.SpaceSmall)) / Math.Max(size.X, size.Y));
         draw.AddText(ImGui.GetFont(), ImGui.GetFontSize() * scale,
-            min + (new Vector2(cell) - size * scale) / 2, Color(1, 1, 1), text);
+            min + (new Vector2(cell) - size * scale) / 2, Color(_designTokens.Colors.Text), text);
     }
 }

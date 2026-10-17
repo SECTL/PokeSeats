@@ -133,6 +133,7 @@ internal sealed class WorkspaceManager : IDisposable
         try
         {
             _scaling.RestoreStyle();
+            UiTheme.Apply(workspace.DesignTokens);
             workspace.Activate(context);
             _scaling.CaptureStyle();
             _activeContext = context;

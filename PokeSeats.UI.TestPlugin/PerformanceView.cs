@@ -10,7 +10,7 @@ internal sealed class PerformancePanel : IUiView
 
     public string DisplayName => "性能";
 
-    public void DrawContent(float deltaSeconds)
+    public void DrawContent(float deltaSeconds, UiDesignTokens designTokens)
     {
         ImGui.Text($"帧时间：{deltaSeconds * 1000.0f:F1} ms");
 

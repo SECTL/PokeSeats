@@ -11,6 +11,8 @@ namespace PokeSeats.UI.TestPlugin;
 /// </summary>
 internal sealed class TestWorkspace : IWorkspace
 {
+    public UiDesignTokens DesignTokens { get; } = UiDesignTokens.Dark;
+
     private readonly Dictionary<string, bool> _panelVisibility = new(StringComparer.Ordinal);
     private readonly HashSet<string> _pendingFocus = new(StringComparer.Ordinal);
     private IWorkspaceContext? _context;
@@ -77,7 +79,7 @@ internal sealed class TestWorkspace : IWorkspace
         bool open = true;
         string title = $"{view.DisplayName}###{view.Id}";
         if (ImGui.Begin(title, ref open))
-            view.DrawContent(deltaSeconds);
+            view.DrawContent(deltaSeconds, DesignTokens);
         ImGui.End();
 
         if (!open)

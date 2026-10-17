@@ -1,6 +1,6 @@
 {
   "id": "pokeseats.test",
-  "apiVersion": 3,
+  "apiVersion": 4,
   "assembly": "PokeSeats.UI.TestPlugin.dll",
   "entryPoint": "PokeSeats.UI.TestPlugin.TestPlugin",
   "dependencies": [],

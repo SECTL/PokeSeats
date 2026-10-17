@@ -6,6 +6,8 @@ namespace PokeSeats.UI.DefaultWorkspace;
 
 public class DefaultWorkspace : IWorkspace
 {
+    public UiDesignTokens DesignTokens { get; } = UiDesignTokens.Light;
+
     internal bool               IsDisposed { get; private set; }
     private IWorkspaceContext? context;
     private bool openAboutPopup;
@@ -23,12 +25,6 @@ public class DefaultWorkspace : IWorkspace
         this.context = _context ?? throw new ArgumentNullException(nameof(_context));
         _viewOpenSubscription = _context.Events.Subscribe<UiViewOpenRequested>(OnViewOpenRequested);
         
-        ImGui.StyleColorsLight();
-        ImGuiStylePtr style = ImGui.GetStyle();
-        style.WindowRounding = 8.0f;
-        style.FrameRounding = 6.0f;
-        style.PopupRounding = 6.0f;
-        style.TabRounding = 6.0f;
     }
 
     private bool IsViewVisible(IUiView view)
@@ -55,7 +51,7 @@ public class DefaultWorkspace : IWorkspace
     }
     private void DrawMainMenuBar(IReadOnlyList<IUiCommand> uiCommands, IReadOnlyList<IUiView> uiViews)
     {
-        ImGui.PushStyleColor(ImGuiCol.MenuBarBg, new Vector4(1f, 1f, 1f, 0.6f)); // 半透明白色
+        ImGui.PushStyleColor(ImGuiCol.MenuBarBg, DesignTokens.Colors.Surface);
         if (!ImGui.BeginMainMenuBar())
         {
             ImGui.PopStyleColor();
@@ -142,7 +138,7 @@ public class DefaultWorkspace : IWorkspace
             (ImGui.GetWindowPos() - viewportOrigin) / scale,
             ImGui.GetWindowSize() / scale, scale, ImGui.IsWindowDocked());
         if (visible)
-            view.DrawContent(deltaSeconds);
+            view.DrawContent(deltaSeconds, DesignTokens);
         ImGui.End();
 
         if (!open)
@@ -153,7 +149,7 @@ public class DefaultWorkspace : IWorkspace
     {
         ImGuiViewportPtr viewport = ImGui.GetMainViewport();
         float scale = UiScale.Current;
-        float margin = 16f * scale;
+        float margin = UiScale.Pixels(DesignTokens.Metrics.SpaceLarge);
         Vector2 offset = new(margin, 40f * scale);
         float rowHeight = 0f;
         foreach (IUiView view in context!.Views)
@@ -190,7 +186,7 @@ public class DefaultWorkspace : IWorkspace
         ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, Vector2.Zero);
         ImGui.PushStyleVar(ImGuiStyleVar.WindowRounding, 0f);
         ImGui.PushStyleVar(ImGuiStyleVar.WindowBorderSize, 0f);
-        ImGui.PushStyleColor(ImGuiCol.WindowBg, new Vector4(0.9f, 0.9f, 0.9f, 1f)); // 浅灰色背景
+        ImGui.PushStyleColor(ImGuiCol.WindowBg, DesignTokens.Colors.Background);
         bool visible = ImGui.Begin("###pokeseats.defaultworkspace.root", flags);
         ImGui.PopStyleColor();
         ImGui.PopStyleVar(3);

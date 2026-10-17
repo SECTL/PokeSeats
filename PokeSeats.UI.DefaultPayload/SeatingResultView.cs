@@ -12,6 +12,7 @@ internal sealed class SeatingResultView : IUiView
     public const string ViewId = "pokeseats.defaultpayload.seating-result";
     private readonly SeatingSession session;
     private readonly Dictionary<GridPos, Person> occupants = new();
+    private UiDesignTokens _designTokens = UiDesignTokens.Light;
     private int displayedRun = -1;
     private float elapsed;
 
@@ -21,8 +22,9 @@ internal sealed class SeatingResultView : IUiView
     public bool InitiallyVisible => false;
     public Vector2? MinimumSize => new(800, 560);
 
-    public void DrawContent(float deltaSeconds)
+    public void DrawContent(float deltaSeconds, UiDesignTokens designTokens)
     {
+        _designTokens = designTokens;
         session.Update();
         if (displayedRun != session.RunNumber)
         {
@@ -83,7 +85,7 @@ internal sealed class SeatingResultView : IUiView
             nameSize = Vector2.Max(nameSize, ImGui.CalcTextSize(person.Name));
         Vector2 available = ImGui.GetContentRegionAvail();
         float rowHeader = Math.Max(UiScale.Pixels(52), ImGui.CalcTextSize($"第{layout.Rows}排").X + UiScale.Pixels(12));
-        float columnHeader = ImGui.GetTextLineHeightWithSpacing() + UiScale.Pixels(8);
+        float columnHeader = ImGui.GetTextLineHeightWithSpacing() + UiScale.Pixels(_designTokens.Metrics.SpaceMedium);
         float width = Math.Max(nameSize.X + UiScale.Pixels(24), Math.Max(UiScale.Pixels(80), (available.X - rowHeader - 1) / layout.Cols));
         float height = Math.Max(UiScale.Pixels(60), nameSize.Y + ImGui.GetTextLineHeightWithSpacing() + UiScale.Pixels(20));
         Vector2 cell = new(width, height);
@@ -92,10 +94,10 @@ internal sealed class SeatingResultView : IUiView
         ImGui.InvisibleButton("##seating-chart-surface", new Vector2(rowHeader + width * layout.Cols, columnHeader + height * layout.Rows));
         ImDrawListPtr draw = ImGui.GetWindowDrawList();
         for (int col = 0; col < layout.Cols; col++)
-            CenterText(draw, origin + new Vector2(rowHeader + col * width, 0), new Vector2(width, columnHeader), $"第{col + 1}列", TextColor);
+            CenterText(draw, origin + new Vector2(rowHeader + col * width, 0), new Vector2(width, columnHeader), $"第{col + 1}列", Color(_designTokens.Colors.Text));
         for (int row = 0; row < layout.Rows; row++)
         {
-            CenterText(draw, origin + new Vector2(0, columnHeader + row * height), new Vector2(rowHeader, height), $"第{row + 1}排", TextColor);
+            CenterText(draw, origin + new Vector2(0, columnHeader + row * height), new Vector2(rowHeader, height), $"第{row + 1}排", Color(_designTokens.Colors.Text));
             for (int col = 0; col < layout.Cols; col++)
             {
                 GridPos seat = new(row, col);
@@ -104,23 +106,23 @@ internal sealed class SeatingResultView : IUiView
                 bool occupied = occupants.TryGetValue(seat, out Person? person);
                 uint background = type switch
                 {
-                    CellType.Desk => occupied ? Color(.82f, .92f, .85f) : Color(.93f, .96f, .98f),
-                    CellType.Podium => Color(.88f, .83f, .94f),
-                    CellType.Aisle => Color(.82f, .84f, .86f),
-                    CellType.NarrowAisle => Color(.95f, .89f, .73f),
-                    _ => Color(.94f, .94f, .94f)
+                    CellType.Desk => Color(occupied ? _designTokens.Colors.SuccessSurface : _designTokens.Colors.AccentSurface),
+                    CellType.Podium => Color(_designTokens.Colors.SecondarySurface),
+                    CellType.Aisle => Color(_designTokens.Colors.Surface),
+                    CellType.NarrowAisle => Color(_designTokens.Colors.WarningSurface),
+                    _ => Color(_designTokens.Colors.Canvas)
                 };
                 draw.AddRectFilled(min, min + cell, background);
-                draw.AddRect(min, min + cell, Color(.56f, .60f, .64f));
+                draw.AddRect(min, min + cell, Color(_designTokens.Colors.Border), 0, ImDrawFlags.None, UiScale.Pixels(_designTokens.Metrics.BorderWidth));
                 if (occupied)
                 {
-                    CenterText(draw, min, new Vector2(width, height * .6f), person!.Name, TextColor);
-                    CenterText(draw, min + new Vector2(0, height * .6f), new Vector2(width, height * .4f), $"第 {row + 1} 排 第 {col + 1} 列", Color(.35f, .4f, .44f));
+                    CenterText(draw, min, new Vector2(width, height * .6f), person!.Name, Color(_designTokens.Colors.Text));
+                    CenterText(draw, min + new Vector2(0, height * .6f), new Vector2(width, height * .4f), $"第 {row + 1} 排 第 {col + 1} 列", Color(_designTokens.Colors.TextMuted));
                 }
                 else
                 {
                     string label = type switch { CellType.Desk => "（空座）", CellType.Podium => "【讲台】", CellType.Aisle => "主走道", CellType.NarrowAisle => "行间走道", _ => "" };
-                    CenterText(draw, min, cell, label, TextColor);
+                    CenterText(draw, min, cell, label, Color(_designTokens.Colors.Text));
                 }
             }
         }
@@ -138,8 +140,7 @@ internal sealed class SeatingResultView : IUiView
         PreCheckError.AlwaysTrue => "该规则在当前教室布局下已自然满足。",
         _ => error.ToString()
     };
-    private static uint TextColor => Color(.12f, .16f, .20f);
-    private static uint Color(float r, float g, float b) => ImGui.ColorConvertFloat4ToU32(new Vector4(r, g, b, 1));
+    private static uint Color(Vector4 color) => ImGui.ColorConvertFloat4ToU32(color);
     private static void CenterText(ImDrawListPtr draw, Vector2 min, Vector2 size, string text, uint color)
         => draw.AddText(min + (size - ImGui.CalcTextSize(text)) / 2, color, text);
 }

@@ -15,6 +15,7 @@ internal sealed class LayoutEditorView : IUiView
     private const string ResizePopupId = "确认缩减教室尺寸###layout-resize-confirm";
     private float _cellSize = 36f;
     private float _gridLineWidth = 1f;
+    private UiDesignTokens _designTokens = UiDesignTokens.Light;
 
     private readonly LayoutDocument _layout;
     private readonly string _storagePath;
@@ -41,10 +42,11 @@ internal sealed class LayoutEditorView : IUiView
 
     public Vector2? MinimumSize => new(620, 520);
 
-    public void DrawContent(float deltaSeconds)
+    public void DrawContent(float deltaSeconds, UiDesignTokens designTokens)
     {
+        _designTokens = designTokens;
         _cellSize = UiScale.Pixels(36f);
-        _gridLineWidth = UiScale.Pixels(1f);
+        _gridLineWidth = UiScale.Pixels(designTokens.Metrics.BorderWidth);
         DrawToolbar();
         ImGui.Separator();
         DrawCanvas();
@@ -147,7 +149,7 @@ internal sealed class LayoutEditorView : IUiView
     private void DrawGrid(ImDrawListPtr drawList, Vector2 origin)
     {
         Vector2 backgroundEnd = origin + new Vector2(_layout.Cols * _cellSize, _layout.Rows * _cellSize);
-        drawList.AddRectFilled(origin, backgroundEnd, Color(0.12f, 0.14f, 0.17f, 1f));
+        drawList.AddRectFilled(origin, backgroundEnd, Color(_designTokens.Colors.Canvas));
         Vector2 inset = new(_gridLineWidth);
 
         for (int row = 0; row < _layout.Rows; row++)
@@ -157,7 +159,7 @@ internal sealed class LayoutEditorView : IUiView
                 Vector2 bottomRight = topLeft + new Vector2(_cellSize, _cellSize);
                 CellType type = _layout.TypeAt(row, col);
                 drawList.AddRectFilled(topLeft + inset, bottomRight - inset, ColorFor(type));
-                drawList.AddRect(topLeft, bottomRight, Color(0.30f, 0.34f, 0.40f, 1f), 0, ImDrawFlags.None, _gridLineWidth);
+                drawList.AddRect(topLeft, bottomRight, Color(_designTokens.Colors.Border), 0, ImDrawFlags.None, _gridLineWidth);
             }
     }
 
@@ -172,9 +174,9 @@ internal sealed class LayoutEditorView : IUiView
         int colMax = Math.Max(start.Col, end.Col);
         Vector2 topLeft = CellTopLeft(origin, rowMin, colMin);
         Vector2 bottomRight = CellTopLeft(origin, rowMax + 1, colMax + 1);
-        drawList.AddRectFilled(topLeft, bottomRight, Color(0.20f, 0.55f, 0.95f, 0.25f));
+        drawList.AddRectFilled(topLeft, bottomRight, Color(_designTokens.Colors.Selection));
         Vector2 inset = new(_gridLineWidth);
-        drawList.AddRect(topLeft + inset, bottomRight - inset, Color(0.35f, 0.75f, 1f, 1f), 0, ImDrawFlags.None, _gridLineWidth * 2f);
+        drawList.AddRect(topLeft + inset, bottomRight - inset, Color(_designTokens.Colors.SelectionBorder), 0, ImDrawFlags.None, _gridLineWidth * 2f);
     }
 
     private void DrawCellLabels(ImDrawListPtr drawList, Vector2 origin)
@@ -188,7 +190,7 @@ internal sealed class LayoutEditorView : IUiView
 
                 Vector2 topLeft = CellTopLeft(origin, row, col);
                 Vector2 textSize = ImGui.CalcTextSize(label);
-                drawList.AddText(topLeft + (new Vector2(_cellSize, _cellSize) - textSize) / 2f, Color(0.95f, 0.97f, 1f, 1f), label);
+                drawList.AddText(topLeft + (new Vector2(_cellSize, _cellSize) - textSize) / 2f, Color(_designTokens.Colors.Text), label);
             }
     }
 
@@ -324,16 +326,16 @@ internal sealed class LayoutEditorView : IUiView
             _ => null
         };
 
-    private static uint ColorFor(CellType type)
+    private uint ColorFor(CellType type)
         => type switch
         {
-            CellType.Desk => Color(0.16f, 0.40f, 0.66f, 1f),
-            CellType.Aisle => Color(0.28f, 0.30f, 0.34f, 1f),
-            CellType.NarrowAisle => Color(0.55f, 0.39f, 0.16f, 1f),
-            CellType.Podium => Color(0.47f, 0.22f, 0.50f, 1f),
-            _ => Color(0.12f, 0.14f, 0.17f, 1f)
+            CellType.Desk => Color(_designTokens.Colors.AccentSurface),
+            CellType.Aisle => Color(_designTokens.Colors.Surface),
+            CellType.NarrowAisle => Color(_designTokens.Colors.WarningSurface),
+            CellType.Podium => Color(_designTokens.Colors.SecondarySurface),
+            _ => Color(_designTokens.Colors.Canvas)
         };
 
-    private static uint Color(float r, float g, float b, float a)
-        => ImGui.ColorConvertFloat4ToU32(new Vector4(r, g, b, a));
+    private static uint Color(Vector4 color)
+        => ImGui.ColorConvertFloat4ToU32(color);
 }

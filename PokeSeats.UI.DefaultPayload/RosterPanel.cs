@@ -29,7 +29,7 @@ internal sealed class RosterPanel : IUiView
 
     public Vector2? MinimumSize => new(520, 360);
 
-    public void DrawContent(float deltaSeconds)
+    public void DrawContent(float deltaSeconds, UiDesignTokens designTokens)
     {
         ImGui.Text("导入学生花名册（Excel / CSV / SecRandom JSON）");
         ImGui.TextDisabled("表格使用首行列标题；SecRandom JSON 自动对应姓名、学号和小组。");
