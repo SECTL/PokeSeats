@@ -34,7 +34,7 @@ internal sealed class StudentRoster
                 new PersonId(item.Id == Guid.Empty ? Guid.NewGuid() : item.Id),
                 item.Name.Trim(),
                 Normalize(item.StudentNumber),
-                null)));
+                Normalize(item.Group))));
     }
 
     public void Save(string path, IEnumerable<Person> students)
@@ -43,12 +43,13 @@ internal sealed class StudentRoster
         var saved = students.Select(student => new StoredStudent(
             student.Id.Value,
             student.Name,
-            student.StudentNumber)).ToList();
+            student.StudentNumber,
+            student.Group)).ToList();
         File.WriteAllText(path, JsonSerializer.Serialize(saved, new JsonSerializerOptions { WriteIndented = true }));
     }
 
     private static string? Normalize(string? value)
         => string.IsNullOrWhiteSpace(value) ? null : value.Trim();
 
-    private sealed record StoredStudent(Guid Id, string Name, string? StudentNumber);
+    private sealed record StoredStudent(Guid Id, string Name, string? StudentNumber, string? Group);
 }
