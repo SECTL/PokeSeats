@@ -159,6 +159,8 @@ context.Events.Subscribe<UiViewOpenRequested>(request =>
 
 各插件的 `.csproj` 为资源配置了 `StronglyTypedLanguage`、`StronglyTypedClassName`、`StronglyTypedNamespace` 和 `StronglyTypedFileName`。`dotnet build` 自动在 `obj/` 下生成内部强类型访问类；不要手工维护或提交生成的 `*.Designer.cs`。
 
+设计时构建（Roslyn 语言服务、VS 设计时构建）只执行 `CompileDependsOn`，不经过 `PrepareResources`，默认不会生成强类型资源访问类，编辑器里会误报 `CS0103`（命令行构建却是成功的）。仓库根目录的 `Directory.Build.targets` 用 `GenerateStronglyTypedResources` 把 `ResGen` 挂到 `CoreCompile` 之前，让设计时构建也能生成并注册 `*.Designer.cs`；新增使用强类型资源的项目无需额外配置，但不要删除这个目标。
+
 新增文案使用有意义的英文资源名，通过 `WorkspaceStrings.Confirm` 这样的属性读取。带变量的句子保留为完整格式模板，例如资源值 `帧时间：{0:F1} ms`，代码使用 `string.Format(WorkspaceStrings.FrameTime, milliseconds)`；在资源注释中说明占位参数含义。不要将一句话拆成多个固定顺序的片段。
 
 ImGui 的 `##`／`###` 内部 ID、JSON 字段名、文件扩展名、导入列名识别别名以及拼音数据不属于界面文案，应继续留在代码中。弹窗标题从资源读取后拼接固定 `###id`，修改标题不会改变对应窗口的持久身份。Windows 文件选择器的筛选说明可放资源中，扩展名和 NUL 分隔符仍由代码组装。

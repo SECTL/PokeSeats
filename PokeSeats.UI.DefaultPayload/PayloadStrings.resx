@@ -406,7 +406,7 @@
     <value>排座结果与座位表</value>
   </data>
   <data name="SeatingRowAisleLabel" xml:space="preserve">
-    <value>行间走道</value>
+    <value>列间窄过道</value>
   </data>
   <data name="SeatingRowHeaderFormat" xml:space="preserve">
     <value>第{0}排</value>
