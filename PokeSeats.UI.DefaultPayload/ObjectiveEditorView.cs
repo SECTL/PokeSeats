@@ -21,37 +21,44 @@ internal sealed class ObjectiveEditorView
         PayloadStrings.ObjectiveShapeDescendingToFront,
         PayloadStrings.ObjectiveCentered,
         PayloadStrings.ObjectiveBimodal,
-        PayloadStrings.ObjectiveGroupBalance,
+        PayloadStrings.ObjectiveRowBalance,
+        PayloadStrings.ObjectiveRegionPreference,
     };
+
+    private static readonly string[] DirectionLabels = { PayloadStrings.ObjectiveHighValues, PayloadStrings.ObjectiveLowValues };
 
     private static readonly string DeletePopupLabel =
         $"{PayloadStrings.ObjectiveDeleteConfirmTitle}###objective-delete-confirm";
 
     private readonly StudentRoster _roster;
+    private readonly ClassroomRegionPicker _picker;
     private readonly ObjectiveDocument _document;
     private readonly string _storagePath;
     private SeatObjective? _draft;
     private string _draftName = string.Empty;
     private string _status;
 
-    public ObjectiveEditorView(StudentRoster roster, ObjectiveDocument document, string storagePath, string? loadMessage)
+    public ObjectiveEditorView(StudentRoster roster, LayoutDocument layout, ObjectiveDocument document, string storagePath, string? loadMessage)
     {
         _roster = roster;
+        _picker = new ClassroomRegionPicker(layout);
         _document = document;
         _storagePath = storagePath;
         _status = loadMessage ?? string.Empty;
     }
 
-    public void DrawContent()
+    public void DrawContent(UiDesignTokens designTokens)
     {
+        ImGui.PushTextWrapPos(ImGui.GetWindowWidth() - ImGui.GetStyle().WindowPadding.X - ImGui.GetStyle().ScrollbarSize);
         DrawToolbar();
         ImGui.Separator();
         DrawObjectiveList();
         ImGui.Separator();
-        DrawEditor();
+        DrawEditor(designTokens);
         if (!string.IsNullOrEmpty(_status))
-            ImGui.TextWrapped(_status);
+            ImGui.TextUnformatted(_status);
         DrawDeleteConfirmation();
+        ImGui.PopTextWrapPos();
     }
 
     private void DrawToolbar()
@@ -81,9 +88,13 @@ internal sealed class ObjectiveEditorView
             return;
         }
 
-        float listHeight = Math.Min(
-            UiScale.Pixels(260),
-            ImGui.GetTextLineHeightWithSpacing() * (_document.Objectives.Count + 1) + UiScale.Pixels(8));
+        float availableHeight = ImGui.GetContentRegionAvail().Y;
+        float rowHeight = ImGui.GetTextLineHeight() + ImGui.GetStyle().CellPadding.Y * 2;
+        float listHeight = _draft is null
+            ? Math.Max(rowHeight * 2, availableHeight - ImGui.GetTextLineHeightWithSpacing()
+                - ImGui.GetStyle().ItemSpacing.Y * 2 - StatusHeight())
+            : Math.Max(rowHeight * 2, Math.Min(availableHeight * .25f,
+                rowHeight * (_document.Objectives.Count + 1) + 2));
         if (!ImGui.BeginTable("##objective-list", 3,
                 ImGuiTableFlags.Borders | ImGuiTableFlags.RowBg | ImGuiTableFlags.ScrollY | ImGuiTableFlags.SizingStretchProp,
                 new Vector2(0, listHeight)))
@@ -111,7 +122,10 @@ internal sealed class ObjectiveEditorView
         ImGui.EndTable();
     }
 
-    private void DrawEditor()
+    private float StatusHeight() => string.IsNullOrEmpty(_status) ? 0
+        : ImGui.CalcTextSize(_status, false, ImGui.GetContentRegionAvail().X).Y + ImGui.GetStyle().ItemSpacing.Y;
+
+    private void DrawEditor(UiDesignTokens designTokens)
     {
         if (_draft is null)
         {
@@ -136,7 +150,37 @@ internal sealed class ObjectiveEditorView
         if (ImGui.InputInt(PayloadStrings.ObjectivePriorityLabel, ref priority))
         {
             priority = Math.Max(1, priority);
-            _draft = draft with { Priority = priority };
+            _draft = draft = draft with { Priority = priority };
+        }
+
+        if (draft.Shape == ObjectiveShape.RowBalance)
+            _draft = draft = draft with { Dimension = SeatDimension.Row, Region = null };
+        else
+        {
+            if (draft.Shape == ObjectiveShape.RegionPreference)
+            {
+                int direction = (int)draft.RegionPreferenceDirection;
+                ImGui.SetNextItemWidth(UiScale.Pixels(220));
+                if (ImGui.Combo(PayloadStrings.ObjectiveDirectionLabel, ref direction, DirectionLabels, DirectionLabels.Length))
+                    _draft = draft = draft with { RegionPreferenceDirection = (RegionPreferenceDirection)direction };
+                if (draft.Region is null) ImGui.TextUnformatted(PayloadStrings.ObjectiveRegionRequired);
+            }
+            ImGui.TextUnformatted(PayloadStrings.ObjectiveRegionDragHint);
+            SeatRegion? region = draft.Region;
+            float footerHeight = ImGui.GetFrameHeightWithSpacing() * 2 + StatusHeight();
+            float previewHeight = Math.Max(UiScale.Pixels(120), ImGui.GetContentRegionAvail().Y - footerHeight);
+            if (_picker.Draw(draft.Id.Value.ToString(), ref region, designTokens, previewHeight))
+                _draft = draft = draft with { Region = region };
+            ImGui.BeginDisabled(draft.Region is null);
+            if (ImGui.Button(PayloadStrings.ObjectiveClearRegion))
+                _draft = draft = draft with { Region = null };
+            ImGui.EndDisabled();
+            if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled)) ImGui.SetTooltip(PayloadStrings.ObjectiveClearRegionHint);
+            if (draft.Region is { } selected)
+            {
+                ImGui.SameLine();
+                ImGui.Text(string.Format(PayloadStrings.ObjectiveRegionBoundsFormat, selected.RowMin, selected.RowMax, selected.ColMin, selected.ColMax));
+            }
         }
 
         if (ImGui.Button(PayloadStrings.ObjectiveSaveButton))
@@ -182,7 +226,7 @@ internal sealed class ObjectiveEditorView
     {
         int dimension = (int)draft.Dimension;
         ImGui.SetNextItemWidth(UiScale.Pixels(220));
-        ImGui.BeginDisabled(draft.Shape == ObjectiveShape.GroupBalance);
+        ImGui.BeginDisabled(draft.Shape is ObjectiveShape.RowBalance or ObjectiveShape.RegionPreference);
         bool changed = ImGui.Combo(PayloadStrings.ObjectiveDimensionLabel, ref dimension, DimensionLabels, DimensionLabels.Length);
         ImGui.EndDisabled();
         if (!changed)
@@ -210,7 +254,9 @@ internal sealed class ObjectiveEditorView
                 ImGui.BeginDisabled(!allowed);
                 if (ImGui.Selectable(ShapeLabels[index], draft.Shape == shape))
                 {
-                    draft = draft with { Shape = shape };
+                    draft = draft with { Shape = shape,
+                        Dimension = shape == ObjectiveShape.RowBalance ? SeatDimension.Row : draft.Dimension,
+                        Region = shape == ObjectiveShape.RowBalance ? null : draft.Region };
                     _draft = draft;
                     ImGui.CloseCurrentPopup();
                 }
@@ -219,8 +265,8 @@ internal sealed class ObjectiveEditorView
             ImGui.EndCombo();
         }
 
-        if (draft.Shape == ObjectiveShape.GroupBalance)
-            ImGui.TextWrapped(PayloadStrings.ObjectiveGroupBalanceExplanation);
+        if (draft.Shape == ObjectiveShape.RowBalance)
+            ImGui.TextUnformatted(PayloadStrings.ObjectiveRowBalanceExplanation);
         return draft;
     }
 
@@ -362,9 +408,8 @@ internal sealed class ObjectiveEditorView
             return PayloadStrings.ObjectiveAttributeRequired;
         if (definition.Kind != PersonAttributeKind.Number)
             return PayloadStrings.ObjectiveNoNumberAttribute;
-        if (draft.Shape is ObjectiveShape.Centered or ObjectiveShape.Bimodal
-            && draft.Dimension != SeatDimension.DistanceFromCenter)
-            return PayloadStrings.ObjectiveInvalidShape;
+        if (ObjectiveDocument.ShapeValidationError(draft) is { } shapeError)
+            return shapeError;
         if (draft.Priority < 1)
             return PayloadStrings.ObjectivePriorityInvalid;
         return null;
@@ -388,11 +433,13 @@ internal sealed class ObjectiveEditorView
         return -1;
     }
 
-    private static string ShapeSummary(SeatObjective objective) =>
-        objective.Shape == ObjectiveShape.GroupBalance
-            ? PayloadStrings.ObjectiveGroupBalance
-            : string.Format(
-                PayloadStrings.ObjectiveListShapeSummaryFormat,
-                ShapeLabels[(int)objective.Shape],
-                DimensionLabels[(int)objective.Dimension]);
+    private static string ShapeSummary(SeatObjective objective)
+    {
+        if (objective.Shape == ObjectiveShape.RowBalance) return PayloadStrings.ObjectiveRowBalance;
+        if (objective.Shape == ObjectiveShape.RegionPreference)
+            return $"{PayloadStrings.ObjectiveRegionPreference} · {(objective.RegionPreferenceDirection == RegionPreferenceDirection.HighValues ? PayloadStrings.ObjectiveHighValues : PayloadStrings.ObjectiveLowValues)} · {(objective.Region is null ? PayloadStrings.ObjectiveRegionMissing : PayloadStrings.ObjectiveRegionLimited)}";
+        string summary = string.Format(PayloadStrings.ObjectiveListShapeSummaryFormat,
+            ShapeLabels[(int)objective.Shape], DimensionLabels[(int)objective.Dimension]);
+        return objective.Region is null ? summary : $"{summary} · {PayloadStrings.ObjectiveRegionLimited}";
+    }
 }

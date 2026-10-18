@@ -277,12 +277,6 @@
   <data name="ObjectiveRowBalanceExplanation" xml:space="preserve">
     <value>按各实际 Desk 行的座位容量比例平衡已知属性总量。缺失属性不计入行和；所有已知值相同时均衡已知人数。此目标固定使用行维度，不限定区域。</value>
   </data>
-  <data name="ObjectiveGroupBalance" xml:space="preserve">
-    <value>各组均衡</value>
-  </data>
-  <data name="ObjectiveGroupBalanceExplanation" xml:space="preserve">
-    <value>说明：该形状按固定小组统计所选属性的平均值，并尝试缩小各组均值之间的差距。小组由名单固定，均值不随座位安排变化，因此这一目标不会改变实际座位分配，也无法保证各组座位在教室里的空间分布均衡。</value>
-  </data>
   <data name="ObjectiveInvalidShape" xml:space="preserve">
     <value>Centered 和“值越大越靠两边”仅支持“距中心列距离”维度。</value>
   </data>

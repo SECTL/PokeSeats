@@ -78,7 +78,7 @@ internal sealed class RuleEditorView : IUiView
         }
         if (ImGui.BeginTabItem(PayloadStrings.ObjectiveEditorViewTitle))
         {
-            objectives.DrawContent();
+            objectives.DrawContent(designTokens);
             ImGui.EndTabItem();
         }
         ImGui.EndTabBar();
@@ -331,18 +331,13 @@ internal sealed class RuleEditorView : IUiView
         if (!ImGui.BeginChild("##rules-classroom", new Vector2(0, height), ImGuiChildFlags.Borders,
             ImGuiWindowFlags.HorizontalScrollbar | ImGuiWindowFlags.AlwaysVerticalScrollbar))
         { ImGui.EndChild(); return; }
-        Vector2 available = ImGui.GetContentRegionAvail();
-        Vector2 labelSize = ImGui.CalcTextSize(RulesStrings.PodiumMarker);
-        float minimumCell = Math.Max(labelSize.X, labelSize.Y) + UiScale.Pixels(_designTokens.Metrics.SpaceMedium);
-        float cell = Math.Max(minimumCell, Math.Max((available.X - 1) / layout.Cols, (available.Y - 1) / layout.Rows)) * .375f;
-        Vector2 gridSize = new Vector2(layout.Cols, layout.Rows) * cell;
-        Vector2 offset = Vector2.Max(Vector2.Zero, (available - gridSize) / 2);
-        ImGui.SetCursorPos(ImGui.GetCursorPos() + offset);
-        Vector2 origin = ImGui.GetCursorScreenPos();
+        var geometry = ClassroomGridGeometry.Place(layout);
+        float cell = geometry.Cell;
+        Vector2 gridSize = geometry.Size;
+        Vector2 origin = geometry.Origin;
         ImGui.InvisibleButton("##rules-classroom-surface", gridSize);
         bool hovered = ImGui.IsItemHovered();
-        Vector2 mouse = ImGui.GetIO().MousePos;
-        GridPos pos = new(Math.Clamp((int)((mouse.Y - origin.Y) / cell), 0, layout.Rows - 1), Math.Clamp((int)((mouse.X - origin.X) / cell), 0, layout.Cols - 1));
+        GridPos pos = geometry.Hit(ImGui.GetIO().MousePos);
         if (hovered && ImGui.IsMouseClicked(ImGuiMouseButton.Left))
         {
             switch (state.Category)
@@ -366,12 +361,7 @@ internal sealed class RuleEditorView : IUiView
                 GridPos p = new(row, col);
                 Vector2 min = origin + new Vector2(col, row) * cell;
                 CellType type = layout.TypeAt(row, col);
-                uint color = type switch
-                {
-                    CellType.Desk => Color(_designTokens.Colors.AccentSurface), CellType.Podium => Color(_designTokens.Colors.SecondarySurface),
-                    CellType.NarrowAisle => Color(_designTokens.Colors.WarningSurface), CellType.Aisle => Color(_designTokens.Colors.Surface),
-                    _ => Color(_designTokens.Colors.Canvas)
-                };
+                uint color = ClassroomGridGeometry.CellColor(type, _designTokens);
                 if (state.Allowed.Contains(p)) color = Color(_designTokens.Colors.SuccessSurface);
                 bool selected = state.Category == 3 ? (state.AxisType == AxisType.Row ? row : col) == state.AxisIndex
                     : state.Category == 1 && state.First is { } start && state.Last is { } end && row >= Math.Min(start.Row, end.Row)

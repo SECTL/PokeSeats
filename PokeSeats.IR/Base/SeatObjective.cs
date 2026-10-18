@@ -15,7 +15,6 @@ public enum ObjectiveShape
     DescendingToFront,
     Centered,
     Bimodal,
-    GroupBalance,
     RowBalance,
     RegionPreference,
 }

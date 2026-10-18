@@ -25,7 +25,7 @@ public sealed class DefaultPayloadPlugin : IUiPlugin
         var objectives = ObjectiveDocument.LoadOrCreate(objectivesPath, out string? objectivesMessage);
         seating = new SeatingSession(roster, layout, rules, objectives, context.Events);
         context.RegisterView(new RuleEditorView(roster, layout, rules, rulesPath, rulesMessage, seating,
-            new ObjectiveEditorView(roster, objectives, objectivesPath, objectivesMessage)));
+            new ObjectiveEditorView(roster, layout, objectives, objectivesPath, objectivesMessage)));
         context.RegisterView(new SeatingResultView(seating, context.DataDirectory));
         context.RegisterCommand(seating);
     }
