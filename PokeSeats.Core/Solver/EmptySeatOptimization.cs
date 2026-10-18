@@ -32,7 +32,7 @@ internal sealed class EmptySeatOptimization
     }
 
     public Optimize CreateZ3(Z3Expansion expansion,
-        IReadOnlyList<IReadOnlyList<(PersonObjectiveCost Person, SeatObjectiveCost Seat)>> objectiveLayers)
+        IReadOnlyList<IReadOnlyList<ExpandedObjective>> objectiveLayers)
     {
         var context = expansion.Context;
         var optimizer = context.MkOptimize();
@@ -62,18 +62,37 @@ internal sealed class EmptySeatOptimization
         foreach (var layer in objectiveLayers)
         {
             var terms = new List<ArithExpr>();
-            foreach (var (personCost, seatCost) in layer)
-                foreach (var (person, cost) in personCost.Costs)
+            foreach (var objective in layer)
+            {
+                foreach (var (person, cost) in objective.PersonCosts)
                 {
                     if (cost == 0) continue;
                     var variable = expansion.Variables[person];
                     ArithExpr weight = zero;
                     for (int seat = plan.Seats.Count - 1; seat >= 0; seat--)
                         weight = (ArithExpr)context.MkITE(context.MkEq(variable, context.MkInt(seat)),
-                            context.MkInt(seatCost.SeatWeights[seat]), weight);
+                            context.MkInt(objective.SeatWeights[seat]), weight);
                     terms.Add(context.MkMul(context.MkInt(cost), weight));
                 }
-            optimizer.MkMinimize(terms.Count == 0 ? zero : context.MkAdd(terms));
+                if (objective.RowBalanceTerm is { } balance)
+                    foreach (var row in balance.Rows)
+                    {
+                        var contributions = new List<ArithExpr>();
+                        foreach (var (person, value) in balance.Values)
+                        {
+                            if (value == 0) continue;
+                            foreach (int seat in row.Seats)
+                                contributions.Add((ArithExpr)context.MkITE(
+                                    context.MkEq(expansion.Variables[person], context.MkInt(seat)),
+                                    context.MkInt(value), zero));
+                        }
+                        ArithExpr sum = contributions.Count == 0 ? zero : context.MkAdd(contributions);
+                        var delta = context.MkSub(context.MkMul(sum, context.MkInt(balance.TotalCapacity)),
+                            context.MkInt(balance.TotalValue * row.Capacity));
+                        terms.Add((ArithExpr)context.MkITE(context.MkGe(delta, zero), delta, context.MkUnaryMinus(delta)));
+                    }
+            }
+            if (terms.Count > 0) optimizer.MkMinimize(context.MkAdd(terms));
         }
         var rear = context.MkAdd(empty.Select((value, seat) =>
             (ArithExpr)context.MkITE(value, context.MkInt(lastRow - plan.Seats[seat].Row), zero)));
@@ -103,22 +122,49 @@ internal sealed class EmptySeatOptimization
     }
 
     public IReadOnlyList<LinearExpr> AddObjectiveLayersOrTools(OrToolsExpansion expansion,
-        IReadOnlyList<IReadOnlyList<(PersonObjectiveCost Person, SeatObjectiveCost Seat)>> objectiveLayers)
+        IReadOnlyList<IReadOnlyList<ExpandedObjective>> objectiveLayers)
     {
         var layers = new List<LinearExpr>(objectiveLayers.Count);
         foreach (var layer in objectiveLayers)
         {
             var terms = new List<LinearExpr>();
-            foreach (var (personCost, seatCost) in layer)
-                foreach (var (person, cost) in personCost.Costs)
+            foreach (var objective in layer)
+            {
+                foreach (var (person, cost) in objective.PersonCosts)
                 {
                     if (cost == 0) continue;
-                    var weight = expansion.Model.NewIntVar(seatCost.SeatWeights.Min(),
-                        seatCost.SeatWeights.Max(), $"objective_{personCost.ObjectiveId.Value:N}_{person.Value:N}");
-                    expansion.Model.AddElement(expansion.Variables[person], seatCost.SeatWeights, weight);
+                    var weight = expansion.Model.NewIntVar(objective.SeatWeights.Min(),
+                        objective.SeatWeights.Max(), $"objective_{objective.ObjectiveId.Value:N}_{person.Value:N}");
+                    expansion.Model.AddElement(expansion.Variables[person], objective.SeatWeights, weight);
                     terms.Add(weight * cost);
                 }
-            layers.Add(LinearExpr.Sum(terms));
+                if (objective.RowBalanceTerm is { } balance)
+                {
+                    var model = expansion.Model;
+                    var rowTerms = balance.Rows.ToDictionary(row => row.Row, _ => new List<LinearExpr>());
+                    foreach (var (person, value) in balance.Values)
+                    {
+                        if (value == 0) continue;
+                        foreach (var row in balance.Rows)
+                            foreach (int seat in row.Seats)
+                            {
+                                var indicator = model.NewBoolVar($"balance_{objective.ObjectiveId.Value:N}_{person.Value:N}_{seat}");
+                                model.Add(expansion.Variables[person] == seat).OnlyEnforceIf(indicator);
+                                model.Add(expansion.Variables[person] != seat).OnlyEnforceIf(indicator.Not());
+                                rowTerms[row.Row].Add(indicator * value);
+                            }
+                    }
+                    foreach (var row in balance.Rows)
+                    {
+                        var sum = LinearExpr.Sum(rowTerms[row.Row]);
+                        long bound = balance.TotalValue * Math.Max(row.Capacity, balance.TotalCapacity - row.Capacity);
+                        var deviation = model.NewIntVar(0, bound, $"balance_deviation_{objective.ObjectiveId.Value:N}_{row.Row}");
+                        model.AddAbsEquality(deviation, sum * balance.TotalCapacity - balance.TotalValue * row.Capacity);
+                        terms.Add(deviation);
+                    }
+                }
+            }
+            if (terms.Count > 0) layers.Add(LinearExpr.Sum(terms));
         }
         return layers;
     }

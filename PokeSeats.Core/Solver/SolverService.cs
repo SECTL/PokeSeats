@@ -46,10 +46,9 @@ public sealed class SolverService
             var expanded = ObjectiveExpander.Expand(plan, request.Objectives, request.Roster);
             var layers = request.Objectives.Select((objective, index) => (objective.Priority, index))
                 .GroupBy(item => item.Priority).OrderBy(group => group.Key)
-                .Select(group => (IReadOnlyList<(PersonObjectiveCost Person, SeatObjectiveCost Seat)>)
+                .Select(group => (IReadOnlyList<ExpandedObjective>)
                     group.Select(item => expanded[item.index]).ToArray()).ToArray();
-            var distinguished = expanded.SelectMany(item => item.Person.Costs)
-                .Where(item => item.Value != 0).Select(item => item.Key).ToHashSet();
+            var distinguished = expanded.SelectMany(item => item.DistinguishedPeople).ToHashSet();
             var effectiveBackend = request.Backend == SolverBackend.OrToolsCpSat
                 && request.Objectives.Any(objective => objective.Shape is ObjectiveShape.Centered or ObjectiveShape.Bimodal)
                 ? SolverBackend.Z3 : request.Backend;
@@ -75,7 +74,7 @@ public sealed class SolverService
     }
 
     private static SolverResult solveZ3(RuleExpansionPlan plan, PreCheckResult preCheck,
-        IReadOnlyList<IReadOnlyList<(PersonObjectiveCost Person, SeatObjectiveCost Seat)>> layers,
+        IReadOnlyList<IReadOnlyList<ExpandedObjective>> layers,
         IReadOnlySet<PersonId> distinguished)
     {
         var expansion = new Z3RuleExpander().Expand(plan);
@@ -121,7 +120,7 @@ public sealed class SolverService
     }
 
     private static SolverResult solveOrTools(RuleExpansionPlan plan, PreCheckResult preCheck,
-        IReadOnlyList<IReadOnlyList<(PersonObjectiveCost Person, SeatObjectiveCost Seat)>> layers,
+        IReadOnlyList<IReadOnlyList<ExpandedObjective>> layers,
         IReadOnlySet<PersonId> distinguished)
     {
         var expansion = new OrToolsRuleExpander().Expand(plan);

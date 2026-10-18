@@ -20,7 +20,7 @@ public sealed class OrToolsRuleExpander : IRuleExpander<OrToolsExpansion>
             item => item.Key,
             item => model.NewIntVar(0, upperBound, item.Value.Name));
 
-        if (plan.Seats.Count == 0)
+        if (plan.Seats.Count == 0 && variables.Count > 0)
         {
             model.AddBoolOr(Array.Empty<ILiteral>());
         }
