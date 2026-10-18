@@ -10,7 +10,9 @@ namespace PokeSeats.UI;
 /// </summary>
 internal sealed class AppConfigStore
 {
-    private const int CurrentSchema = 1;
+    private const int CurrentSchema = 3;
+    private const string DefaultSectlPlatformId = "platform_5d216a8e4424effc";
+    private const string DefaultSectlClientId = "6ad35e32003196df861c";
 
     private static readonly JsonSerializerOptions SerializerOptions = new()
     {
@@ -34,6 +36,18 @@ internal sealed class AppConfigStore
         bool changed = _config.Schema != CurrentSchema || _config.DeviceId != resolved;
         _config.Schema = CurrentSchema;
         _config.DeviceId = resolved;
+        string? environmentPlatformId = Environment.GetEnvironmentVariable("POKESEATS_SECTL_PLATFORM_ID");
+        string resolvedPlatformId = string.IsNullOrWhiteSpace(environmentPlatformId)
+            ? (_config.SectlPlatformId ?? DefaultSectlPlatformId)
+            : environmentPlatformId.Trim();
+        if (!string.Equals(_config.SectlPlatformId, resolvedPlatformId, StringComparison.Ordinal))
+            changed = true;
+        _config.SectlPlatformId = resolvedPlatformId;
+        if (_config.SectlClientId is null)
+        {
+            _config.SectlClientId = DefaultSectlClientId;
+            changed = true;
+        }
 
         if (string.IsNullOrWhiteSpace(_config.WorkspaceId) && !string.IsNullOrWhiteSpace(legacyWorkspaceId))
         {
@@ -55,6 +69,10 @@ internal sealed class AppConfigStore
     }
 
     public Guid DeviceId => _config.DeviceId;
+
+    public string SectlPlatformId => _config.SectlPlatformId!;
+
+    public string SectlClientId => _config.SectlClientId!;
 
     public string? WorkspaceId => _config.WorkspaceId;
 
@@ -107,5 +125,7 @@ internal sealed class AppConfigStore
         public int Schema { get; set; }
         public Guid DeviceId { get; set; }
         public string? WorkspaceId { get; set; }
+        public string? SectlPlatformId { get; set; }
+        public string? SectlClientId { get; set; }
     }
 }

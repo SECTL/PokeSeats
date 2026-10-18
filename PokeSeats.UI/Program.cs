@@ -29,6 +29,7 @@ FontAtlasScaling? fontAtlasScaling = null;
 PluginCatalog? catalog = null;
 WorkspaceManager? workspaces = null;
 WorkspaceSelector? selector = null;
+SectlStatsReporter? statsReporter = null;
 Vector2D<int>? pendingFramebufferSize = null;
 var scaling = new UiScaling();
 
@@ -85,6 +86,8 @@ window.Load += () =>
     scaling.CaptureStyle();
     workspaces = new WorkspaceManager(catalog, config, scaling, textures);
     selector = new WorkspaceSelector(workspaces);
+    statsReporter = new SectlStatsReporter(config);
+    statsReporter.Start();
     
     catalog.CreateEventScope().Subscribe<ApplicationExitRequested>(_ => window.Close());
 };
@@ -126,6 +129,7 @@ window.Render += delta =>
 
 window.Closing += () =>
 {
+    statsReporter?.Dispose();
     workspaces?.Dispose();
     catalog?.Dispose();
     renderer?.Dispose();
