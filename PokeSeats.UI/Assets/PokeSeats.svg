@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" fill="none">
+  <title>PokeSeats 戳座</title>
+  <desc>分段的 P 字母与座椅，搭配靛紫渐变、青色高光、星芒和斜向键盘背景。</desc>
+  <defs>
+    <linearGradient id="background" x1="64" y1="32" x2="456" y2="512" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FBFBFF"/>
+      <stop offset="0.56" stop-color="#F5F4FF"/>
+      <stop offset="1" stop-color="#E7E4FF"/>
+    </linearGradient>
+    <linearGradient id="letter" x1="105" y1="352" x2="402" y2="106" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#323180"/>
+      <stop offset="0.52" stop-color="#4940AD"/>
+      <stop offset="1" stop-color="#8955F4"/>
+    </linearGradient>
+    <linearGradient id="segments" x1="96" y1="388" x2="212" y2="173" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#4840AD"/>
+      <stop offset="0.58" stop-color="#7460DE"/>
+      <stop offset="1" stop-color="#69CADB"/>
+    </linearGradient>
+    <linearGradient id="chair" x1="265" y1="382" x2="401" y2="281" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#4B40AD"/>
+      <stop offset="1" stop-color="#9767F2"/>
+    </linearGradient>
+    <linearGradient id="spark" x1="400" y1="42" x2="450" y2="114" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#B47BFF"/>
+      <stop offset="1" stop-color="#8750EE"/>
+    </linearGradient>
+    <clipPath id="tile"><rect x="16" y="16" width="480" height="480" rx="108"/></clipPath>
+    <clipPath id="letterClip">
+      <path d="M427 150H121.387C106.824 150 95 141.117 95 130.175V108.825C95 97.883 106.824 89 121.387 89H427C487.68 89.137 536.888 126.5 536.888 172.5C536.888 218.501 487.68 255.863 427 256H304.548C297.894 256 291.239 253.765 287.246 251C283.584 248.464 280.582 243.362 280.591 239.41V220.746C280.591 212.589 281.923 209.354 285.915 206.276C289.908 203.197 292.569 202.276 304.548 202.276H427C444.247 202.276 461.397 191.096 461.397 176.138C461.397 161.18 444.246 150.09 427 150Z" transform="matrix(.751322 0 0 1 23.6244 0)"/>
+    </clipPath>
+  </defs>
+  <g clip-path="url(#tile)">
+    <rect x="16" y="16" width="480" height="480" fill="url(#background)"/>
+    <path d="M16 16H279L16 197Z" fill="#E8E5FC"/>
+    <path d="M163 284L279 496H16V421Z" fill="#ECE9FF"/>
+    <path d="M227 313L301 496H496V226Z" fill="#E0DEFC" opacity=".52"/>
+    <g transform="translate(336 324) rotate(-18)" opacity=".62">
+      <rect x="-12" y="-40" width="239" height="18" rx="7" fill="#CDC9F7"/>
+      <rect width="194" height="28" rx="7" fill="#BFBBF4"/>
+      <g fill="#C3BEF6">
+        <rect y="42" width="44" height="38" rx="7"/>
+        <rect x="56" y="42" width="44" height="38" rx="7"/>
+        <rect x="168" y="42" width="44" height="38" rx="7"/>
+        <rect y="92" width="44" height="38" rx="7"/>
+        <rect x="112" y="92" width="44" height="38" rx="7"/>
+        <rect x="168" y="92" width="44" height="38" rx="7"/>
+        <rect y="142" width="44" height="38" rx="7"/>
+        <rect x="56" y="142" width="44" height="38" rx="7"/>
+        <rect x="112" y="142" width="100" height="38" rx="7"/>
+      </g>
+      <rect x="112" y="42" width="44" height="38" rx="7" fill="#B18AEF"/>
+      <rect x="56" y="92" width="44" height="38" rx="7" fill="#A9B5EF"/>
+    </g>
+    <g transform="translate(-8 24)">
+      <path d="M427 150H121.387C106.824 150 95 141.117 95 130.175V108.825C95 97.883 106.824 89 121.387 89H427C487.68 89.137 536.888 126.5 536.888 172.5C536.888 218.501 487.68 255.863 427 256H304.548C297.894 256 291.239 253.765 287.246 251C283.584 248.464 280.582 243.362 280.591 239.41V220.746C280.591 212.589 281.923 209.354 285.915 206.276C289.908 203.197 292.569 202.276 304.548 202.276H427C444.247 202.276 461.397 191.096 461.397 176.138C461.397 161.18 444.246 150.09 427 150Z" transform="matrix(.751322 0 0 1 23.6244 0)" fill="url(#letter)"/>
+      <path d="M355 70H454V292H203Z" clip-path="url(#letterClip)" fill="#B68AFF" opacity=".12"/>
+      <g fill="url(#segments)">
+        <rect x="95" y="174" width="119" height="42" rx="15"/>
+        <rect x="95" y="235" width="119" height="72" rx="23"/>
+        <rect x="95" y="326" width="119" height="102" rx="32"/>
+      </g>
+      <g stroke="url(#chair)" stroke-width="24" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M281 349V393M347 349V393"/>
+        <path d="M362 349H255C243 349 234 343 234 335V321C234 313 243 307 255 307H350V293C350 284 361 277 374 277H390C403 277 414 284 414 293V335"/>
+      </g>
+      <path d="M251 322H349" stroke="#F9F8FF" stroke-width="10" stroke-linecap="round"/>
+    </g>
+    <path d="M426 48C432 69 441 79 462 85C441 91 432 101 426 122C420 101 411 91 390 85C411 79 420 69 426 48Z" fill="url(#spark)"/>
+  </g>
+</svg>

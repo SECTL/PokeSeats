@@ -1,5 +1,6 @@
 using System.Runtime.InteropServices;
 using ImGuiNET;
+using Silk.NET.Core;
 using Silk.NET.Input;
 using Silk.NET.Maths;
 using Silk.NET.Windowing;
@@ -8,6 +9,7 @@ using PokeSeats.UI.Fonts;
 using PokeSeats.UI.Plugins;
 using PokeSeats.UI.PluginContracts;
 using PokeSeats.UI.Rendering;
+using StbImageSharp;
 
 
 var options = WindowOptions.Default with
@@ -35,6 +37,13 @@ var scaling = new UiScaling();
 
 window.Load += () =>
 {
+    using (Stream iconStream = typeof(AppData).Assembly.GetManifestResourceStream("PokeSeats.UI.Assets.PokeSeats.png")!)
+    {
+        ImageResult icon = ImageResult.FromStream(iconStream, ColorComponents.RedGreenBlueAlpha);
+        var windowIcon = new RawImage(icon.Width, icon.Height, icon.Data);
+        window.SetWindowIcon(ref windowIcon);
+    }
+
     float initialScale = DisplayScale.ForWindow(window);
     if (initialScale > 1f)
     {

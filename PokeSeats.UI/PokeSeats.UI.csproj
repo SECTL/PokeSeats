@@ -7,6 +7,7 @@
         <Nullable>enable</Nullable>
         <Company>SECTL 思拓创联</Company>
         <Product>PokeSeats 戳座</Product>
+        <ApplicationIcon>Assets\PokeSeats.ico</ApplicationIcon>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
@@ -43,6 +44,8 @@
     </ItemGroup>
 
     <ItemGroup>
+      <EmbeddedResource Include="Assets\PokeSeats.png" LogicalName="PokeSeats.UI.Assets.PokeSeats.png" />
+      <None Update="Assets\PokeSeats.svg;Assets\PokeSeats.png;Assets\PokeSeats.ico" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
       <EmbeddedResource Include="Fonts\Assets\HarmonyOS_Sans_SC_Regular.ttf" LogicalName="PokeSeats.UI.Fonts.Assets.HarmonyOS_Sans_SC_Regular.ttf" />
       <None Include="Fonts\Assets\LICENSE_Fonts" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
     </ItemGroup>
