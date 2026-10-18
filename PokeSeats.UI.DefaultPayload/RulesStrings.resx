@@ -65,17 +65,17 @@
     <value>规则</value>
   </data>
   <data name="DefaultStatus" xml:space="preserve">
-    <value>请在左侧选择规则类型并配置约束条件，点击“保存规则”即可生效。</value>
+    <value>从左侧选择规则类型并设置条件，保存后即生效。</value>
   </data>
   <data name="NewRuleButton" xml:space="preserve">
     <value>新建规则</value>
   </data>
   <data name="ActiveRuleCountFormat" xml:space="preserve">
-    <value>当前生效：{0} 条排座规则</value>
+    <value>已生效 {0} 条规则</value>
     <comment>{0}：当前生效的排座规则数量。</comment>
   </data>
   <data name="SaveChangesButton" xml:space="preserve">
-    <value>保存修改</value>
+    <value>保存</value>
   </data>
   <data name="SaveRuleButton" xml:space="preserve">
     <value>保存规则</value>
@@ -84,7 +84,7 @@
     <value>规则配置</value>
   </data>
   <data name="SavedRulesColumnHeader" xml:space="preserve">
-    <value>已设规则清单</value>
+    <value>已保存规则</value>
   </data>
   <data name="RuleTypeLabel" xml:space="preserve">
     <value>规则类型</value>
@@ -99,57 +99,57 @@
     <value>参照学生 B</value>
   </data>
   <data name="CategoryPinnedSeat" xml:space="preserve">
-    <value>固定特定座位</value>
+    <value>固定座位</value>
   </data>
   <data name="CategoryRegion" xml:space="preserve">
-    <value>限定就座区域</value>
+    <value>限定区域</value>
   </data>
   <data name="CategoryRelation" xml:space="preserve">
-    <value>学生相对位置</value>
+    <value>相对位置</value>
   </data>
   <data name="CategoryCapacity" xml:space="preserve">
-    <value>单排行列人数</value>
+    <value>行列人数上限</value>
   </data>
   <data name="NegateRegionCheckbox" xml:space="preserve">
-    <value>禁止就座（禁止安排在所选区域内）</value>
+    <value>禁止就座（不能坐在所选区域）</value>
   </data>
   <data name="NegateRelationCheckbox" xml:space="preserve">
-    <value>反向限制（如：“相邻”改为“不可相邻”）</value>
+    <value>反向限制（如把“相邻”改为“不可相邻”）</value>
   </data>
   <data name="DraftRelationPreviewStatus" xml:space="preserve">
-    <value>未选定学生时可先在下方画布预览相对空间关系；选齐两名学生后方可保存。</value>
+    <value>可以先在下方预览相对位置；选好两名学生后才能保存。</value>
   </data>
   <data name="DraftIncompleteStatus" xml:space="preserve">
-    <value>请在下方配置具体的排座条件。</value>
+    <value>请在下方设置排座条件。</value>
   </data>
   <data name="RelationCanvasHint" xml:space="preserve">
-    <value>说明：下图用于直观预览规则。点击任意课桌放置基准学生 A，高亮绿色课桌即为允许学生 B 就座的位置。</value>
+    <value>点击任意课桌放置基准学生 A，绿色课桌即为 B 可以坐的位置。</value>
   </data>
   <data name="RegionCanvasHint" xml:space="preserve">
-    <value>说明：请在教室网格中按住鼠标左键框选区域；高亮绿色课桌为该规则允许就座的位置。</value>
+    <value>在网格中按住左键框选区域，绿色课桌为该规则允许就座的位置。</value>
   </data>
   <data name="PinnedCanvasHint" xml:space="preserve">
-    <value>说明：请在教室网格中点击目标课桌，将该学生固定在该座位。</value>
+    <value>点击目标课桌，把该学生固定在这里。</value>
   </data>
   <data name="CapacityCanvasHint" xml:space="preserve">
-    <value>说明：请点击教室中的任意课桌，选定要设置容量上限的对应排或列。</value>
+    <value>点击任意课桌，选中要限制人数的排或列。</value>
   </data>
   <data name="CanvasSeatSummaryFormat" xml:space="preserve">
-    <value>当前教室共 {0} 处有效课桌；当前临时基准 A 下，有 {1} 处课桌符合条件。</value>
-    <comment>{0}：当前教室有效课桌数量；{1}：当前临时基准 A 下符合条件的课桌数量。</comment>
+    <value>教室共 {0} 个课桌，其中 {1} 个符合条件。</value>
+    <comment>{0}：教室有效课桌数量；{1}：当前条件下符合条件的课桌数量。</comment>
   </data>
   <data name="SelectStudentPrompt" xml:space="preserve">
-    <value>（点击选取学生）</value>
+    <value>（点击选择）</value>
   </data>
   <data name="NoStudentNumber" xml:space="preserve">
     <value>无学号</value>
   </data>
   <data name="PersonSummaryFormat" xml:space="preserve">
-    <value>{0} · {1}</value>
+    <value>{0}（{1}）</value>
     <comment>{0}：学生姓名；{1}：学号，缺失时为“无学号”。</comment>
   </data>
   <data name="PersonSearchHint" xml:space="preserve">
-    <value>输入姓名 / 学号 / 拼音 / 首字母检索</value>
+    <value>姓名 / 学号 / 拼音 / 首字母</value>
   </data>
   <data name="PersonSearchLabel" xml:space="preserve">
     <value>搜索</value>
@@ -163,29 +163,29 @@
     <value>相对关系</value>
   </data>
   <data name="AdjacencyRangeLabel" xml:space="preserve">
-    <value>相邻范围</value>
+    <value>相邻方式</value>
   </data>
   <data name="AdjacencyAisleLabel" xml:space="preserve">
-    <value>同桌方式</value>
+    <value>走道</value>
   </data>
   <data name="AdjacencySameDeskOnly" xml:space="preserve">
-    <value>必须同桌（紧挨着）</value>
+    <value>不能隔走道</value>
   </data>
   <data name="AdjacencyAllowNarrowAisle" xml:space="preserve">
-    <value>可隔一条窄走道</value>
+    <value>可隔窄走道</value>
   </data>
   <data name="ResetViewportButton" xml:space="preserve">
-    <value>视口复位至 A</value>
+    <value>回到 A</value>
   </data>
   <data name="RelationCanvasHelp" xml:space="preserve">
-    <value>操作：鼠标左键拖拽指定相对方位，松开选取关系；中键平移；滚轮缩放画布。上方朝向教室讲台。</value>
+    <value>左键拖拽指定方位并松开选定；中键平移，滚轮缩放。上方为讲台方向。</value>
   </data>
   <data name="RelativeDirectionFormat" xml:space="preserve">
-    <value>B 相对 A 方位：横向偏 {0:+0;-0;0} 列，纵向偏 {1:+0;-0;0} 排</value>
-    <comment>{0}：B 相对 A 的横向列偏移，正数带“+”号并显示符号；{1}：B 相对 A 的纵向排偏移，正数带“+”号并显示符号。</comment>
+    <value>B 相对 A：横向 {0:+0;-0;0} 列，纵向 {1:+0;-0;0} 排</value>
+    <comment>{0}：B 相对 A 的横向列偏移，正数带“+”号；{1}：纵向排偏移，正数带“+”号。</comment>
   </data>
   <data name="FixedOffsetPositionFormat" xml:space="preserve">
-    <value>固定偏移位置：{0}</value>
+    <value>偏移：{0}</value>
     <comment>{0}：相对偏移说明，由 OffsetSummaryFormat 生成。</comment>
   </data>
   <data name="AnchorA" xml:space="preserve">
@@ -195,8 +195,8 @@
     <value>B</value>
   </data>
   <data name="OffsetSummaryFormat" xml:space="preserve">
-    <value>朝{0} {1} 排、朝{2} {3} 列</value>
-    <comment>{0}：纵向方向文字（讲台前或教室后）；{1}：纵向偏移排数；{2}：横向方向文字（门左或窗右）；{3}：横向偏移列数。</comment>
+    <value>向{0} {1} 排，向{2} {3} 列</value>
+    <comment>{0}：纵向方向文字（讲台前或教室后）；{1}：纵向偏移排数；{2}：横向方向文字（门侧或窗侧）；{3}：横向偏移列数。</comment>
   </data>
   <data name="OffsetTowardPodium" xml:space="preserve">
     <value>讲台前</value>
@@ -205,90 +205,90 @@
     <value>教室后</value>
   </data>
   <data name="OffsetTowardDoor" xml:space="preserve">
-    <value>门左</value>
+    <value>门侧</value>
   </data>
   <data name="OffsetTowardWindow" xml:space="preserve">
-    <value>窗右</value>
+    <value>窗侧</value>
   </data>
   <data name="LimitRowCountRadio" xml:space="preserve">
-    <value>限制排人数（横向）</value>
+    <value>限制每排人数（左右）</value>
   </data>
   <data name="LimitColumnCountRadio" xml:space="preserve">
-    <value>限制列人数（纵向）</value>
+    <value>限制每列人数（前后）</value>
   </data>
   <data name="TargetRowNumberLabel" xml:space="preserve">
-    <value>目标排号（从1起）</value>
+    <value>排号（从 1 起）</value>
   </data>
   <data name="TargetColumnNumberLabel" xml:space="preserve">
-    <value>目标列号（从1起）</value>
+    <value>列号（从 1 起）</value>
   </data>
   <data name="UseMinimumSeatsCheckbox" xml:space="preserve">
-    <value>设定最少就座人数</value>
+    <value>限制最少人数</value>
   </data>
   <data name="UseMaximumSeatsCheckbox" xml:space="preserve">
-    <value>设定最多就座人数</value>
+    <value>限制最多人数</value>
   </data>
   <data name="ExactSeatCountButton" xml:space="preserve">
-    <value>固定为精确人数（最少=最多）</value>
+    <value>固定人数（最少 = 最多）</value>
   </data>
   <data name="PodiumMarker" xml:space="preserve">
     <value>讲</value>
   </data>
   <data name="SavedRulesListLabel" xml:space="preserve">
-    <value>已生效规则列表（点击可调入修改）：</value>
+    <value>已保存的规则（点击可编辑）：</value>
   </data>
   <data name="ConflictRulePrefixFormat" xml:space="preserve">
-    <value>[冲突规则] {0}</value>
+    <value>【冲突】{0}</value>
     <comment>{0}：规则的完整说明文字。</comment>
   </data>
   <data name="DeleteSelectedRuleButton" xml:space="preserve">
-    <value>删除选中的规则</value>
+    <value>删除</value>
   </data>
   <data name="ClearAllRulesButton" xml:space="preserve">
-    <value>清空所有规则</value>
+    <value>清空全部</value>
   </data>
   <data name="ClearAllConfirmTitle" xml:space="preserve">
-    <value>清空所有规则确认</value>
+    <value>清空全部规则</value>
   </data>
   <data name="ClearAllConfirmMessageFormat" xml:space="preserve">
-    <value>确认清空全部 {0} 条排座规则？此操作无法撤销。</value>
+    <value>清空全部 {0} 条规则？此操作无法撤销。</value>
     <comment>{0}：当前已保存的排座规则数量。</comment>
   </data>
   <data name="ConfirmClearButton" xml:space="preserve">
-    <value>确认清空</value>
+    <value>清空</value>
   </data>
   <data name="CancelButton" xml:space="preserve">
     <value>取消</value>
   </data>
   <data name="DeleteConfirmTitle" xml:space="preserve">
-    <value>删除规则确认</value>
+    <value>删除规则</value>
   </data>
   <data name="DeleteConfirmMessage" xml:space="preserve">
-    <value>确认移除当前选中的这条排座规则？</value>
+    <value>删除选中的这条规则？</value>
   </data>
   <data name="ConfirmDeleteButton" xml:space="preserve">
-    <value>确认删除</value>
+    <value>删除</value>
   </data>
   <data name="RuleRemovedStatus" xml:space="preserve">
-    <value>排座规则已成功移除。</value>
+    <value>规则已删除。</value>
   </data>
   <data name="RuleRemoveFailedFormat" xml:space="preserve">
-    <value>规则移除未写入磁盘：{0}</value>
+    <value>删除失败：{0}</value>
     <comment>{0}：写盘失败的错误信息。</comment>
   </data>
   <data name="RuleSavedStatus" xml:space="preserve">
-    <value>排座规则已保存生效。</value>
+    <value>规则已保存。</value>
   </data>
   <data name="RuleSaveFailedFormat" xml:space="preserve">
-    <value>保存规则失败：{0}</value>
+    <value>保存失败：{0}</value>
     <comment>{0}：写盘失败的错误信息。</comment>
   </data>
   <data name="RulesClearedStatusFormat" xml:space="preserve">
-    <value>已清空全部 {0} 条排座规则。</value>
+    <value>已清空 {0} 条规则。</value>
     <comment>{0}：本次清空的排座规则数量。</comment>
   </data>
   <data name="ClearRulesFailedFormat" xml:space="preserve">
-    <value>清空规则未写入磁盘，原规则已保留：{0}</value>
+    <value>清空失败，规则未改动：{0}</value>
     <comment>{0}：写盘失败的错误信息。</comment>
   </data>
   <data name="CheckMarkError" xml:space="preserve">
@@ -298,35 +298,35 @@
     <value>【排座提示】</value>
   </data>
   <data name="CheckMarkCurrentDraft" xml:space="preserve">
-    <value>【当前编辑规则】</value>
+    <value>【正在编辑】</value>
   </data>
   <data name="CheckMarkSavedConflict" xml:space="preserve">
-    <value>【已存冲突规则】</value>
+    <value>【已保存的冲突规则】</value>
   </data>
   <data name="CheckReportFormat" xml:space="preserve">
     <value>{0}：{1}</value>
-    <comment>{0}：检查状态标签（规则错误、排座提示、当前编辑规则或已存冲突规则）；{1}：诊断说明。</comment>
+    <comment>{0}：检查状态标签；{1}：诊断说明。</comment>
   </data>
   <data name="PreCheckDanglingReference" xml:space="preserve">
-    <value>规则中关联的学生已不在当前班级名单中。</value>
+    <value>规则关联的学生已不在当前名单中。</value>
   </data>
   <data name="PreCheckAlwaysTrue" xml:space="preserve">
-    <value>该规则在当前教室布局下已自然满足（无实际约束作用）。</value>
+    <value>该规则在当前布局下已自动满足，没有实际约束作用。</value>
   </data>
   <data name="PreCheckAlwaysFalse" xml:space="preserve">
-    <value>该规则在当前教室布局下在数学上不可达成（无任何合法座位）。</value>
+    <value>该规则在当前布局下无法满足（没有任何合法座位）。</value>
   </data>
   <data name="PreCheckOutOfBound" xml:space="preserve">
-    <value>指定的行列编号或坐标已超出当前教室的实际尺寸边界。</value>
+    <value>指定的行列编号或坐标超出了教室尺寸。</value>
   </data>
   <data name="PreCheckPinnedSeatCollision" xml:space="preserve">
-    <value>固定座位的目标格当前不是有效学生课桌（例如被设为走道或讲台）。</value>
+    <value>固定座位的目标格不是学生课桌（例如被设为走道或讲台）。</value>
   </data>
   <data name="PreCheckDuplicatePin" xml:space="preserve">
-    <value>多位不同的学生被指定在同一个座位上，造成位置冲突。</value>
+    <value>多名学生被固定在同一个座位上。</value>
   </data>
   <data name="PreCheckOverCapacity" xml:space="preserve">
-    <value>班级学生总数超过了教室可用的课桌总容量，或单排行列人数上限不足。</value>
+    <value>学生总人数超过可用课桌数，或某排、列的人数上限不足。</value>
   </data>
   <data name="RelationExactOffset" xml:space="preserve">
     <value>指定相对偏移</value>
@@ -338,47 +338,47 @@
     <value>坐在正后方</value>
   </data>
   <data name="RelationLeftOf" xml:space="preserve">
-    <value>坐在正左侧</value>
+    <value>坐在左边</value>
   </data>
   <data name="RelationRightOf" xml:space="preserve">
-    <value>坐在正右侧</value>
+    <value>坐在右边</value>
   </data>
   <data name="RelationSameRow" xml:space="preserve">
-    <value>安排在同一排</value>
+    <value>在同一排</value>
   </data>
   <data name="RelationSameColumn" xml:space="preserve">
-    <value>安排在同一列</value>
+    <value>在同一列</value>
   </data>
   <data name="RelationProximity" xml:space="preserve">
     <value>相邻就座</value>
   </data>
   <data name="AdjacencyHorizontal" xml:space="preserve">
-    <value>横向（左右）</value>
+    <value>左右</value>
   </data>
   <data name="AdjacencyFourWay" xml:space="preserve">
-    <value>四向（前后左右）</value>
+    <value>前后左右</value>
   </data>
   <data name="AdjacencyEightWay" xml:space="preserve">
-    <value>八向（含斜角）</value>
+    <value>含斜角</value>
   </data>
   <data name="PinnedRuleFormat" xml:space="preserve">
-    <value>{0} 必须固定在第 {1} 排、第 {2} 列</value>
+    <value>{0} 固定在第 {1} 排第 {2} 列</value>
     <comment>{0}：学生姓名；{1}：目标排号（从 1 起）；{2}：目标列号（从 1 起）。</comment>
   </data>
   <data name="RegionUnrestrictedFormat" xml:space="preserve">
-    <value>{0} 的就座区域不设限制</value>
+    <value>{0} 不限区域</value>
     <comment>{0}：学生姓名。</comment>
   </data>
   <data name="RegionForbiddenAllFormat" xml:space="preserve">
-    <value>{0} 禁止在教室内任何座位就座（此限制导致无解）</value>
+    <value>{0} 被禁止坐在任何座位，导致无解</value>
     <comment>{0}：学生姓名。</comment>
   </data>
   <data name="RegionRequiredFormat" xml:space="preserve">
-    <value>{0} 必须坐在 {1} 区域内的课桌</value>
+    <value>{0} 只能坐在 {1} 区域内</value>
     <comment>{0}：学生姓名；{1}：区域范围说明。</comment>
   </data>
   <data name="RegionForbiddenFormat" xml:space="preserve">
-    <value>{0} 禁止坐在 {1} 区域内的课桌</value>
+    <value>{0} 不能坐在 {1} 区域内</value>
     <comment>{0}：学生姓名；{1}：区域范围说明。</comment>
   </data>
   <data name="RowUnit" xml:space="preserve">
@@ -391,7 +391,7 @@
     <value>、</value>
   </data>
   <data name="RangeEmptyFormat" xml:space="preserve">
-    <value>第 {0} {1}至第 {2} {1}（空区间，不可达成）</value>
+    <value>第 {0} {1}到第 {2} {1}（空区间，无法满足）</value>
     <comment>{0}：起始排号或列号；{1}：单位（排或列）；{2}：结束排号或列号。</comment>
   </data>
   <data name="RangeSingleFormat" xml:space="preserve">
@@ -403,58 +403,58 @@
     <comment>{0}：起始排号或列号；{1}：结束排号或列号；{2}：单位（排或列）。</comment>
   </data>
   <data name="RangeMinimumFormat" xml:space="preserve">
-    <value>第 {0} {1}及以后排列</value>
+    <value>第 {0} {1}及以后</value>
     <comment>{0}：起始排号或列号；{1}：单位（排或列）。</comment>
   </data>
   <data name="RangeMaximumFormat" xml:space="preserve">
-    <value>第 {0} {1}及以前排列</value>
+    <value>第 {0} {1}及以前</value>
     <comment>{0}：结束排号或列号；{1}：单位（排或列）。</comment>
   </data>
   <data name="CapacityRowTargetFormat" xml:space="preserve">
-    <value>第 {0} 排（横向）</value>
+    <value>第 {0} 排</value>
     <comment>{0}：目标排号（从 1 起）。</comment>
   </data>
   <data name="CapacityColumnTargetFormat" xml:space="preserve">
-    <value>第 {0} 列（纵向）</value>
+    <value>第 {0} 列</value>
     <comment>{0}：目标列号（从 1 起）。</comment>
   </data>
   <data name="CapacityUnlimited" xml:space="preserve">
     <value>不限人数</value>
   </data>
   <data name="CapacityAtLeastFormat" xml:space="preserve">
-    <value>至少安排 {0} 人</value>
+    <value>至少 {0} 人</value>
     <comment>{0}：最少就座人数。</comment>
   </data>
   <data name="CapacityAtMostFormat" xml:space="preserve">
-    <value>最多允许 {0} 人</value>
+    <value>最多 {0} 人</value>
     <comment>{0}：最多就座人数。</comment>
   </data>
   <data name="CapacityExactFormat" xml:space="preserve">
-    <value>精确安排 {0} 人</value>
+    <value>正好 {0} 人</value>
     <comment>{0}：精确就座人数。</comment>
   </data>
   <data name="CapacityRangeFormat" xml:space="preserve">
-    <value>安排 {0} 至 {1} 人</value>
+    <value>{0} 到 {1} 人</value>
     <comment>{0}：最少就座人数；{1}：最多就座人数。</comment>
   </data>
   <data name="CapacitySummaryFormat" xml:space="preserve">
-    <value>{0}容纳人数：{1}</value>
+    <value>{0}：{1}</value>
     <comment>{0}：行列目标说明；{1}：人数限制说明。</comment>
   </data>
   <data name="SameSeatRequiredFormat" xml:space="preserve">
-    <value>{0} 必须与 {1} 同座（偏移量为 0）</value>
+    <value>{0} 与 {1} 必须同桌</value>
     <comment>{0}：学生 A 姓名；{1}：学生 B 姓名。</comment>
   </data>
   <data name="SameSeatForbiddenFormat" xml:space="preserve">
-    <value>{0} 不得与 {1} 坐在同一张课桌</value>
+    <value>{0} 不能与 {1} 同桌</value>
     <comment>{0}：学生 A 姓名；{1}：学生 B 姓名。</comment>
   </data>
   <data name="OffsetSeatRequiredFormat" xml:space="preserve">
-    <value>{0} 必须坐在 {1} {2}的课桌</value>
+    <value>{0} 必须坐在 {1} {2}的座位</value>
     <comment>{0}：学生 A 姓名；{1}：学生 B 姓名；{2}：相对偏移说明。</comment>
   </data>
   <data name="OffsetSeatForbiddenFormat" xml:space="preserve">
-    <value>{0} 禁止坐在 {1} {2}的课桌</value>
+    <value>{0} 不能坐在 {1} {2}的座位</value>
     <comment>{0}：学生 A 姓名；{1}：学生 B 姓名；{2}：相对偏移说明。</comment>
   </data>
   <data name="DirectionRequiredFormat" xml:space="preserve">
@@ -462,43 +462,43 @@
     <comment>{0}：学生 A 姓名；{1}：学生 B 姓名；{2}：方位说明。</comment>
   </data>
   <data name="DirectionForbiddenFormat" xml:space="preserve">
-    <value>{0} 禁止坐在 {1} 的{2}</value>
+    <value>{0} 不能坐在 {1} 的{2}</value>
     <comment>{0}：学生 A 姓名；{1}：学生 B 姓名；{2}：方位说明。</comment>
   </data>
   <data name="ProximityDistanceUnlimitedFormat" xml:space="preserve">
-    <value>{0} 与 {1} 的相对距离不限（无约束效果）</value>
+    <value>{0} 与 {1} 的距离不限，没有约束作用</value>
     <comment>{0}：学生 A 姓名；{1}：学生 B 姓名。</comment>
   </data>
   <data name="ProximityNoLimitConflictFormat" xml:space="preserve">
-    <value>{0} 与 {1} 不限距离（与排座逻辑冲突，无法满足）</value>
+    <value>{0} 与 {1} 不限距离，与排座要求冲突，无法满足</value>
     <comment>{0}：学生 A 姓名；{1}：学生 B 姓名。</comment>
   </data>
   <data name="ProximityNegativeFormat" xml:space="preserve">
-    <value>{0} 与 {1} 的最大距离上限为负数（不可达成）</value>
+    <value>{0} 与 {1} 的最大距离为负数，无法满足</value>
     <comment>{0}：学生 A 姓名；{1}：学生 B 姓名。</comment>
   </data>
   <data name="ProximitySameSeatRequiredFormat" xml:space="preserve">
-    <value>{0} 必须与 {1} 安排在同一张课桌</value>
+    <value>{0} 与 {1} 必须同桌</value>
     <comment>{0}：学生 A 姓名；{1}：学生 B 姓名。</comment>
   </data>
   <data name="ProximitySameSeatForbiddenFormat" xml:space="preserve">
-    <value>{0} 禁止与 {1} 坐在同一张课桌</value>
+    <value>{0} 不能与 {1} 同桌</value>
     <comment>{0}：学生 A 姓名；{1}：学生 B 姓名。</comment>
   </data>
   <data name="ProximityAdjacentRequiredFormat" xml:space="preserve">
-    <value>{0} 必须与 {1} 相邻就座（{2}）</value>
-    <comment>{0}：学生 A 姓名；{1}：学生 B 姓名；{2}：相邻范围说明。</comment>
+    <value>{0} 与 {1} 必须相邻（{2}）</value>
+    <comment>{0}：学生 A 姓名；{1}：学生 B 姓名；{2}：相邻方式说明。</comment>
   </data>
   <data name="ProximityAdjacentForbiddenFormat" xml:space="preserve">
-    <value>{0} 禁止与 {1} 相邻就座（{2}）</value>
-    <comment>{0}：学生 A 姓名；{1}：学生 B 姓名；{2}：相邻范围说明。</comment>
+    <value>{0} 不能与 {1} 相邻（{2}）</value>
+    <comment>{0}：学生 A 姓名；{1}：学生 B 姓名；{2}：相邻方式说明。</comment>
   </data>
   <data name="ProximityMaxDistanceFormat" xml:space="preserve">
-    <value>{0} 与 {1} 之间的座位间距不得超过 {2} 步</value>
+    <value>{0} 与 {1} 的距离不超过 {2} 步</value>
     <comment>{0}：学生 A 姓名；{1}：学生 B 姓名；{2}：最大距离步数。</comment>
   </data>
   <data name="ProximityMinDistanceFormat" xml:space="preserve">
-    <value>{0} 与 {1} 之间的座位间距必须大于 {2} 步</value>
+    <value>{0} 与 {1} 的距离大于 {2} 步</value>
     <comment>{0}：学生 A 姓名；{1}：学生 B 姓名；{2}：距离步数阈值。</comment>
   </data>
   <data name="UnsupportedDistanceFormat" xml:space="preserve">
@@ -518,10 +518,10 @@
     <value>正右侧</value>
   </data>
   <data name="DirectionSameRow" xml:space="preserve">
-    <value>同一排座位</value>
+    <value>同一排</value>
   </data>
   <data name="DirectionSameColumn" xml:space="preserve">
-    <value>同一列座位</value>
+    <value>同一列</value>
   </data>
   <data name="UnsupportedRelationKindFormat" xml:space="preserve">
     <value>不支持的关系类型：{0}</value>
@@ -536,11 +536,11 @@
     <comment>{0}：方位说明。</comment>
   </data>
   <data name="DirectionNegativeDistanceFormat" xml:space="preserve">
-    <value>{0}课桌（距离上限为负数，无法达成）</value>
+    <value>{0}课桌（距离为负，无法满足）</value>
     <comment>{0}：方位说明。</comment>
   </data>
   <data name="DirectionSameDeskFormat" xml:space="preserve">
-    <value>{0}同一课桌（距离为 0）</value>
+    <value>{0}同一课桌（距离 0）</value>
     <comment>{0}：方位说明。</comment>
   </data>
   <data name="DirectionWithinStepsFormat" xml:space="preserve">
@@ -548,16 +548,16 @@
     <comment>{0}：方位说明；{1}：距离步数。</comment>
   </data>
   <data name="AdjacencyHorizontalHint" xml:space="preserve">
-    <value>横向：同排左右，可跨窄走道</value>
+    <value>同排左右，可隔窄走道</value>
   </data>
   <data name="AdjacencyHorizontalStrictHint" xml:space="preserve">
-    <value>横向：同排左右，必须同桌</value>
+    <value>同排左右，不能隔走道</value>
   </data>
   <data name="AdjacencyFourWayHint" xml:space="preserve">
-    <value>四向：前后左右，含跨窄过道</value>
+    <value>前后左右，可隔窄过道</value>
   </data>
   <data name="AdjacencyEightWayHint" xml:space="preserve">
-    <value>八向：前后左右及斜角，含正交跨窄过道</value>
+    <value>前后左右及斜角，可隔窄过道</value>
   </data>
   <data name="UnsupportedAdjacencyFormat" xml:space="preserve">
     <value>不支持的相邻模式：{0}</value>
@@ -567,11 +567,11 @@
     <value>（含斜角）</value>
   </data>
   <data name="OffsetWindowFormat" xml:space="preserve">
-    <value>向窗侧（右）偏 {0} 列</value>
+    <value>向窗侧偏 {0} 列</value>
     <comment>{0}：向窗侧偏移的列数。</comment>
   </data>
   <data name="OffsetDoorFormat" xml:space="preserve">
-    <value>向门侧（左）偏 {0} 列</value>
+    <value>向门侧偏 {0} 列</value>
     <comment>{0}：向门侧偏移的列数。</comment>
   </data>
   <data name="OffsetBackFormat" xml:space="preserve">
@@ -583,7 +583,7 @@
     <comment>{0}：向讲台前方偏移的排数。</comment>
   </data>
   <data name="UnknownStudentFormat" xml:space="preserve">
-    <value>[未知学生:{0}]</value>
+    <value>【未知学生 {0}】</value>
     <comment>{0}：名单中已找不到的人员标识。</comment>
   </data>
   <data name="UnsupportedRuleTypeFormat" xml:space="preserve">
@@ -601,21 +601,21 @@
     <comment>{0}：重复的规则标识。</comment>
   </data>
   <data name="RuleLoadFailedFormat" xml:space="preserve">
-    <value>规则文件读取失败，已使用空规则集（原文件未改动）：{0}</value>
+    <value>规则读取失败，已改用空规则集（原文件未改动）：{0}</value>
     <comment>{0}：读取或解析失败的错误信息。</comment>
   </data>
   <data name="MissingRuleId" xml:space="preserve">
-    <value>规则缺少标识 Id。</value>
+    <value>规则缺少 Id。</value>
   </data>
   <data name="MissingRelationData" xml:space="preserve">
-    <value>关系规则缺少关系数据。</value>
+    <value>关系规则缺少数据。</value>
   </data>
   <data name="MissingRelationPersonFormat" xml:space="preserve">
     <value>关系规则缺少人员标识：{0}。</value>
     <comment>{0}：出错的关系规则标识。</comment>
   </data>
   <data name="MissingPinnedPosition" xml:space="preserve">
-    <value>固定规则缺少固定位置。</value>
+    <value>固定规则缺少位置。</value>
   </data>
   <data name="MissingPinnedPersonFormat" xml:space="preserve">
     <value>固定规则缺少人员标识：{0}。</value>
@@ -625,7 +625,7 @@
     <value>容量规则缺少人数限制。</value>
   </data>
   <data name="MissingRegionData" xml:space="preserve">
-    <value>区域规则缺少区域数据。</value>
+    <value>区域规则缺少数据。</value>
   </data>
   <data name="MissingRegionPersonFormat" xml:space="preserve">
     <value>区域规则缺少人员标识：{0}。</value>

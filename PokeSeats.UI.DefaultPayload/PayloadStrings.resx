@@ -62,23 +62,23 @@
     <value>取消</value>
   </data>
   <data name="CsvMalformedLineFormat" xml:space="preserve">
-    <value>CSV 第 {0} 行格式无效：{1}</value>
+    <value>CSV 第 {0} 行格式有误：{1}</value>
     <comment>{0} = CSV 行号；{1} = 解析异常信息。</comment>
   </data>
   <data name="CsvMissingHeader" xml:space="preserve">
-    <value>CSV 文件中缺少表头列标题行。</value>
+    <value>CSV 文件缺少表头行。</value>
   </data>
   <data name="ExcelFileNotFound" xml:space="preserve">
-    <value>未找到指定的 Excel 表格文件。</value>
+    <value>找不到指定的 Excel 文件。</value>
   </data>
   <data name="ExcelMissingHeader" xml:space="preserve">
-    <value>工作表中缺少表头列标题行。</value>
+    <value>工作表中没有表头行。</value>
   </data>
   <data name="ExcelNoWorksheets" xml:space="preserve">
-    <value>所选 Excel 工作簿中没有任何工作表。</value>
+    <value>所选工作簿中没有工作表。</value>
   </data>
   <data name="ExcelUnsupportedFormat" xml:space="preserve">
-    <value>仅支持导入 Excel 工作簿格式（.xlsx 或 .xls）。</value>
+    <value>仅支持 .xlsx 或 .xls 格式的工作簿。</value>
   </data>
   <data name="FilePickerAllFilesFilter" xml:space="preserve">
     <value>所有文件 (*.*)</value>
@@ -96,20 +96,20 @@
     <value>JSON 名单 (*.json)</value>
   </data>
   <data name="FilePickerSelectRosterTitle" xml:space="preserve">
-    <value>选择学生名单文件</value>
+    <value>选择名单文件</value>
   </data>
   <data name="LayoutApplySizeButton" xml:space="preserve">
-    <value>调整规格</value>
+    <value>应用规格</value>
   </data>
   <data name="LayoutAssignedStatusFormat" xml:space="preserve">
-    <value>已将选中的 {0} 处位置设为：{1}。</value>
-    <comment>{0} = 单元格数量；{1} = 区域类型名称。</comment>
+    <value>已将 {0} 个所选位置设为{1}。</value>
+    <comment>{0} = 单元格数量；{1} = 区域类型名称（以全角冒号结尾）。</comment>
   </data>
   <data name="LayoutAssignTypeHeading" xml:space="preserve">
-    <value>设置选中区域为：</value>
+    <value>将选中区域设为：</value>
   </data>
   <data name="LayoutCellCountMismatch" xml:space="preserve">
-    <value>教室布局数据损坏：单元格总数与行列尺寸不匹配。</value>
+    <value>布局数据损坏：单元格总数与行列尺寸不符。</value>
   </data>
   <data name="LayoutCellShortAisle" xml:space="preserve">
     <value>宽</value>
@@ -124,25 +124,25 @@
     <value>讲</value>
   </data>
   <data name="LayoutCellTypeAisle" xml:space="preserve">
-    <value>主走道（宽过道）</value>
+    <value>主走道</value>
   </data>
   <data name="LayoutCellTypeDesk" xml:space="preserve">
-    <value>学生座位（课桌）</value>
+    <value>学生课桌</value>
   </data>
   <data name="LayoutCellTypeEmpty" xml:space="preserve">
-    <value>空白区域（无设施）</value>
+    <value>空白格</value>
   </data>
   <data name="LayoutCellTypeNarrowAisle" xml:space="preserve">
-    <value>行间过道（窄过道）</value>
+    <value>窄过道</value>
   </data>
   <data name="LayoutCellTypePodium" xml:space="preserve">
-    <value>讲台区域</value>
+    <value>讲台</value>
   </data>
   <data name="LayoutClassroomSpecLabel" xml:space="preserve">
     <value>教室规格：</value>
   </data>
   <data name="LayoutClearButton" xml:space="preserve">
-    <value>清空教室</value>
+    <value>清空布局</value>
   </data>
   <data name="LayoutColumnCountLabel" xml:space="preserve">
     <value>列数</value>
@@ -151,41 +151,41 @@
     <value>列</value>
   </data>
   <data name="LayoutCurrentSpecFormat" xml:space="preserve">
-    <value>当前规格：{0} 排 × {1} 列 · 可用座位 {2} 个</value>
-    <comment>{0} = 排数；{1} = 列数；{2} = 可用座位数。</comment>
+    <value>{0} 排 × {1} 列，可用课桌 {2} 个</value>
+    <comment>{0} = 排数；{1} = 列数；{2} = 可用课桌数。</comment>
   </data>
   <data name="LayoutDimensionErrorFormat" xml:space="preserve">
-    <value>教室{0}必须在 {1} 至 {2} 之间。</value>
+    <value>教室{0}需在 {1} 到 {2} 之间。</value>
     <comment>{0} = “排数”或“列数”；{1} = 最小尺寸；{2} = 最大尺寸。</comment>
   </data>
   <data name="LayoutDimensionRangeError" xml:space="preserve">
-    <value>教室排数和列数必须在 1 至 32 之间。</value>
+    <value>教室排数和列数需在 1 到 32 之间。</value>
   </data>
   <data name="LayoutFileEmpty" xml:space="preserve">
-    <value>教室布局文件内容为空。</value>
+    <value>布局文件为空。</value>
   </data>
   <data name="LayoutLoadFailedFormat" xml:space="preserve">
-    <value>布局文件加载异常，已重置为空白教室：{0}</value>
+    <value>布局文件读取失败，已重置为空白教室：{0}</value>
     <comment>{0} = 异常信息。</comment>
   </data>
   <data name="LayoutResetStatus" xml:space="preserve">
-    <value>教室布局已重置为空白并自动保存。</value>
+    <value>教室布局已重置为空白并保存。</value>
   </data>
   <data name="LayoutResizeConfirmButton" xml:space="preserve">
-    <value>确认调整</value>
+    <value>确认缩减</value>
   </data>
   <data name="LayoutResizeConfirmQuestionFormat" xml:space="preserve">
-    <value>确认将教室规格缩减为 {0} 排 × {1} 列？</value>
+    <value>将教室缩减为 {0} 排 × {1} 列？</value>
     <comment>{0} = 目标排数；{1} = 目标列数。</comment>
   </data>
   <data name="LayoutResizeConfirmTitle" xml:space="preserve">
-    <value>确认缩减教室尺寸</value>
+    <value>确认缩减教室</value>
   </data>
   <data name="LayoutResizeConfirmWarning" xml:space="preserve">
-    <value>注意：超出新范围的座位和走道设置将被永久裁剪。</value>
+    <value>新范围之外的座位和走道设置将被永久裁掉。</value>
   </data>
   <data name="LayoutResizedStatusFormat" xml:space="preserve">
-    <value>教室规格已更新为 {0} 排 × {1} 列。</value>
+    <value>教室规格已改为 {0} 排 × {1} 列。</value>
     <comment>{0} = 排数；{1} = 列数。</comment>
   </data>
   <data name="LayoutRowCountLabel" xml:space="preserve">
@@ -202,14 +202,14 @@
     <comment>{0} = 异常信息。</comment>
   </data>
   <data name="LayoutSavedStatus" xml:space="preserve">
-    <value>教室布局已保存。</value>
+    <value>布局已保存。</value>
   </data>
   <data name="LayoutSizeInvalidFormat" xml:space="preserve">
-    <value>尺寸设置无效：{0}</value>
+    <value>尺寸无效：{0}</value>
     <comment>{0} = 异常信息。</comment>
   </data>
   <data name="LayoutUnknownCellTypeFormat" xml:space="preserve">
-    <value>布局包含未识别的区域类型编号：{0}。</value>
+    <value>布局中存在未识别的区域类型编号 {0}。</value>
     <comment>{0} = 未识别的区域类型编号。</comment>
   </data>
   <data name="LayoutViewTitle" xml:space="preserve">
@@ -223,69 +223,69 @@
     <comment>{0} = 属性名称；该属性不是数值类型，不能用于排座目标。</comment>
   </data>
   <data name="ObjectiveAttributeRequired" xml:space="preserve">
-    <value>请选择一个数值属性。</value>
+    <value>请选择属性。</value>
   </data>
   <data name="ObjectiveBimodal" xml:space="preserve">
-    <value>值越大越靠两边</value>
+    <value>值越大越靠两侧</value>
   </data>
   <data name="ObjectiveCentered" xml:space="preserve">
     <value>值越大越居中</value>
   </data>
   <data name="ObjectiveDeleteButton" xml:space="preserve">
-    <value>删除选中</value>
+    <value>删除</value>
   </data>
   <data name="ObjectiveDeleteConfirmButton" xml:space="preserve">
-    <value>确认删除</value>
+    <value>删除</value>
   </data>
   <data name="ObjectiveDeleteConfirmFormat" xml:space="preserve">
-    <value>确认删除目标「{0}」？</value>
+    <value>删除目标「{0}」？</value>
     <comment>{0} = 目标的显示名称。</comment>
   </data>
   <data name="ObjectiveDeleteConfirmTitle" xml:space="preserve">
-    <value>确认删除目标</value>
+    <value>删除目标</value>
   </data>
   <data name="ObjectiveDeletedStatus" xml:space="preserve">
-    <value>目标已删除并保存。</value>
+    <value>目标已删除。</value>
   </data>
   <data name="ObjectiveDimensionCenter" xml:space="preserve">
-    <value>距中心列距离</value>
+    <value>距中心列的距离</value>
   </data>
   <data name="ObjectiveDimensionColumn" xml:space="preserve">
-    <value>左右（列号）</value>
+    <value>左右（列）</value>
   </data>
   <data name="ObjectiveDimensionLabel" xml:space="preserve">
     <value>座位维度</value>
   </data>
   <data name="ObjectiveDimensionRow" xml:space="preserve">
-    <value>前后（行号）</value>
+    <value>前后（排）</value>
   </data>
   <data name="ObjectiveDisplayNameColumnHeader" xml:space="preserve">
-    <value>显示名称</value>
+    <value>名称</value>
   </data>
   <data name="ObjectiveDisplayNameLabel" xml:space="preserve">
-    <value>显示名称</value>
+    <value>名称</value>
   </data>
   <data name="ObjectiveEditorHeading" xml:space="preserve">
-    <value>目标设置</value>
+    <value>编辑目标</value>
   </data>
   <data name="ObjectiveEditorViewTitle" xml:space="preserve">
     <value>排座目标</value>
   </data>
   <data name="ObjectiveRowBalance" xml:space="preserve">
-    <value>各排均衡</value>
+    <value>各排人数均衡</value>
   </data>
   <data name="ObjectiveRowBalanceExplanation" xml:space="preserve">
-    <value>按各实际 Desk 行的座位容量比例平衡已知属性总量。缺失属性不计入行和；所有已知值相同时均衡已知人数。此目标固定使用行维度，不限定区域。</value>
+    <value>按各排课桌数分配该属性的已知总和，缺失值不计。该目标固定使用前后维度，且不设区域。</value>
   </data>
   <data name="ObjectiveInvalidShape" xml:space="preserve">
-    <value>Centered 和“值越大越靠两边”仅支持“距中心列距离”维度。</value>
+    <value>“居中”和“靠两侧”只能用于“距中心列的距离”维度。</value>
   </data>
   <data name="ObjectiveListShapeSummaryFormat" xml:space="preserve">
-    <value>{0} · {1}</value>
+    <value>{0}，{1}</value>
     <comment>{0} = 映射形状名称；{1} = 座位维度名称。</comment>
   </data>
   <data name="ObjectiveLoadFailedFormat" xml:space="preserve">
-    <value>目标文件加载失败：{0}</value>
+    <value>目标文件读取失败：{0}</value>
     <comment>{0} = 异常信息。</comment>
   </data>
   <data name="ObjectiveMoveDownButton" xml:space="preserve">
@@ -295,34 +295,34 @@
     <value>上移</value>
   </data>
   <data name="ObjectiveNameRequired" xml:space="preserve">
-    <value>显示名称不能为空。</value>
+    <value>名称不能为空。</value>
   </data>
   <data name="ObjectiveNewButton" xml:space="preserve">
     <value>新建目标</value>
   </data>
   <data name="ObjectiveNoAttributeOption" xml:space="preserve">
-    <value>（请选择属性）</value>
+    <value>（未选择）</value>
   </data>
   <data name="ObjectiveNoAttributesAvailable" xml:space="preserve">
-    <value>名单中还没有属性定义，请先在“学生名单”面板导入带属性的名单。</value>
+    <value>还没有属性定义。请先在「学生名单」中导入带属性的名单。</value>
   </data>
   <data name="ObjectiveNoneHint" xml:space="preserve">
-    <value>暂无排座目标，点击“新建目标”添加。</value>
+    <value>暂无排座目标，点击「新建目标」添加。</value>
   </data>
   <data name="ObjectiveNoNumberAttribute" xml:space="preserve">
-    <value>所选属性不是数值类型，无法用于排座目标。</value>
+    <value>该属性不是数值类型，无法用于排座目标。</value>
   </data>
   <data name="ObjectivePriorityColumnHeader" xml:space="preserve">
     <value>优先级</value>
   </data>
   <data name="ObjectivePriorityInvalid" xml:space="preserve">
-    <value>优先级必须大于等于 1。</value>
+    <value>优先级需不小于 1。</value>
   </data>
   <data name="ObjectivePriorityLabel" xml:space="preserve">
     <value>优先级</value>
   </data>
   <data name="ObjectiveSaveButton" xml:space="preserve">
-    <value>保存修改</value>
+    <value>保存</value>
   </data>
   <data name="ObjectiveSaveFailedFormat" xml:space="preserve">
     <value>保存失败：{0}</value>
@@ -332,13 +332,13 @@
     <value>目标已保存。</value>
   </data>
   <data name="ObjectiveSelectHint" xml:space="preserve">
-    <value>选择列表中的目标进行编辑，或点击“新建目标”。</value>
+    <value>选择上方的目标进行编辑，或点击「新建目标」。</value>
   </data>
   <data name="ObjectiveShapeAscendingToFront" xml:space="preserve">
     <value>值越小越靠前</value>
   </data>
   <data name="ObjectiveShapeColumnHeader" xml:space="preserve">
-    <value>形状摘要</value>
+    <value>形状</value>
   </data>
   <data name="ObjectiveShapeDescendingToFront" xml:space="preserve">
     <value>值越大越靠前</value>
@@ -347,53 +347,53 @@
     <value>映射形状</value>
   </data>
   <data name="RosterBrowseButton" xml:space="preserve">
-    <value>浏览文件...</value>
+    <value>浏览…</value>
   </data>
   <data name="RosterClearButton" xml:space="preserve">
     <value>清空名单</value>
   </data>
   <data name="RosterClearConfirmBody" xml:space="preserve">
-    <value>清空后将保存为空名单，可重新导入名单文件。</value>
+    <value>清空后会保存为空名单，可重新导入。</value>
   </data>
   <data name="RosterClearConfirmButton" xml:space="preserve">
     <value>确认清空</value>
   </data>
   <data name="RosterClearConfirmQuestionFormat" xml:space="preserve">
-    <value>确认清空当前名单中的 {0} 名学生？</value>
+    <value>清空当前名单中的 {0} 名学生？</value>
     <comment>{0} = 当前名单学生人数。</comment>
   </data>
   <data name="RosterClearConfirmRulesNote" xml:space="preserve">
-    <value>已有排座规则会保留，涉及原名单学生的规则需重新设置。</value>
+    <value>排座规则会保留，但涉及原名单学生的规则需要重新设置。</value>
   </data>
   <data name="RosterClearConfirmTitle" xml:space="preserve">
-    <value>确认清空名单</value>
+    <value>清空名单</value>
   </data>
   <data name="RosterClearedStatus" xml:space="preserve">
-    <value>学生名单已清空并保存，可重新导入名单。</value>
+    <value>名单已清空并保存，可重新导入。</value>
   </data>
   <data name="RosterClearFailedFormat" xml:space="preserve">
-    <value>清空失败，当前名单未更改：{0}</value>
+    <value>清空失败，名单未改动：{0}</value>
     <comment>{0} = 异常信息。</comment>
   </data>
   <data name="RosterColumnNoneOption" xml:space="preserve">
-    <value>（不导入此项）</value>
+    <value>不导入</value>
   </data>
   <data name="RosterColumnPrompt" xml:space="preserve">
-    <value>请指定姓名、学号和小组对应的列（学号和小组非必填）：</value>
+    <value>指定姓名、学号、小组对应的列（学号和小组可留空）：</value>
   </data>
   <data name="RosterColumnUnsetOption" xml:space="preserve">
-    <value>（请选择匹配列）</value>
+    <value>（请选择列）</value>
   </data>
   <data name="RosterCurrentCountFormat" xml:space="preserve">
-    <value>当前班级人数：{0} 人</value>
+    <value>当前 {0} 人</value>
     <comment>{0} = 当前班级人数。</comment>
   </data>
   <data name="RosterDuplicateStudentNumberFormat" xml:space="preserve">
-    <value>检测到重复学号“{0}”，请核对名单后重试。</value>
+    <value>学号「{0}」重复，请核对名单后重试。</value>
     <comment>{0} = 重复学号。</comment>
   </data>
   <data name="RosterFileNotFound" xml:space="preserve">
-    <value>未找到指定的名单文件。</value>
+    <value>找不到指定的名单文件。</value>
   </data>
   <data name="RosterGroupColumnLabel" xml:space="preserve">
     <value>小组列（可选）</value>
@@ -402,23 +402,23 @@
     <value>小组</value>
   </data>
   <data name="RosterImportConfirmButton" xml:space="preserve">
-    <value>确认导入名单</value>
+    <value>导入</value>
   </data>
   <data name="RosterImportFailedFormat" xml:space="preserve">
     <value>导入失败：{0}</value>
     <comment>{0} = 异常信息。</comment>
   </data>
   <data name="RosterImportHeading" xml:space="preserve">
-    <value>导入学生花名册（Excel / CSV / JSON）</value>
+    <value>导入学生名单（Excel / CSV / JSON）</value>
   </data>
   <data name="RosterImportHint" xml:space="preserve">
-    <value>表格使用首行列标题；原生 JSON 保留属性，SecRandom JSON 对应姓名、学号和小组。</value>
+    <value>表格以首行为列标题；原生 JSON 保留属性，SecRandom JSON 按姓名、学号、小组读取。</value>
   </data>
   <data name="RosterImportNote" xml:space="preserve">
-    <value>确认导入会整体替换名单及属性定义并保存；表格中的空姓名行会跳过。</value>
+    <value>导入会整体替换名单及属性定义并保存；姓名为空的行会跳过。</value>
   </data>
   <data name="RosterImportSuccessFormat" xml:space="preserve">
-    <value>导入成功：已录入 {0} 名学生（跳过空白或无效行 {1} 行）。</value>
+    <value>已导入 {0} 名学生，跳过空行或无效行 {1} 行。</value>
     <comment>{0} = 导入学生数；{1} = 跳过的空白或无效行数。</comment>
   </data>
   <data name="RosterInitialStatus" xml:space="preserve">
@@ -428,20 +428,20 @@
     <value>姓名列</value>
   </data>
   <data name="RosterNameHeader" xml:space="preserve">
-    <value>学生姓名</value>
+    <value>姓名</value>
   </data>
   <data name="RosterPreviewFailedFormat" xml:space="preserve">
     <value>名单读取失败：{0}</value>
     <comment>{0} = 异常信息。</comment>
   </data>
   <data name="RosterPreviewSuccessStatus" xml:space="preserve">
-    <value>名单读取成功，请核对姓名、学号和小组列后点击导入。</value>
+    <value>名单读取成功，核对下方的列对应关系后点击「导入」。</value>
   </data>
   <data name="RosterReadButton" xml:space="preserve">
     <value>读取名单</value>
   </data>
   <data name="RosterRecordCountFormat" xml:space="preserve">
-    <value>共读取 {0} 条记录</value>
+    <value>共 {0} 条记录</value>
     <comment>{0} = 读取到的记录条数。</comment>
   </data>
   <data name="RosterSelectedFileFormat" xml:space="preserve">
@@ -455,35 +455,35 @@
     <value>学号</value>
   </data>
   <data name="RosterUnsupportedFormat" xml:space="preserve">
-    <value>支持 Excel（.xlsx、.xls）、CSV、PokeSeats 原生 JSON 和 SecRandom JSON 名单。</value>
+    <value>支持 Excel（.xlsx、.xls）、CSV、PokeSeats 原生 JSON 和 SecRandom JSON。</value>
   </data>
   <data name="RosterViewTitle" xml:space="preserve">
     <value>学生名单</value>
   </data>
   <data name="SeatingAssignedFormat" xml:space="preserve">
-    <value>成功安排学生：{0} 人 · 教室剩余空座：{1} 个</value>
+    <value>已安排 {0} 人，教室还剩 {1} 个空座</value>
     <comment>{0} = 已安排学生数；{1} = 教室剩余空座数。</comment>
   </data>
   <data name="SeatingChartHint" xml:space="preserve">
-    <value>方位说明：讲台及教室前方位于上方；行列编号从 1 起算。每个格子均完整显示学生姓名及精确座次，超出显示范围可滚动浏览。</value>
+    <value>讲台在前方（上方），行列编号从 1 起。格内显示姓名和座次，超出范围可滚动查看。</value>
   </data>
   <data name="SeatingColumnHeaderFormat" xml:space="preserve">
     <value>第{0}列</value>
     <comment>{0} = 列号（从 1 起算）。</comment>
   </data>
   <data name="SeatingConflictRulesFormat" xml:space="preserve">
-    <value>已在“规则编辑”面板高亮标红 {0} 条核心冲突规则。上述规则共同导致了无解，请检查并调整其约束。</value>
+    <value>已在「规则编辑」中把 {0} 条冲突规则标红。这些规则共同导致无解，请调整其约束。</value>
     <comment>{0} = 冲突规则条数。</comment>
   </data>
   <data name="SeatingConflictUnresolvedHint" xml:space="preserve">
-    <value>未能收敛至特定的单条冲突规则；请重点核查班级总人数、教室可用课桌总数或单排容量上限。</value>
+    <value>无法定位到具体的冲突规则，请重点检查班级总人数、可用课桌总数或单排容量上限。</value>
   </data>
   <data name="SeatingElapsedFormat" xml:space="preserve">
     <value>已耗时 {0:0.0} 秒</value>
     <comment>{0} = 已耗时秒数，按 0.0 格式保留一位小数。</comment>
   </data>
   <data name="SeatingEmptyRosterError" xml:space="preserve">
-    <value>学生花名册当前为空，请先在“学生名单”面板导入班级名单。</value>
+    <value>名单为空，请先在「学生名单」中导入班级名单。</value>
   </data>
   <data name="SeatingEmptySeatLabel" xml:space="preserve">
     <value>（空座）</value>
@@ -493,51 +493,51 @@
     <comment>{0} = 异常信息。</comment>
   </data>
   <data name="SeatingErrorAlwaysFalse" xml:space="preserve">
-    <value>该规则在此教室布局下在数学上无法达成。</value>
+    <value>该规则在当前教室布局下无论怎样排座都无法满足。</value>
   </data>
   <data name="SeatingErrorAlwaysTrue" xml:space="preserve">
-    <value>该规则在当前教室布局下已自然满足。</value>
+    <value>该规则在当前教室布局下已自动满足，没有实际约束作用。</value>
   </data>
   <data name="SeatingErrorDanglingRef" xml:space="preserve">
-    <value>规则关联的学生不存在于当前班级花名册中。</value>
+    <value>规则关联的学生已不在当前名单中。</value>
   </data>
   <data name="SeatingErrorDuplicatePin" xml:space="preserve">
-    <value>多个学生被同时固定在同一个课桌座位上。</value>
+    <value>多名学生被固定在同一个座位上。</value>
   </data>
   <data name="SeatingErrorOutOfBound" xml:space="preserve">
-    <value>座位的排号或列号已超出当前教室设定的网格范围。</value>
+    <value>座位的排号或列号超出了教室网格范围。</value>
   </data>
   <data name="SeatingErrorOverCapacity" xml:space="preserve">
-    <value>班级学生总人数超出了教室课桌容量，或某一行列人数超出限制。</value>
+    <value>学生总人数超过教室课桌总数，或某一排、列的人数上限不足以容纳。</value>
   </data>
   <data name="SeatingErrorPinnedSeatCollision" xml:space="preserve">
-    <value>固定座位的坐标并非学生课桌（例如被设置为讲台或走道）。</value>
+    <value>固定座位的目标格不是学生课桌（例如被设为讲台或走道）。</value>
   </data>
   <data name="SeatingGlobalErrorFormat" xml:space="preserve">
     <value>全局异常：{0}</value>
     <comment>{0} = 预检查错误说明。</comment>
   </data>
   <data name="SeatingIdleHint" xml:space="preserve">
-    <value>点击顶部导航栏中的“开始自动排座”后，在此查看求解进度与可视化座位表。</value>
+    <value>点击顶部的「开始自动排座」，在这里查看求解进度和座位表。</value>
   </data>
   <data name="SeatingMainAisleLabel" xml:space="preserve">
     <value>主走道</value>
   </data>
   <data name="SeatingPlanningFormat" xml:space="preserve">
-    <value>正在智能规划座位方案{0}</value>
+    <value>正在规划座位{0}</value>
     <comment>{0} = 动态省略号（空字符串、“.”、“..”或“...”）。</comment>
   </data>
   <data name="SeatingPlanningHint" xml:space="preserve">
-    <value>求解引擎正在分析规则约束并生成最优指派方案，请稍候；在此期间可正常进行其他操作。</value>
+    <value>正在分析规则并生成方案，完成后自动显示，期间可以继续操作。</value>
   </data>
   <data name="SeatingPodiumLabel" xml:space="preserve">
     <value>【讲台】</value>
   </data>
   <data name="SeatingResultViewTitle" xml:space="preserve">
-    <value>排座结果与座位表</value>
+    <value>排座结果</value>
   </data>
   <data name="SeatingRowAisleLabel" xml:space="preserve">
-    <value>列间窄过道</value>
+    <value>列间过道</value>
   </data>
   <data name="SeatingRowHeaderFormat" xml:space="preserve">
     <value>第{0}排</value>
@@ -552,19 +552,19 @@
     <comment>{0} = 排号（从 1 起算）；{1} = 列号（从 1 起算）。</comment>
   </data>
   <data name="SeatingStaleHint" xml:space="preserve">
-    <value>提示：班级名单、教室布局、排座规则或排座目标已发生变更；当前展示的是上一次的排座结果，请重新点击“开始自动排座”。</value>
+    <value>名单、布局、规则或目标已变更，下方是上一次的结果。请重新点击「开始自动排座」。</value>
   </data>
   <data name="SeatingStartCommandTitle" xml:space="preserve">
     <value>开始自动排座</value>
   </data>
   <data name="SeatingStatusRejected" xml:space="preserve">
-    <value>【预检查未通过】规则配置中存在基础逻辑错误（如越界、重复固定等），已阻止求解。</value>
+    <value>【未通过预检查】规则中有越界、重复固定等基础错误，已停止求解。</value>
   </data>
   <data name="SeatingStatusUndetermined" xml:space="preserve">
-    <value>【求解未决】在当前时限或资源内未能确定是否存在可行座位分配方案。</value>
+    <value>【无法确定】在时限内未能判断是否存在可行方案。</value>
   </data>
   <data name="SeatingStatusUnsatisfiable" xml:space="preserve">
-    <value>【排座无解】当前设置的规则组合在逻辑上存在不可调和的冲突，无法排出有效方案。</value>
+    <value>【无解】当前规则互相冲突，排不出有效方案。</value>
   </data>
   <data name="SecRandomEntriesArrayRequired" xml:space="preserve">
     <value>SecRandom 名单记录必须是数组。</value>
@@ -578,33 +578,33 @@
     <comment>{0} = JSON 字段名。</comment>
   </data>
   <data name="SecRandomMissingEntries" xml:space="preserve">
-    <value>未识别到 SecRandom students 名单或 rows 传输文档。</value>
+    <value>未找到 SecRandom 的 students 名单或 rows 传输文档。</value>
   </data>
   <data name="SecRandomRootObjectRequired" xml:space="preserve">
     <value>SecRandom 名单必须是包含 students 或 rows 的 JSON 对象。</value>
   </data>
   <data name="SecRandomUnsupportedVersion" xml:space="preserve">
-    <value>仅支持 SecRandom version 为 1 的名单传输文档。</value>
+    <value>仅支持 version 为 1 的 SecRandom 名单文档。</value>
   </data>
   <data name="SecRandomWrongKind" xml:space="preserve">
-    <value>所选 SecRandom 传输文档不是学生名单（kind 必须为 0）。</value>
+    <value>所选 SecRandom 文档不是学生名单（kind 应为 0）。</value>
   </data>
   <data name="SpreadsheetColumnFallbackHeaderFormat" xml:space="preserve">
     <value>第 {0} 列</value>
     <comment>{0} = 列号（从 1 起算）。</comment>
   </data>
-  <data name="ObjectiveRegionInvalid" xml:space="preserve"><value>区域边界必须非负，且最小值不能大于最大值。</value></data>
-  <data name="ObjectiveRowBalanceInvalid" xml:space="preserve"><value>各排均衡必须使用行维度，且不能限定区域。</value></data>
-  <data name="ObjectiveRegionRequired" xml:space="preserve"><value>区域偏好需要先在教室预览中拖拽选择区域。</value></data>
-  <data name="ObjectiveDirectionInvalid" xml:space="preserve"><value>未识别的区域偏好方向。</value></data>
+  <data name="ObjectiveRegionInvalid" xml:space="preserve"><value>区域边界不能为负，且下限不能大于上限。</value></data>
+  <data name="ObjectiveRowBalanceInvalid" xml:space="preserve"><value>各排人数均衡只能使用前后维度，且不能限定区域。</value></data>
+  <data name="ObjectiveRegionRequired" xml:space="preserve"><value>区域偏好需要先在教室预览中框选区域。</value></data>
+  <data name="ObjectiveDirectionInvalid" xml:space="preserve"><value>未识别的偏好方向。</value></data>
   <data name="ObjectiveRegionPreference" xml:space="preserve"><value>区域偏好</value></data>
   <data name="ObjectiveDirectionLabel" xml:space="preserve"><value>偏好方向</value></data>
-  <data name="ObjectiveHighValues" xml:space="preserve"><value>高值优先</value></data>
-  <data name="ObjectiveLowValues" xml:space="preserve"><value>低值优先</value></data>
-  <data name="ObjectiveRegionDragHint" xml:space="preserve"><value>在教室预览中按住左键拖拽框选矩形，再次拖拽可替换区域。普通排序可选区域，区域外座位同权。</value></data>
+  <data name="ObjectiveHighValues" xml:space="preserve"><value>值大优先</value></data>
+  <data name="ObjectiveLowValues" xml:space="preserve"><value>值小优先</value></data>
+  <data name="ObjectiveRegionDragHint" xml:space="preserve"><value>在预览中按住左键拖拽框选区域，再次拖拽可重新选择。普通排序可以不选区，区域外的座位同等对待。</value></data>
   <data name="ObjectiveClearRegion" xml:space="preserve"><value>清除区域</value></data>
-  <data name="ObjectiveClearRegionHint" xml:space="preserve"><value>清除矩形作用范围；区域偏好需要重新框选区域后才能保存。</value></data>
-  <data name="ObjectiveRegionBoundsFormat" xml:space="preserve"><value>区域：行 {0}–{1}，列 {2}–{3}（从 0 起）</value></data>
+  <data name="ObjectiveClearRegionHint" xml:space="preserve"><value>清除后再保存普通排序即可；区域偏好需要重新框选区域。</value></data>
+  <data name="ObjectiveRegionBoundsFormat" xml:space="preserve"><value>区域：{0}–{1} 行，{2}–{3} 列</value></data>
   <data name="ObjectiveRegionMissing" xml:space="preserve"><value>未选择区域</value></data>
   <data name="ObjectiveRegionLimited" xml:space="preserve"><value>区域已限定</value></data>
 </root>

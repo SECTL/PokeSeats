@@ -231,15 +231,15 @@ internal sealed class ObjectiveDocument
         return null;
     }
 
-    private const string ObjectiveFileEmpty = "排座目标文件内容为空。";
-    private const string ObjectiveFileMissingList = "排座目标文件缺少目标列表。";
-    private const string ObjectiveItemEmpty = "排座目标文件中包含空目标条目。";
-    private const string ObjectiveMissingId = "排座目标缺少标识。";
-    private const string ObjectiveDuplicateIdFormat = "排座目标标识重复：{0}。";
-    private const string ObjectiveMissingDisplayName = "排座目标缺少显示名称。";
-    private const string ObjectiveMissingAttribute = "排座目标缺少属性。";
-    private const string ObjectiveUnknownShapeFormat = "排座目标包含未识别的映射形状：{0}。";
-    private const string ObjectiveUnknownDimensionFormat = "排座目标包含未识别的座位维度：{0}。";
+    private const string ObjectiveFileEmpty = "目标文件为空。";
+    private const string ObjectiveFileMissingList = "目标文件缺少目标列表。";
+    private const string ObjectiveItemEmpty = "目标文件中有空条目。";
+    private const string ObjectiveMissingId = "目标缺少标识。";
+    private const string ObjectiveDuplicateIdFormat = "目标标识重复：{0}。";
+    private const string ObjectiveMissingDisplayName = "目标缺少名称。";
+    private const string ObjectiveMissingAttribute = "目标缺少属性。";
+    private const string ObjectiveUnknownShapeFormat = "目标包含未识别的映射形状：{0}。";
+    private const string ObjectiveUnknownDimensionFormat = "目标包含未识别的座位维度：{0}。";
 
     private sealed record StoredDocument(int Version, List<StoredObjective>? Objectives);
 

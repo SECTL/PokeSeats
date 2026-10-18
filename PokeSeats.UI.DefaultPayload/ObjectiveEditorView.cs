@@ -437,9 +437,9 @@ internal sealed class ObjectiveEditorView
     {
         if (objective.Shape == ObjectiveShape.RowBalance) return PayloadStrings.ObjectiveRowBalance;
         if (objective.Shape == ObjectiveShape.RegionPreference)
-            return $"{PayloadStrings.ObjectiveRegionPreference} · {(objective.RegionPreferenceDirection == RegionPreferenceDirection.HighValues ? PayloadStrings.ObjectiveHighValues : PayloadStrings.ObjectiveLowValues)} · {(objective.Region is null ? PayloadStrings.ObjectiveRegionMissing : PayloadStrings.ObjectiveRegionLimited)}";
+            return $"{PayloadStrings.ObjectiveRegionPreference}，{(objective.RegionPreferenceDirection == RegionPreferenceDirection.HighValues ? PayloadStrings.ObjectiveHighValues : PayloadStrings.ObjectiveLowValues)}";
         string summary = string.Format(PayloadStrings.ObjectiveListShapeSummaryFormat,
             ShapeLabels[(int)objective.Shape], DimensionLabels[(int)objective.Dimension]);
-        return objective.Region is null ? summary : $"{summary} · {PayloadStrings.ObjectiveRegionLimited}";
+        return objective.Region is null ? summary : $"{summary}，{PayloadStrings.ObjectiveRegionLimited}";
     }
 }
