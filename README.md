@@ -25,7 +25,7 @@ Windows 使用 Direct3D 11（DX11）渲染；Linux 保持 OpenGL 后端，完整
 
 ## 上手流程
 
-下载或自行发布后运行 `PokeSeats.UI.exe`，按下面的顺序操作：
+从 [Github Releases](https://github.com/SECTL/PokeSeats/releases/latest) 或 [思拓创联 STK](https://stk.sectl.cn/PokeSeats/) 中选择最新版本下载或自行发布后运行 `PokeSeats.UI.exe`，按下面的顺序操作：
 
 默认工作区左侧上下排列「教室布局」和「学生名单」，右侧由「规则编辑」占满整列；左侧占可用列宽的 40%，右侧占 60%。面板随主窗口大小调整，关闭其中一个后其余面板自动补位，可从「功能面板」菜单重新打开。面板内容超出可用空间时可滚动查看。「排座结果」保持独立悬浮，可以拖动、缩放和关闭。
 
