@@ -17,6 +17,21 @@
       <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     </PropertyGroup>
 
+    <PropertyGroup Condition="$(RuntimeIdentifier.StartsWith('win')) or ('$(RuntimeIdentifier)' == '' and '$(OS)' == 'Windows_NT')">
+      <D3DCompilerPath Condition="'$(D3DCompilerPath)' == ''">$(MSBuildProgramFiles32)\Windows Kits\10\Redist\D3D\x64\d3dcompiler_47.dll</D3DCompilerPath>
+    </PropertyGroup>
+
+    <ItemGroup Condition="'$(D3DCompilerPath)' != '' and ($(RuntimeIdentifier.StartsWith('win')) or '$(RuntimeIdentifier)' == '')">
+      <None Include="$(D3DCompilerPath)" Link="d3dcompiler_47.dll"
+            CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+    </ItemGroup>
+
+    <Target Name="RequireD3DCompiler" BeforeTargets="PrepareForBuild"
+            Condition="'$(DesignTimeBuild)' != 'true' and ($(RuntimeIdentifier.StartsWith('win')) or ('$(RuntimeIdentifier)' == '' and '$(OS)' == 'Windows_NT'))">
+      <Error Condition="!Exists('$(D3DCompilerPath)')"
+             Text="Missing x64 d3dcompiler_47.dll. Install the Windows SDK or set -p:D3DCompilerPath to its Redist/D3D/x64/d3dcompiler_47.dll." />
+    </Target>
+
     <ItemGroup>
       <PackageReference Include="ImGui.NET" Version="1.91.6.1" />
       <PackageReference Include="Silk.NET" Version="2.23.0" />
