@@ -39,7 +39,7 @@
     </ItemGroup>
 
     <Target Name="GetBuiltinPluginFiles" DependsOnTargets="ResolveProjectReferences">
-      <MSBuild Projects="..\PokeSeats.UI.DefaultWorkspace\PokeSeats.UI.DefaultWorkspace.csproj" Targets="GetTargetPath" Properties="Configuration=$(Configuration)">
+      <MSBuild Projects="..\PokeSeats.UI.DefaultWorkspace\PokeSeats.UI.DefaultWorkspace.csproj" Targets="GetTargetPath" Properties="Configuration=$(Configuration)" RemoveProperties="RuntimeIdentifier">
         <Output TaskParameter="TargetOutputs" ItemName="BuiltinPluginAssembly" />
       </MSBuild>
       <ItemGroup>
@@ -62,8 +62,18 @@
     </Target>
 
     <Target Name="GetBuiltinPayloadFiles" DependsOnTargets="ResolveProjectReferences">
-      <ItemGroup>
+      <!-- A project reference with ReferenceOutputAssembly="false" is not rebuilt per RID, so the
+           payload's native assets must be produced explicitly for the requested runtime. -->
+      <MSBuild Condition="'$(RuntimeIdentifier)' != ''"
+               Projects="..\PokeSeats.UI.DefaultPayload\PokeSeats.UI.DefaultPayload.csproj"
+               Targets="Build" />
+      <ItemGroup Condition="'$(RuntimeIdentifier)' == ''">
         <BuiltinPayloadFiles Include="..\PokeSeats.UI.DefaultPayload\bin\$(Configuration)\net6.0\**\*" />
+      </ItemGroup>
+      <ItemGroup Condition="'$(RuntimeIdentifier)' != ''">
+        <BuiltinPayloadFiles Include="..\PokeSeats.UI.DefaultPayload\bin\$(Configuration)\net6.0\$(RuntimeIdentifier)\**\*" />
+      </ItemGroup>
+      <ItemGroup>
         <BuiltinPayloadFiles Include="..\PokeSeats.UI.DefaultPayload\plugin.json" />
       </ItemGroup>
     </Target>

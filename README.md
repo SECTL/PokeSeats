@@ -132,10 +132,11 @@ dotnet run --project PokeSeats.UI
 发布：
 
 ```text
-dotnet publish PokeSeats.UI -c Release
+dotnet publish PokeSeats.UI -c Release -r win-x64 --self-contained false -o publish/win-x64
+dotnet publish PokeSeats.UI -c Release -r linux-x64 --self-contained false -o publish/linux-x64
 ```
 
-发布输出在 `PokeSeats.UI/bin/Release/net6.0/`，整个目录拷走即可运行。求解器依赖的原生库只有 64 位版本，构建目标固定为 x64。
+按运行时分别发布，每个输出目录只包含对应平台的原生库，整个目录拷走即可运行。不指定 `-r` 时各平台原生库会一起打包，体积约 520 MB，通常没有必要。求解器依赖的原生库只有 64 位版本，构建目标固定为 x64。
 
 ## 项目结构
 
