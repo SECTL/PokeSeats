@@ -7,17 +7,17 @@
   <data name="WorkspaceName" xml:space="preserve"><value>标准工作区</value></data>
   <data name="SystemMenu" xml:space="preserve"><value>系统</value></data>
   <data name="AboutTitle" xml:space="preserve"><value>关于 PokeSeats 戳座</value></data>
-  <data name="Exit" xml:space="preserve"><value>退出程序</value></data>
-  <data name="PanelsMenu" xml:space="preserve"><value>功能面板</value></data>
-  <data name="NoPanels" xml:space="preserve"><value>（当前无可用面板）</value></data>
+  <data name="Exit" xml:space="preserve"><value>退出</value></data>
+  <data name="PanelsMenu" xml:space="preserve"><value>面板</value></data>
+  <data name="NoPanels" xml:space="preserve"><value>（无可用面板）</value></data>
   <data name="ProductName" xml:space="preserve"><value>PokeSeats 戳座</value></data>
-  <data name="VersionCopyright" xml:space="preserve"><value>版本 1.0 · Copyright (c) 2025-2026 SECTL Studio &amp; chenjintang-shrimp</value></data>
-  <data name="MadeBy" xml:space="preserve"><value>Made by</value></data>
-  <data name="SupportsThanks" xml:space="preserve"><value>感谢</value></data>
-  <data name="Supporter" xml:space="preserve"><value>SECTL 思拓创联的大力支持</value></data>
+  <data name="VersionCopyright" xml:space="preserve"><value>版本 1.0　Copyright (c) 2025-2026 SECTL Studio &amp; chenjintang-shrimp</value></data>
+  <data name="MadeBy" xml:space="preserve"><value>作者</value></data>
+  <data name="SupportsThanks" xml:space="preserve"><value>鸣谢</value></data>
+  <data name="Supporter" xml:space="preserve"><value>SECTL 思拓创联</value></data>
   <data name="LicenseNotice" xml:space="preserve"><value>本项目以 GPL-3.0-or-later 发布，源码见项目仓库。</value></data>
   <data name="FontDescription" xml:space="preserve"><value>界面字体：HarmonyOS Sans SC</value></data>
-  <data name="FontLicenseNotice" xml:space="preserve"><value>字体版权所有 2021 Huawei Device Co., Ltd. 根据字体许可协议分发。</value></data>
+  <data name="FontLicenseNotice" xml:space="preserve"><value>字体版权归 Huawei Device Co., Ltd. 所有（2021），依字体许可协议分发。</value></data>
   <data name="Confirm" xml:space="preserve"><value>确定</value></data>
   <data name="SettingsTitle" xml:space="preserve"><value>设置</value></data>
   <data name="SettingsAppearanceSection" xml:space="preserve"><value>外观</value></data>
@@ -27,11 +27,11 @@
   <data name="SettingsSurfaceColor" xml:space="preserve"><value>面板色</value></data>
   <data name="SettingsTextColor" xml:space="preserve"><value>文字色</value></data>
   <data name="SettingsAccentColor" xml:space="preserve"><value>强调色</value></data>
-  <data name="SettingsReset" xml:space="preserve"><value>恢复当前模式默认</value></data>
+  <data name="SettingsReset" xml:space="preserve"><value>恢复本模式默认</value></data>
   <data name="SettingsClose" xml:space="preserve"><value>关闭</value></data>
-  <data name="SettingsHint" xml:space="preserve"><value>颜色修改会立即生效并自动保存。切换亮色/暗色会载入该模式的默认配色。</value></data>
+  <data name="SettingsHint" xml:space="preserve"><value>颜色修改会立即生效并自动保存；切换亮色 / 暗色会载入该模式的默认配色。</value></data>
   <data name="SettingsScaleFormat" xml:space="preserve">
-    <value>界面缩放：{0:F2}x（Ctrl + / Ctrl - 微调，Ctrl + 0 恢复自动值）</value>
+    <value>界面缩放 {0:F2}x（Ctrl + / Ctrl - 微调，Ctrl + 0 恢复自动）</value>
     <comment>{0}：当前界面缩放比例。</comment>
   </data>
 </root>
