@@ -271,6 +271,12 @@
   <data name="ObjectiveEditorViewTitle" xml:space="preserve">
     <value>排座目标</value>
   </data>
+  <data name="ObjectiveRowBalance" xml:space="preserve">
+    <value>各排均衡</value>
+  </data>
+  <data name="ObjectiveRowBalanceExplanation" xml:space="preserve">
+    <value>按各实际 Desk 行的座位容量比例平衡已知属性总量。缺失属性不计入行和；所有已知值相同时均衡已知人数。此目标固定使用行维度，不限定区域。</value>
+  </data>
   <data name="ObjectiveGroupBalance" xml:space="preserve">
     <value>各组均衡</value>
   </data>
@@ -310,7 +316,7 @@
     <value>暂无排座目标，点击“新建目标”添加。</value>
   </data>
   <data name="ObjectiveNoNumberAttribute" xml:space="preserve">
-    <value>所选属性不是数值类型，无法用于该目标形状。GroupBalance 需要数值属性。</value>
+    <value>所选属性不是数值类型，无法用于排座目标。</value>
   </data>
   <data name="ObjectivePriorityColumnHeader" xml:space="preserve">
     <value>优先级</value>
@@ -593,4 +599,18 @@
     <value>第 {0} 列</value>
     <comment>{0} = 列号（从 1 起算）。</comment>
   </data>
+  <data name="ObjectiveRegionInvalid" xml:space="preserve"><value>区域边界必须非负，且最小值不能大于最大值。</value></data>
+  <data name="ObjectiveRowBalanceInvalid" xml:space="preserve"><value>各排均衡必须使用行维度，且不能限定区域。</value></data>
+  <data name="ObjectiveRegionRequired" xml:space="preserve"><value>区域偏好需要先在教室预览中拖拽选择区域。</value></data>
+  <data name="ObjectiveDirectionInvalid" xml:space="preserve"><value>未识别的区域偏好方向。</value></data>
+  <data name="ObjectiveRegionPreference" xml:space="preserve"><value>区域偏好</value></data>
+  <data name="ObjectiveDirectionLabel" xml:space="preserve"><value>偏好方向</value></data>
+  <data name="ObjectiveHighValues" xml:space="preserve"><value>高值优先</value></data>
+  <data name="ObjectiveLowValues" xml:space="preserve"><value>低值优先</value></data>
+  <data name="ObjectiveRegionDragHint" xml:space="preserve"><value>在教室预览中按住左键拖拽框选矩形，再次拖拽可替换区域。普通排序可选区域，区域外座位同权。</value></data>
+  <data name="ObjectiveClearRegion" xml:space="preserve"><value>清除区域</value></data>
+  <data name="ObjectiveClearRegionHint" xml:space="preserve"><value>清除矩形作用范围；区域偏好需要重新框选区域后才能保存。</value></data>
+  <data name="ObjectiveRegionBoundsFormat" xml:space="preserve"><value>区域：行 {0}–{1}，列 {2}–{3}（从 0 起）</value></data>
+  <data name="ObjectiveRegionMissing" xml:space="preserve"><value>未选择区域</value></data>
+  <data name="ObjectiveRegionLimited" xml:space="preserve"><value>区域已限定</value></data>
 </root>
