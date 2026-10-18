@@ -1,0 +1,11 @@
+<Project>
+
+  <!--
+    所有程序集共用一个版本号。SectlStatsReporter 上报的版本、关于对话框显示的版本
+    都取自程序集版本，发版时只改这里。
+  -->
+  <PropertyGroup>
+    <Version>1.1.0</Version>
+  </PropertyGroup>
+
+</Project>
