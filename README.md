@@ -18,7 +18,7 @@ PokeSeats 是一个给老师排座位的桌面小程序。你把花名册、教�
 
 ## 运行要求
 
-- Windows 10 及以上，64 位
+- Windows 7 SP1 及以上，64 位
 - [.NET 6 运行时](https://dotnet.microsoft.com/download/dotnet/6.0)
 
 Windows 使用 Direct3D 11（DX11）渲染；Linux 保持 OpenGL 后端，完整运行情况仍需在 Linux 环境验证。Android 在计划中，目前还不能用。
