@@ -17,20 +17,22 @@ internal sealed class EmptySeatOptimization
     private readonly int width;
     private readonly PokeSeats.IR.Base.PersonId[] interchangeable;
 
-    public EmptySeatOptimization(RuleExpansionPlan plan)
+    public EmptySeatOptimization(RuleExpansionPlan plan, IReadOnlySet<PokeSeats.IR.Base.PersonId> objectiveDistinguished)
     {
         this.plan = plan;
         emptyCount = plan.Seats.Count - plan.Variables.Count;
         lastRow = plan.Seats.Max(seat => seat.Row);
         firstColumn = plan.Seats.Min(seat => seat.Col);
         width = plan.Seats.Max(seat => seat.Col) - firstColumn + 1;
-        // 未出现在个人规则中的学生可任意互换；排序只删除等价排列，不改变空座或可行性。
+        // 仅对没有个人规则或非零目标代价的学生消除等价排列。
         var distinguished = plan.UnaryRules.Select(rule => rule.Person)
-            .Concat(plan.RelationRules.SelectMany(rule => new[] { rule.A, rule.B })).ToHashSet();
+            .Concat(plan.RelationRules.SelectMany(rule => new[] { rule.A, rule.B }))
+            .Concat(objectiveDistinguished).ToHashSet();
         interchangeable = plan.Variables.Keys.Where(person => !distinguished.Contains(person)).ToArray();
     }
 
-    public Optimize CreateZ3(Z3Expansion expansion)
+    public Optimize CreateZ3(Z3Expansion expansion,
+        IReadOnlyList<IReadOnlyList<(PersonObjectiveCost Person, SeatObjectiveCost Seat)>> objectiveLayers)
     {
         var context = expansion.Context;
         var optimizer = context.MkOptimize();
@@ -57,6 +59,22 @@ internal sealed class EmptySeatOptimization
             optimizer.Add(context.MkPBEq(unitWeights, occupants, 1));
         }
         optimizer.Add(context.MkPBEq(Enumerable.Repeat(1, empty.Length).ToArray(), empty, emptyCount));
+        foreach (var layer in objectiveLayers)
+        {
+            var terms = new List<ArithExpr>();
+            foreach (var (personCost, seatCost) in layer)
+                foreach (var (person, cost) in personCost.Costs)
+                {
+                    if (cost == 0) continue;
+                    var variable = expansion.Variables[person];
+                    ArithExpr weight = zero;
+                    for (int seat = plan.Seats.Count - 1; seat >= 0; seat--)
+                        weight = (ArithExpr)context.MkITE(context.MkEq(variable, context.MkInt(seat)),
+                            context.MkInt(seatCost.SeatWeights[seat]), weight);
+                    terms.Add(context.MkMul(context.MkInt(cost), weight));
+                }
+            optimizer.MkMinimize(terms.Count == 0 ? zero : context.MkAdd(terms));
+        }
         var rear = context.MkAdd(empty.Select((value, seat) =>
             (ArithExpr)context.MkITE(value, context.MkInt(lastRow - plan.Seats[seat].Row), zero)));
         var rearLowerBound = plan.Seats.Select(seat => lastRow - seat.Row).OrderBy(distance => distance).Take(emptyCount).Sum();
@@ -82,6 +100,27 @@ internal sealed class EmptySeatOptimization
         optimizer.Add(context.MkGe(spread, context.MkInt(spreadLowerBound)));
         optimizer.MkMinimize(spread);
         return optimizer;
+    }
+
+    public IReadOnlyList<LinearExpr> AddObjectiveLayersOrTools(OrToolsExpansion expansion,
+        IReadOnlyList<IReadOnlyList<(PersonObjectiveCost Person, SeatObjectiveCost Seat)>> objectiveLayers)
+    {
+        var layers = new List<LinearExpr>(objectiveLayers.Count);
+        foreach (var layer in objectiveLayers)
+        {
+            var terms = new List<LinearExpr>();
+            foreach (var (personCost, seatCost) in layer)
+                foreach (var (person, cost) in personCost.Costs)
+                {
+                    if (cost == 0) continue;
+                    var weight = expansion.Model.NewIntVar(seatCost.SeatWeights.Min(),
+                        seatCost.SeatWeights.Max(), $"objective_{personCost.ObjectiveId.Value:N}_{person.Value:N}");
+                    expansion.Model.AddElement(expansion.Variables[person], seatCost.SeatWeights, weight);
+                    terms.Add(weight * cost);
+                }
+            layers.Add(LinearExpr.Sum(terms));
+        }
+        return layers;
     }
 
     public (LinearExpr Rear, LinearExpr Spread) AddOrTools(OrToolsExpansion expansion)

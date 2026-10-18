@@ -17,6 +17,7 @@ public sealed class SolverService
         ArgumentNullException.ThrowIfNull(request.Roster);
         ArgumentNullException.ThrowIfNull(request.Layout);
         ArgumentNullException.ThrowIfNull(request.Rules);
+        ArgumentNullException.ThrowIfNull(request.Objectives);
 
         var preCheck = PreChecker.Run(request.Rules, request.Roster, request.Layout);
         // 预检查错误直接返回对应规则 ID，不冒充 Z3 核心；也不展开规则集，避免悬空引用在展开时抛错。
@@ -42,15 +43,25 @@ public sealed class SolverService
         try
         {
             var plan = RuleExpansionPlan.Build(request.Layout, request.Roster, request.Rules);
-            return request.Backend switch
+            var expanded = ObjectiveExpander.Expand(plan, request.Objectives, request.Roster);
+            var layers = request.Objectives.Select((objective, index) => (objective.Priority, index))
+                .GroupBy(item => item.Priority).OrderBy(group => group.Key)
+                .Select(group => (IReadOnlyList<(PersonObjectiveCost Person, SeatObjectiveCost Seat)>)
+                    group.Select(item => expanded[item.index]).ToArray()).ToArray();
+            var distinguished = expanded.SelectMany(item => item.Person.Costs)
+                .Where(item => item.Value != 0).Select(item => item.Key).ToHashSet();
+            var effectiveBackend = request.Backend == SolverBackend.OrToolsCpSat
+                && request.Objectives.Any(objective => objective.Shape is ObjectiveShape.Centered or ObjectiveShape.Bimodal)
+                ? SolverBackend.Z3 : request.Backend;
+            return effectiveBackend switch
             {
-                SolverBackend.Z3 => solveZ3(plan, preCheck),
-                SolverBackend.OrToolsCpSat => solveOrTools(plan, preCheck),
+                SolverBackend.Z3 => solveZ3(plan, preCheck, layers, distinguished),
+                SolverBackend.OrToolsCpSat => solveOrTools(plan, preCheck, layers, distinguished),
                 _ => new SolverResult(
                     SolveStatus.Rejected,
                     Array.Empty<SeatAssignment>(),
                     preCheck,
-                    $"不支持的排座求解器后端：{request.Backend}")
+                    $"不支持的排座求解器后端：{effectiveBackend}")
             };
         }
         catch (Exception exception) when (exception is KeyNotFoundException or InvalidOperationException or NotSupportedException)
@@ -63,21 +74,23 @@ public sealed class SolverService
         }
     }
 
-    private static SolverResult solveZ3(RuleExpansionPlan plan, PreCheckResult preCheck)
+    private static SolverResult solveZ3(RuleExpansionPlan plan, PreCheckResult preCheck,
+        IReadOnlyList<IReadOnlyList<(PersonObjectiveCost Person, SeatObjectiveCost Seat)>> layers,
+        IReadOnlySet<PersonId> distinguished)
     {
         var expansion = new Z3RuleExpander().Expand(plan);
         try
         {
-            // 有空座时直接优化；无解再运行带跟踪断言的模型提取规则冲突，避免重复可行性搜索。
-            if (plan.Variables.Count > 0 && plan.Variables.Count < plan.Seats.Count)
+            // 有目标或空座时优化；无解后用跟踪断言提取冲突。
+            if (plan.Variables.Count > 0 && (layers.Count > 0 || plan.Variables.Count < plan.Seats.Count))
             {
-                using var optimizer = new EmptySeatOptimization(plan).CreateZ3(expansion);
+                using var optimizer = new EmptySeatOptimization(plan, distinguished).CreateZ3(expansion, layers);
                 var optimizedStatus = optimizer.Check();
                 if (optimizedStatus == Status.SATISFIABLE)
                     return new SolverResult(SolveStatus.Satisfiable, decodeZ3(expansion, plan, optimizer.Model), preCheck);
                 if (optimizedStatus != Status.UNSATISFIABLE)
                     return new SolverResult(SolveStatus.Unknown, Array.Empty<SeatAssignment>(), preCheck,
-                        $"Z3 未能完成空座分布优化：{optimizer.ReasonUnknown}。");
+                        $"Z3 未能完成排座目标优化：{optimizer.ReasonUnknown}。");
             }
             var status = expansion.Solver.Check();
             return status switch
@@ -107,24 +120,42 @@ public sealed class SolverService
         }
     }
 
-    private static SolverResult solveOrTools(RuleExpansionPlan plan, PreCheckResult preCheck)
+    private static SolverResult solveOrTools(RuleExpansionPlan plan, PreCheckResult preCheck,
+        IReadOnlyList<IReadOnlyList<(PersonObjectiveCost Person, SeatObjectiveCost Seat)>> layers,
+        IReadOnlySet<PersonId> distinguished)
     {
         var expansion = new OrToolsRuleExpander().Expand(plan);
         using var solver = new CpSolver();
-        (LinearExpr Rear, LinearExpr Spread)? objectives = null;
-        if (plan.Variables.Count > 0 && plan.Variables.Count < plan.Seats.Count)
+        var expressions = new List<LinearExpr>();
+        if (plan.Variables.Count > 0 && (layers.Count > 0 || plan.Variables.Count < plan.Seats.Count))
         {
-            objectives = new EmptySeatOptimization(plan).AddOrTools(expansion);
-            expansion.Model.Minimize(objectives.Value.Rear);
+            var optimization = new EmptySeatOptimization(plan, distinguished);
+            expressions.AddRange(optimization.AddObjectiveLayersOrTools(expansion, layers));
+            if (plan.Variables.Count < plan.Seats.Count)
+            {
+                var empty = optimization.AddOrTools(expansion);
+                expressions.Add(empty.Rear);
+                expressions.Add(empty.Spread);
+            }
         }
-        var status = solver.Solve(expansion.Model);
-        if (objectives is { } target && status == CpSolverStatus.Optimal)
+        var status = CpSolverStatus.Unknown;
+        for (int index = 0; index < expressions.Count; index++)
         {
-            // 固定已证明最优的靠后分数，再优化左右分布，避免权重混合改变优先级。
-            expansion.Model.Add(target.Rear == solver.Value(target.Rear));
-            expansion.Model.Minimize(target.Spread);
+            var target = expressions[index];
+            expansion.Model.Minimize(target);
             status = solver.Solve(expansion.Model);
+            if (status != CpSolverStatus.Optimal)
+            {
+                if (status == CpSolverStatus.Feasible)
+                    return new SolverResult(SolveStatus.Unknown, Array.Empty<SeatAssignment>(), preCheck,
+                        "CP-SAT 尚未证明当前目标层最优，已停止后续层优化。");
+                break;
+            }
+            if (index + 1 < expressions.Count)
+                expansion.Model.Add(target == solver.Value(target));
         }
+        if (expressions.Count == 0)
+            status = solver.Solve(expansion.Model);
         return status switch
         {
             CpSolverStatus.Optimal or CpSolverStatus.Feasible => new SolverResult(
