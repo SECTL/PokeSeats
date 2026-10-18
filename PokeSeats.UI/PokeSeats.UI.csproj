@@ -63,19 +63,24 @@
 
     <Target Name="GetBuiltinPayloadFiles" DependsOnTargets="ResolveProjectReferences">
       <!-- A project reference with ReferenceOutputAssembly="false" is not rebuilt per RID, so the
-           payload's native assets must be produced explicitly for the requested runtime. -->
+           payload's native assets must be produced explicitly for the requested runtime.
+           SelfContained is dropped because the payload runs inside the host process: letting it
+           flow through would copy a second copy of the .NET runtime into the plugin folder. -->
       <MSBuild Condition="'$(RuntimeIdentifier)' != ''"
                Projects="..\PokeSeats.UI.DefaultPayload\PokeSeats.UI.DefaultPayload.csproj"
-               Targets="Build" />
+               Targets="Build"
+               RemoveProperties="SelfContained" />
       <ItemGroup Condition="'$(RuntimeIdentifier)' == ''">
-        <BuiltinPayloadFiles Include="..\PokeSeats.UI.DefaultPayload\bin\$(Configuration)\net6.0\**\*" />
+        <BuiltinPayloadFiles Include="..\PokeSeats.UI.DefaultPayload\bin\$(Configuration)\net6.0\**\*"
+                             Exclude="..\PokeSeats.UI.DefaultPayload\bin\$(Configuration)\net6.0\**\*.xml;..\PokeSeats.UI.DefaultPayload\bin\$(Configuration)\net6.0\**\*.pdb" />
       </ItemGroup>
       <ItemGroup Condition="'$(RuntimeIdentifier)' != '' and $(RuntimeIdentifier.StartsWith('win'))">
-        <BuiltinPayloadFiles Include="..\PokeSeats.UI.DefaultPayload\bin\$(Configuration)\net6.0\$(RuntimeIdentifier)\**\*" />
+        <BuiltinPayloadFiles Include="..\PokeSeats.UI.DefaultPayload\bin\$(Configuration)\net6.0\$(RuntimeIdentifier)\**\*"
+                             Exclude="..\PokeSeats.UI.DefaultPayload\bin\$(Configuration)\net6.0\$(RuntimeIdentifier)\**\*.xml;..\PokeSeats.UI.DefaultPayload\bin\$(Configuration)\net6.0\$(RuntimeIdentifier)\**\*.pdb" />
       </ItemGroup>
       <ItemGroup Condition="'$(RuntimeIdentifier)' != '' and !$(RuntimeIdentifier.StartsWith('win'))">
         <BuiltinPayloadFiles Include="..\PokeSeats.UI.DefaultPayload\bin\$(Configuration)\net6.0\$(RuntimeIdentifier)\**\*"
-                             Exclude="..\PokeSeats.UI.DefaultPayload\bin\$(Configuration)\net6.0\$(RuntimeIdentifier)\libz3.dll" />
+                             Exclude="..\PokeSeats.UI.DefaultPayload\bin\$(Configuration)\net6.0\$(RuntimeIdentifier)\libz3.dll;..\PokeSeats.UI.DefaultPayload\bin\$(Configuration)\net6.0\$(RuntimeIdentifier)\**\*.xml;..\PokeSeats.UI.DefaultPayload\bin\$(Configuration)\net6.0\$(RuntimeIdentifier)\**\*.pdb" />
       </ItemGroup>
       <ItemGroup>
         <BuiltinPayloadFiles Include="..\PokeSeats.UI.DefaultPayload\plugin.json" />
@@ -105,6 +110,16 @@
       <ItemGroup>
         <_WindowsZ3Native Include="@(ResolvedFileToPublish)" Condition="'%(ResolvedFileToPublish.Filename)' == 'libz3' and '%(ResolvedFileToPublish.Extension)' == '.dll'" />
         <ResolvedFileToPublish Remove="@(_WindowsZ3Native)" />
+      </ItemGroup>
+    </Target>
+
+    <!-- 发布目录是给用户的下载产物，符号文件和 XML 文档只在开发时有用。 -->
+    <Target Name="DropDevelopmentFilesFromPublish"
+            AfterTargets="ComputeResolvedFilesToPublishList">
+      <ItemGroup>
+        <_DevelopmentFile Include="@(ResolvedFileToPublish)"
+                          Condition="'%(ResolvedFileToPublish.Extension)' == '.pdb' or '%(ResolvedFileToPublish.Extension)' == '.xml'" />
+        <ResolvedFileToPublish Remove="@(_DevelopmentFile)" />
       </ItemGroup>
     </Target>
 
