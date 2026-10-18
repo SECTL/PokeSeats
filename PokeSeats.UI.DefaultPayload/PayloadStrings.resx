@@ -215,6 +215,137 @@
   <data name="LayoutViewTitle" xml:space="preserve">
     <value>教室布局</value>
   </data>
+  <data name="ObjectiveAttributeLabel" xml:space="preserve">
+    <value>属性</value>
+  </data>
+  <data name="ObjectiveAttributeNonNumericFormat" xml:space="preserve">
+    <value>{0}（非数值）</value>
+    <comment>{0} = 属性名称；该属性不是数值类型，不能用于排座目标。</comment>
+  </data>
+  <data name="ObjectiveAttributeRequired" xml:space="preserve">
+    <value>请选择一个数值属性。</value>
+  </data>
+  <data name="ObjectiveBimodal" xml:space="preserve">
+    <value>值越大越靠两边</value>
+  </data>
+  <data name="ObjectiveCentered" xml:space="preserve">
+    <value>值越大越居中</value>
+  </data>
+  <data name="ObjectiveDeleteButton" xml:space="preserve">
+    <value>删除选中</value>
+  </data>
+  <data name="ObjectiveDeleteConfirmButton" xml:space="preserve">
+    <value>确认删除</value>
+  </data>
+  <data name="ObjectiveDeleteConfirmFormat" xml:space="preserve">
+    <value>确认删除目标「{0}」？</value>
+    <comment>{0} = 目标的显示名称。</comment>
+  </data>
+  <data name="ObjectiveDeleteConfirmTitle" xml:space="preserve">
+    <value>确认删除目标</value>
+  </data>
+  <data name="ObjectiveDeletedStatus" xml:space="preserve">
+    <value>目标已删除并保存。</value>
+  </data>
+  <data name="ObjectiveDimensionCenter" xml:space="preserve">
+    <value>距中心列距离</value>
+  </data>
+  <data name="ObjectiveDimensionColumn" xml:space="preserve">
+    <value>左右（列号）</value>
+  </data>
+  <data name="ObjectiveDimensionLabel" xml:space="preserve">
+    <value>座位维度</value>
+  </data>
+  <data name="ObjectiveDimensionRow" xml:space="preserve">
+    <value>前后（行号）</value>
+  </data>
+  <data name="ObjectiveDisplayNameColumnHeader" xml:space="preserve">
+    <value>显示名称</value>
+  </data>
+  <data name="ObjectiveDisplayNameLabel" xml:space="preserve">
+    <value>显示名称</value>
+  </data>
+  <data name="ObjectiveEditorHeading" xml:space="preserve">
+    <value>目标设置</value>
+  </data>
+  <data name="ObjectiveEditorViewTitle" xml:space="preserve">
+    <value>排座目标</value>
+  </data>
+  <data name="ObjectiveGroupBalance" xml:space="preserve">
+    <value>各组均衡</value>
+  </data>
+  <data name="ObjectiveGroupBalanceExplanation" xml:space="preserve">
+    <value>说明：该形状按固定小组统计所选属性的平均值，并尝试缩小各组均值之间的差距。小组由名单固定，均值不随座位安排变化，因此这一目标不会改变实际座位分配，也无法保证各组座位在教室里的空间分布均衡。</value>
+  </data>
+  <data name="ObjectiveInvalidShape" xml:space="preserve">
+    <value>Centered 和“值越大越靠两边”仅支持“距中心列距离”维度。</value>
+  </data>
+  <data name="ObjectiveListShapeSummaryFormat" xml:space="preserve">
+    <value>{0} · {1}</value>
+    <comment>{0} = 映射形状名称；{1} = 座位维度名称。</comment>
+  </data>
+  <data name="ObjectiveLoadFailedFormat" xml:space="preserve">
+    <value>目标文件加载失败：{0}</value>
+    <comment>{0} = 异常信息。</comment>
+  </data>
+  <data name="ObjectiveMoveDownButton" xml:space="preserve">
+    <value>下移</value>
+  </data>
+  <data name="ObjectiveMoveUpButton" xml:space="preserve">
+    <value>上移</value>
+  </data>
+  <data name="ObjectiveNameRequired" xml:space="preserve">
+    <value>显示名称不能为空。</value>
+  </data>
+  <data name="ObjectiveNewButton" xml:space="preserve">
+    <value>新建目标</value>
+  </data>
+  <data name="ObjectiveNoAttributeOption" xml:space="preserve">
+    <value>（请选择属性）</value>
+  </data>
+  <data name="ObjectiveNoAttributesAvailable" xml:space="preserve">
+    <value>名单中还没有属性定义，请先在“学生名单”面板导入带属性的名单。</value>
+  </data>
+  <data name="ObjectiveNoneHint" xml:space="preserve">
+    <value>暂无排座目标，点击“新建目标”添加。</value>
+  </data>
+  <data name="ObjectiveNoNumberAttribute" xml:space="preserve">
+    <value>所选属性不是数值类型，无法用于该目标形状。GroupBalance 需要数值属性。</value>
+  </data>
+  <data name="ObjectivePriorityColumnHeader" xml:space="preserve">
+    <value>优先级</value>
+  </data>
+  <data name="ObjectivePriorityInvalid" xml:space="preserve">
+    <value>优先级必须大于等于 1。</value>
+  </data>
+  <data name="ObjectivePriorityLabel" xml:space="preserve">
+    <value>优先级</value>
+  </data>
+  <data name="ObjectiveSaveButton" xml:space="preserve">
+    <value>保存修改</value>
+  </data>
+  <data name="ObjectiveSaveFailedFormat" xml:space="preserve">
+    <value>保存失败：{0}</value>
+    <comment>{0} = 异常信息。</comment>
+  </data>
+  <data name="ObjectiveSavedStatus" xml:space="preserve">
+    <value>目标已保存。</value>
+  </data>
+  <data name="ObjectiveSelectHint" xml:space="preserve">
+    <value>选择列表中的目标进行编辑，或点击“新建目标”。</value>
+  </data>
+  <data name="ObjectiveShapeAscendingToFront" xml:space="preserve">
+    <value>值越小越靠前</value>
+  </data>
+  <data name="ObjectiveShapeColumnHeader" xml:space="preserve">
+    <value>形状摘要</value>
+  </data>
+  <data name="ObjectiveShapeDescendingToFront" xml:space="preserve">
+    <value>值越大越靠前</value>
+  </data>
+  <data name="ObjectiveShapeLabel" xml:space="preserve">
+    <value>映射形状</value>
+  </data>
   <data name="RosterBrowseButton" xml:space="preserve">
     <value>浏览文件...</value>
   </data>
@@ -421,7 +552,7 @@
     <comment>{0} = 排号（从 1 起算）；{1} = 列号（从 1 起算）。</comment>
   </data>
   <data name="SeatingStaleHint" xml:space="preserve">
-    <value>提示：班级名单、教室布局或排座规则已发生变更；当前展示的是上一次的排座结果，请重新点击“开始自动排座”。</value>
+    <value>提示：班级名单、教室布局、排座规则或排座目标已发生变更；当前展示的是上一次的排座结果，请重新点击“开始自动排座”。</value>
   </data>
   <data name="SeatingStartCommandTitle" xml:space="preserve">
     <value>开始自动排座</value>
