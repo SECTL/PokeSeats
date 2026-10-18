@@ -4,7 +4,10 @@ using NPOI.XSSF.UserModel;
 
 namespace PokeSeats.UI.DefaultPayload;
 
-internal sealed record SpreadsheetPreview(string FilePath, IReadOnlyList<string> Headers, IReadOnlyList<IReadOnlyList<string>> Rows);
+internal sealed record SpreadsheetPreview(string FilePath, IReadOnlyList<string> Headers, IReadOnlyList<IReadOnlyList<string>> Rows)
+{
+    public PokeSeats.IR.Base.RosterSnapshot? NativeRoster { get; init; }
+}
 
 internal static class ExcelRosterImporter
 {

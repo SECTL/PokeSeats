@@ -54,10 +54,12 @@ internal sealed class RosterPanel : IUiView
         {
             ImGui.Separator();
             ImGui.Text(string.Format(PayloadStrings.RosterSelectedFileFormat, Path.GetFileName(_preview.FilePath)));
+            ImGui.BeginDisabled(_preview.NativeRoster is not null);
             ImGui.Text(PayloadStrings.RosterColumnPrompt);
             DrawColumnSelector("roster-name-column", PayloadStrings.RosterNameColumnLabel, ref _nameColumn, false);
             DrawColumnSelector("roster-student-number-column", PayloadStrings.RosterStudentNumberColumnLabel, ref _studentNumberColumn, true);
             DrawColumnSelector("roster-group-column", PayloadStrings.RosterGroupColumnLabel, ref _groupColumn, true);
+            ImGui.EndDisabled();
 
             if (ImGui.Button(PayloadStrings.RosterImportConfirmButton))
                 TryImport();
@@ -99,7 +101,7 @@ internal sealed class RosterPanel : IUiView
     {
         try
         {
-            var empty = Array.Empty<Person>();
+            var empty = RosterSnapshot.Empty;
             _roster.Save(_storagePath, empty);
             _roster.Replace(empty);
             _status = PayloadStrings.RosterClearedStatus;
@@ -180,9 +182,9 @@ internal sealed class RosterPanel : IUiView
         try
         {
             ImportResult result = RosterImporter.Import(_preview!, _nameColumn, _studentNumberColumn, _groupColumn);
-            _roster.Save(_storagePath, result.Students);
-            _roster.Replace(result.Students);
-            _status = string.Format(PayloadStrings.RosterImportSuccessFormat, result.Students.Count, result.SkippedRows);
+            _roster.Save(_storagePath, result.Roster);
+            _roster.Replace(result.Roster);
+            _status = string.Format(PayloadStrings.RosterImportSuccessFormat, result.Roster.Count, result.SkippedRows);
         }
         catch (Exception exception) when (exception is IOException or InvalidDataException or UnauthorizedAccessException or ArgumentException)
         {

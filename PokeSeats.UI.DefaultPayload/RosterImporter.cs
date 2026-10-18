@@ -4,7 +4,7 @@ using PokeSeats.IR.Base;
 
 namespace PokeSeats.UI.DefaultPayload;
 
-internal sealed record ImportResult(IReadOnlyList<Person> Students, int SkippedRows);
+internal sealed record ImportResult(RosterSnapshot Roster, int SkippedRows);
 
 internal static class RosterImporter
 {
@@ -17,13 +17,14 @@ internal static class RosterImporter
         {
             ".xls" or ".xlsx" => ExcelRosterImporter.Preview(path),
             ".csv" => PreviewCsv(path),
-            ".json" => PreviewSecRandom(path),
+            ".json" => PreviewJson(path),
             _ => throw new InvalidDataException(PayloadStrings.RosterUnsupportedFormat)
         };
     }
 
     public static ImportResult Import(SpreadsheetPreview preview, int nameColumn, int studentNumberColumn, int groupColumn)
     {
+        if (preview.NativeRoster is { } roster) return new ImportResult(roster, 0);
         if (nameColumn < 0 || nameColumn >= preview.Headers.Count)
             throw new ArgumentOutOfRangeException(nameof(nameColumn));
         if (studentNumberColumn < -1 || studentNumberColumn >= preview.Headers.Count)
@@ -46,9 +47,10 @@ internal static class RosterImporter
             string group = ReadColumn(row, groupColumn);
             if (number.Length > 0 && !numbers.Add(number))
                 throw new InvalidDataException(string.Format(PayloadStrings.RosterDuplicateStudentNumberFormat, number));
-            students.Add(new Person(PersonId.New(), name, number.Length == 0 ? null : number, group.Length == 0 ? null : group));
+            students.Add(new Person(PersonId.New(), name, number.Length == 0 ? null : number, group.Length == 0 ? null : group,
+                Array.Empty<KeyValuePair<PersonAttributeId, PersonAttributeValue>>()));
         }
-        return new ImportResult(students, skippedRows);
+        return new ImportResult(new RosterSnapshot(Array.Empty<PersonAttributeDefinition>(), students), skippedRows);
     }
 
     private static string ReadColumn(IReadOnlyList<string> row, int column)
@@ -83,11 +85,21 @@ internal static class RosterImporter
         }
     }
 
-    private static SpreadsheetPreview PreviewSecRandom(string path)
+    private static SpreadsheetPreview PreviewJson(string path)
     {
         using var reader = new StreamReader(path, System.Text.Encoding.UTF8, true);
         using JsonDocument document = JsonDocument.Parse(reader.ReadToEnd());
         JsonElement root = document.RootElement;
+        if (root.ValueKind == JsonValueKind.Array || root.ValueKind == JsonValueKind.Object && root.TryGetProperty("Version", out _))
+        {
+            using Stream stream = File.OpenRead(path);
+            var roster = StudentRoster.ReadJson(stream);
+            return new SpreadsheetPreview(path, new[] { "姓名", "学号", "小组" },
+                roster.Students.Select(person => (IReadOnlyList<string>)new[] { person.Name, person.StudentNumber ?? "", person.Group ?? "" }).ToArray())
+            {
+                NativeRoster = roster
+            };
+        }
         if (root.ValueKind != JsonValueKind.Object)
             throw new InvalidDataException(PayloadStrings.SecRandomRootObjectRequired);
 

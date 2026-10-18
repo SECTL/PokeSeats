@@ -93,7 +93,7 @@
     <value>名单文件 (*.xlsx;*.xls;*.csv;*.json)</value>
   </data>
   <data name="FilePickerSecRandomJsonFilter" xml:space="preserve">
-    <value>SecRandom JSON (*.json)</value>
+    <value>JSON 名单 (*.json)</value>
   </data>
   <data name="FilePickerSelectRosterTitle" xml:space="preserve">
     <value>选择学生名单文件</value>
@@ -278,13 +278,13 @@
     <comment>{0} = 异常信息。</comment>
   </data>
   <data name="RosterImportHeading" xml:space="preserve">
-    <value>导入学生花名册（Excel / CSV / SecRandom JSON）</value>
+    <value>导入学生花名册（Excel / CSV / JSON）</value>
   </data>
   <data name="RosterImportHint" xml:space="preserve">
-    <value>表格使用首行列标题；SecRandom JSON 自动对应姓名、学号和小组。</value>
+    <value>表格使用首行列标题；原生 JSON 保留属性，SecRandom JSON 对应姓名、学号和小组。</value>
   </data>
   <data name="RosterImportNote" xml:space="preserve">
-    <value>确认导入会替换当前名单并保存；姓名为空的记录会跳过。</value>
+    <value>确认导入会整体替换名单及属性定义并保存；表格中的空姓名行会跳过。</value>
   </data>
   <data name="RosterImportSuccessFormat" xml:space="preserve">
     <value>导入成功：已录入 {0} 名学生（跳过空白或无效行 {1} 行）。</value>
@@ -324,7 +324,7 @@
     <value>学号</value>
   </data>
   <data name="RosterUnsupportedFormat" xml:space="preserve">
-    <value>支持 Excel（.xlsx、.xls）、CSV 和 SecRandom JSON 名单。</value>
+    <value>支持 Excel（.xlsx、.xls）、CSV、PokeSeats 原生 JSON 和 SecRandom JSON 名单。</value>
   </data>
   <data name="RosterViewTitle" xml:space="preserve">
     <value>学生名单</value>

@@ -18,7 +18,7 @@ public enum SolveStatus
 }
 
 public sealed record SolverRequest(
-    IReadOnlyCollection<Person> Roster,
+    RosterSnapshot Roster,
     LayoutGrid Layout,
     IReadOnlyCollection<PokeSeats.IR.Rules.Rule> Rules,
     SolverBackend Backend);

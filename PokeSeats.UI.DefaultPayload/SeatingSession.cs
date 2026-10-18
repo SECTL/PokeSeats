@@ -45,7 +45,7 @@ internal sealed class SeatingSession : IUiCommand, IDisposable
         {
             rosterRevision = roster.Revision; layoutRevision = layout.Revision;
             ruleSnapshot = rules.Rules.ToArray();
-            Request = new SolverRequest(roster.Students.ToArray(), layout.ToGrid(), ruleSnapshot, SolverBackend.OrToolsCpSat);
+            Request = new SolverRequest(roster.Snapshot, layout.ToGrid(), ruleSnapshot, SolverBackend.OrToolsCpSat);
             Result = null; Error = null; conflicts.Clear(); RunNumber++;
             pending = true;
         }
