@@ -21,7 +21,8 @@ public sealed record SolverRequest(
     RosterSnapshot Roster,
     LayoutGrid Layout,
     IReadOnlyCollection<PokeSeats.IR.Rules.Rule> Rules,
-    SolverBackend Backend);
+    SolverBackend Backend,
+    IReadOnlyList<SeatObjective> Objectives);
 
 public sealed record SeatAssignment(PersonId Person, GridPos Seat);
 

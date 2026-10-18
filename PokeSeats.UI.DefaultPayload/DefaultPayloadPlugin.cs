@@ -21,9 +21,12 @@ public sealed class DefaultPayloadPlugin : IUiPlugin
         context.RegisterView(new LayoutEditorView(layout, layoutPath, loadMessage));
         string rulesPath = Path.Combine(context.DataDirectory, "rules.json");
         var rules = RuleDocument.LoadOrCreate(rulesPath, out string? rulesMessage);
-        seating = new SeatingSession(roster, layout, rules, context.Events);
+        string objectivesPath = Path.Combine(context.DataDirectory, "objectives.json");
+        var objectives = ObjectiveDocument.LoadOrCreate(objectivesPath, out string? objectivesMessage);
+        seating = new SeatingSession(roster, layout, rules, objectives, context.Events);
         context.RegisterView(new RuleEditorView(roster, layout, rules, rulesPath, rulesMessage, seating));
         context.RegisterView(new SeatingResultView(seating, context.DataDirectory));
+        context.RegisterView(new ObjectiveEditorView(roster, objectives, objectivesPath, objectivesMessage));
         context.RegisterCommand(seating);
     }
 

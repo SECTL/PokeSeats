@@ -11,20 +11,24 @@ internal sealed class SeatingSession : IUiCommand, IDisposable
     private readonly StudentRoster roster;
     private readonly LayoutDocument layout;
     private readonly RuleDocument rules;
+    private readonly ObjectiveDocument objectives;
     private readonly IUiEventBus events;
     private Task<Outcome>? worker;
     private bool pending;
     private bool disposed;
     private int rosterRevision;
     private int layoutRevision;
+    private int objectivesRevision;
     private Rule[] ruleSnapshot = Array.Empty<Rule>();
     private readonly HashSet<RuleId> conflicts = new();
 
     private sealed record Outcome(SolverResult? Result, string? Error);
 
-    public SeatingSession(StudentRoster roster, LayoutDocument layout, RuleDocument rules, IUiEventBus events)
+    public SeatingSession(StudentRoster roster, LayoutDocument layout, RuleDocument rules,
+        ObjectiveDocument objectives, IUiEventBus events)
     {
         this.roster = roster; this.layout = layout; this.rules = rules; this.events = events;
+        this.objectives = objectives;
     }
 
     public string Id => "pokeseats.defaultpayload.start-seating";
@@ -35,7 +39,8 @@ internal sealed class SeatingSession : IUiCommand, IDisposable
     public string? Error { get; private set; }
     public int RunNumber { get; private set; }
     public bool IsCurrent => Request is not null && rosterRevision == roster.Revision
-        && layoutRevision == layout.Revision && ruleSnapshot.SequenceEqual(rules.Rules);
+        && layoutRevision == layout.Revision && ruleSnapshot.SequenceEqual(rules.Rules)
+        && objectivesRevision == objectives.Revision;
 
     public void Execute()
     {
@@ -44,8 +49,10 @@ internal sealed class SeatingSession : IUiCommand, IDisposable
         if (!IsRunning)
         {
             rosterRevision = roster.Revision; layoutRevision = layout.Revision;
+            objectivesRevision = objectives.Revision;
             ruleSnapshot = rules.Rules.ToArray();
-            Request = new SolverRequest(roster.Snapshot, layout.ToGrid(), ruleSnapshot, SolverBackend.OrToolsCpSat);
+            Request = new SolverRequest(roster.Snapshot, layout.ToGrid(), ruleSnapshot,
+                SolverBackend.OrToolsCpSat, objectives.Objectives.ToArray());
             Result = null; Error = null; conflicts.Clear(); RunNumber++;
             pending = true;
         }
