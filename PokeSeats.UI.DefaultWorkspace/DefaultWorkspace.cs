@@ -1,4 +1,5 @@
 using System.Numerics;
+using System.Reflection;
 using ImGuiNET;
 using PokeSeats.UI.PluginContracts;
 
@@ -9,6 +10,10 @@ public class DefaultWorkspace : IWorkspace
     private const string AuthorGitHub = "chenjintang-shrimp";
     private const string AuthorAvatarResource = "PokeSeats.UI.DefaultWorkspace.Assets.chenjintang-shrimp.png";
     private const string SectIconResource = "PokeSeats.UI.DefaultWorkspace.Assets.sectl.jpg";
+
+    /// <summary>宿主程序集的版本；没有宿主时退回本插件自己的版本。</summary>
+    private static string ApplicationVersion =>
+        (Assembly.GetEntryAssembly() ?? typeof(DefaultWorkspace).Assembly).GetName().Version?.ToString(3) ?? "0.0.0";
 
     public UiDesignTokens DesignTokens => _designTokens;
 
@@ -305,7 +310,7 @@ public class DefaultWorkspace : IWorkspace
             ImGui.TextUnformatted(WorkspaceStrings.ProductName);
             ImGui.SetWindowFontScale(1f);
 
-            ImGui.TextDisabled(WorkspaceStrings.VersionCopyright);
+            ImGui.TextDisabled(string.Format(WorkspaceStrings.VersionCopyrightFormat, ApplicationVersion));
             ImGui.TextDisabled(WorkspaceStrings.LicenseNotice);
             ImGui.Spacing();
             DrawCreditLine(WorkspaceStrings.MadeBy, _authorAvatar, AuthorGitHub);

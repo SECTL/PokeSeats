@@ -11,7 +11,7 @@
   <data name="PanelsMenu" xml:space="preserve"><value>面板</value></data>
   <data name="NoPanels" xml:space="preserve"><value>（无可用面板）</value></data>
   <data name="ProductName" xml:space="preserve"><value>PokeSeats 戳座</value></data>
-  <data name="VersionCopyright" xml:space="preserve"><value>版本 1.0　Copyright (c) 2025-2026 SECTL Studio &amp; chenjintang-shrimp</value></data>
+  <data name="VersionCopyrightFormat" xml:space="preserve"><value>版本 {0}　Copyright (c) 2025-2026 SECTL Studio &amp; chenjintang-shrimp</value></data>
   <data name="MadeBy" xml:space="preserve"><value>作者</value></data>
   <data name="SupportsThanks" xml:space="preserve"><value>鸣谢</value></data>
   <data name="Supporter" xml:space="preserve"><value>SECTL 思拓创联</value></data>
