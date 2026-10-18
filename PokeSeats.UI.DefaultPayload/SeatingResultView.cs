@@ -13,6 +13,7 @@ internal sealed class SeatingResultView : IUiView
     private readonly SeatingSession session;
     private readonly Dictionary<GridPos, Person> occupants = new();
     private readonly SeatingImageExportDialog imageExport;
+    private readonly SeatingArchiveExportDialog archiveExport;
     private UiDesignTokens _designTokens = UiDesignTokens.Light;
     private int displayedRun = -1;
     private float elapsed;
@@ -21,6 +22,7 @@ internal sealed class SeatingResultView : IUiView
     {
         this.session = session;
         imageExport = new SeatingImageExportDialog(dataDirectory);
+        archiveExport = new SeatingArchiveExportDialog(dataDirectory);
     }
     public string Id => ViewId;
     public string DisplayName => PayloadStrings.SeatingResultViewTitle;
@@ -35,6 +37,7 @@ internal sealed class SeatingResultView : IUiView
         {
             displayedRun = session.RunNumber; elapsed = 0; occupants.Clear();
             imageExport.ResetResult();
+            archiveExport.ResetResult();
         }
         if (session.IsRunning)
         {
@@ -80,6 +83,9 @@ internal sealed class SeatingResultView : IUiView
         ImGui.Text(string.Format(PayloadStrings.SeatingAssignedFormat, result.Assignments.Count, request.Layout.GetDeskCount() - result.Assignments.Count));
         ImGui.TextWrapped(PayloadStrings.SeatingChartHint);
         if (ImGui.Button(ExportStrings.Open)) imageExport.Open();
+        ImGui.SameLine();
+        if (ImGui.Button(ExportStrings.ArchiveOpen)) archiveExport.Open();
+        archiveExport.Draw(request, result);
         imageExport.Draw(request.Layout, occupants);
         DrawChart(request.Layout);
     }

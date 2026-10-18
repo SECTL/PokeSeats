@@ -110,10 +110,16 @@ internal sealed class RuleDocument
         if (!string.IsNullOrEmpty(directory))
             Directory.CreateDirectory(directory);
 
-        var stored = new StoredDocument(_rules.Select(ToStored).ToList());
         string temporaryPath = path + ".tmp";
-        File.WriteAllText(temporaryPath, JsonSerializer.Serialize(stored, SerializerOptions));
+        using (Stream stream = File.Create(temporaryPath))
+            WriteJson(stream, _rules);
         File.Move(temporaryPath, path, true);
+    }
+
+    internal static void WriteJson(Stream stream, IEnumerable<Rule> rules)
+    {
+        var stored = new StoredDocument(rules.Select(ToStored).ToList());
+        JsonSerializer.Serialize(stream, stored, SerializerOptions);
     }
 
     private static StoredRule ToStored(Rule rule) => rule switch

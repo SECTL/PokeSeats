@@ -252,6 +252,24 @@ internal static class WindowsFilePicker
         return GetSaveFileName(ref dialog) ? dialog.File.TrimEnd('\0') : null;
     }
 
+    public static string? SelectZipFile(string path)
+    {
+        if (!OperatingSystem.IsWindows()) return null;
+        var dialog = new OpenFileName
+        {
+            Size = Marshal.SizeOf<OpenFileName>(),
+            Filter = ExportStrings.ZipFilter + "\0*.zip\0\0",
+            File = Path.GetFileName(path).PadRight(4096, '\0'),
+            MaxFile = 4096,
+            InitialDirectory = Directory.Exists(Path.GetDirectoryName(path)) ? Path.GetDirectoryName(path)! : AppContext.BaseDirectory,
+            Title = ExportStrings.ArchiveTitle,
+            DefExt = "zip",
+            FilterIndex = 1,
+            Flags = 0x00080000 | 0x00000800 | 0x00000002
+        };
+        return GetSaveFileName(ref dialog) ? dialog.File.TrimEnd('\0') : null;
+    }
+
     [DllImport("comdlg32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
     private static extern bool GetSaveFileName(ref OpenFileName dialog);
 

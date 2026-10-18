@@ -45,4 +45,16 @@
   <data name="Overwrite" xml:space="preserve"><value>覆盖</value></data>
   <data name="Cancel" xml:space="preserve"><value>取消</value></data>
   <data name="PngFilter" xml:space="preserve"><value>PNG 图片 (*.png)</value></data>
+  <data name="ArchiveOpen" xml:space="preserve"><value>导出 ZIP…</value></data>
+  <data name="ArchiveTitle" xml:space="preserve"><value>导出排座数据 ZIP</value></data>
+  <data name="ArchiveHint" xml:space="preserve"><value>压缩包包含 students.json（学生名单）、rules.json（规则列表）和 seating.json（完整布局与座位分配）。三个文件均使用本次排座时的数据快照。</value></data>
+  <data name="ArchivePath" xml:space="preserve"><value>ZIP 保存路径</value></data>
+  <data name="ArchiveSave" xml:space="preserve"><value>保存 ZIP</value></data>
+  <data name="ArchiveSuccess" xml:space="preserve"><value>排座数据已保存：{0}</value></data>
+  <data name="ArchiveFailure" xml:space="preserve"><value>ZIP 导出失败：{0}</value></data>
+  <data name="ArchivePathRequired" xml:space="preserve"><value>请填写 ZIP 保存路径。</value></data>
+  <data name="ZipOnly" xml:space="preserve"><value>请使用 .zip 扩展名。</value></data>
+  <data name="ZipFilter" xml:space="preserve"><value>ZIP 压缩包 (*.zip)</value></data>
+  <data name="ArchiveOverwriteTitle" xml:space="preserve"><value>覆盖 ZIP？</value></data>
+  <data name="ArchiveResultRequired" xml:space="preserve"><value>请先成功完成一次排座。</value></data>
 </root>
