@@ -70,8 +70,12 @@
       <ItemGroup Condition="'$(RuntimeIdentifier)' == ''">
         <BuiltinPayloadFiles Include="..\PokeSeats.UI.DefaultPayload\bin\$(Configuration)\net6.0\**\*" />
       </ItemGroup>
-      <ItemGroup Condition="'$(RuntimeIdentifier)' != ''">
+      <ItemGroup Condition="'$(RuntimeIdentifier)' != '' and $(RuntimeIdentifier.StartsWith('win'))">
         <BuiltinPayloadFiles Include="..\PokeSeats.UI.DefaultPayload\bin\$(Configuration)\net6.0\$(RuntimeIdentifier)\**\*" />
+      </ItemGroup>
+      <ItemGroup Condition="'$(RuntimeIdentifier)' != '' and !$(RuntimeIdentifier.StartsWith('win'))">
+        <BuiltinPayloadFiles Include="..\PokeSeats.UI.DefaultPayload\bin\$(Configuration)\net6.0\$(RuntimeIdentifier)\**\*"
+                             Exclude="..\PokeSeats.UI.DefaultPayload\bin\$(Configuration)\net6.0\$(RuntimeIdentifier)\libz3.dll" />
       </ItemGroup>
       <ItemGroup>
         <BuiltinPayloadFiles Include="..\PokeSeats.UI.DefaultPayload\plugin.json" />
@@ -88,6 +92,19 @@
           <RelativePath>builtins\pokeseats.defaultpayload\%(RecursiveDir)%(Filename)%(Extension)</RelativePath>
           <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
         </ResolvedFileToPublish>
+      </ItemGroup>
+    </Target>
+
+    <!--
+      Microsoft.Z3.x64 的 build 目标无条件把 Windows 版 libz3.dll 带进任何平台的输出。
+      非 Windows 包用不上它，Linux 的原生库由 runtimes/ubuntu-x64 提供，这里统一剔掉。
+    -->
+    <Target Name="DropWindowsZ3NativeFromUnixPackage"
+            AfterTargets="ComputeResolvedFilesToPublishList"
+            Condition="'$(RuntimeIdentifier)' != '' and !$(RuntimeIdentifier.StartsWith('win'))">
+      <ItemGroup>
+        <_WindowsZ3Native Include="@(ResolvedFileToPublish)" Condition="'%(ResolvedFileToPublish.Filename)' == 'libz3' and '%(ResolvedFileToPublish.Extension)' == '.dll'" />
+        <ResolvedFileToPublish Remove="@(_WindowsZ3Native)" />
       </ItemGroup>
     </Target>
 

@@ -133,10 +133,10 @@ dotnet run --project PokeSeats.UI
 
 ```text
 dotnet publish PokeSeats.UI -c Release -r win-x64 --self-contained false -o publish/win-x64
-dotnet publish PokeSeats.UI -c Release -r linux-x64 --self-contained false -o publish/linux-x64
+dotnet publish PokeSeats.UI -c Release -r ubuntu-x64 --self-contained false -o publish/linux-x64
 ```
 
-按运行时分别发布，每个输出目录只包含对应平台的原生库，整个目录拷走即可运行。不指定 `-r` 时各平台原生库会一起打包，体积约 520 MB，通常没有必要。求解器依赖的原生库只有 64 位版本，构建目标固定为 x64。
+按运行时分别发布，每个输出目录只包含对应平台的原生库，整个目录拷走即可运行。Linux 用 `ubuntu-x64` 而不是 `linux-x64`：Z3 的 NuGet 包只把 Linux 原生库放在 `runtimes/ubuntu-x64` 下，而 RID 回退只能从具体到宽泛，`linux-x64` 取不到它，无解时的冲突规则定位就会失效。产物在 glibc 发行版上通用，已在 Arch Linux 上验证启动与 Z3 求解。不指定 `-r` 时各平台原生库会一起打包，体积约 520 MB，通常没有必要。求解器依赖的原生库只有 64 位版本，构建目标固定为 x64。
 
 ## 项目结构
 
