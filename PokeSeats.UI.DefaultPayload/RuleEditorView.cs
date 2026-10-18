@@ -35,6 +35,7 @@ internal sealed class RuleEditorView : IUiView
     private readonly RuleDocument document;
     private readonly string storagePath;
     private readonly SeatingSession seating;
+    private readonly ObjectiveEditorView objectives;
     private RuleEditorState state = new();
     private string personSearch = "";
     private string referenceSearch = "";
@@ -51,10 +52,12 @@ internal sealed class RuleEditorView : IUiView
     private bool checksDirty = true;
     private UiDesignTokens _designTokens = UiDesignTokens.Light;
 
-    public RuleEditorView(StudentRoster roster, LayoutDocument layout, RuleDocument document, string storagePath, string? loadMessage, SeatingSession seating)
+    public RuleEditorView(StudentRoster roster, LayoutDocument layout, RuleDocument document, string storagePath,
+        string? loadMessage, SeatingSession seating, ObjectiveEditorView objectives)
     {
         this.roster = roster; this.layout = layout; this.document = document; this.storagePath = storagePath;
         this.seating = seating;
+        this.objectives = objectives;
         people = new StudentSearchIndex(roster);
         status = loadMessage ?? RulesStrings.DefaultStatus;
     }
@@ -67,6 +70,22 @@ internal sealed class RuleEditorView : IUiView
     {
         _designTokens = designTokens;
         seating.Update();
+        if (!ImGui.BeginTabBar("##rule-editor-tabs")) return;
+        if (ImGui.BeginTabItem(RulesStrings.RulesTabTitle))
+        {
+            DrawRules();
+            ImGui.EndTabItem();
+        }
+        if (ImGui.BeginTabItem(PayloadStrings.ObjectiveEditorViewTitle))
+        {
+            objectives.DrawContent();
+            ImGui.EndTabItem();
+        }
+        ImGui.EndTabBar();
+    }
+
+    private void DrawRules()
+    {
         if (ImGui.Button(RulesStrings.NewRuleButton)) NewDraft();
         ImGui.SameLine();
         ImGui.TextDisabled(string.Format(RulesStrings.ActiveRuleCountFormat, document.Rules.Count));

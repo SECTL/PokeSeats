@@ -61,6 +61,9 @@
   <data name="RuleEditorDisplayName" xml:space="preserve">
     <value>规则编辑</value>
   </data>
+  <data name="RulesTabTitle" xml:space="preserve">
+    <value>规则</value>
+  </data>
   <data name="DefaultStatus" xml:space="preserve">
     <value>请在左侧选择规则类型并配置约束条件，点击“保存规则”即可生效。</value>
   </data>

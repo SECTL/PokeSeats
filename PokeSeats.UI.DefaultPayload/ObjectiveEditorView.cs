@@ -5,8 +5,8 @@ using PokeSeats.UI.PluginContracts;
 
 namespace PokeSeats.UI.DefaultPayload;
 
-/// <summary>「排座目标」面板：编辑并排序写入 objectives.json 的软目标列表。</summary>
-internal sealed class ObjectiveEditorView : IUiView
+/// <summary>「排座目标」标签页：编辑并排序写入 objectives.json 的软目标列表。</summary>
+internal sealed class ObjectiveEditorView
 {
     private static readonly string[] DimensionLabels =
     {
@@ -42,15 +42,7 @@ internal sealed class ObjectiveEditorView : IUiView
         _status = loadMessage ?? string.Empty;
     }
 
-    public string Id => "pokeseats.defaultpayload.objectives";
-
-    public string DisplayName => PayloadStrings.ObjectiveEditorViewTitle;
-
-    public bool InitiallyVisible => false;
-
-    public Vector2? MinimumSize => new(760, 520);
-
-    public void DrawContent(float deltaSeconds, UiDesignTokens designTokens)
+    public void DrawContent()
     {
         DrawToolbar();
         ImGui.Separator();
