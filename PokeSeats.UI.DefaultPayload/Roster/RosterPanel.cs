@@ -4,6 +4,7 @@ using System.Text.Json;
 using ImGuiNET;
 using PokeSeats.UI.PluginContracts;
 using PokeSeats.IR.Base;
+
 namespace PokeSeats.UI.DefaultPayload;
 
 internal sealed class RosterPanel : IUiView
@@ -57,7 +58,8 @@ internal sealed class RosterPanel : IUiView
             ImGui.BeginDisabled(_preview.NativeRoster is not null);
             ImGui.Text(PayloadStrings.RosterColumnPrompt);
             DrawColumnSelector("roster-name-column", PayloadStrings.RosterNameColumnLabel, ref _nameColumn, false);
-            DrawColumnSelector("roster-student-number-column", PayloadStrings.RosterStudentNumberColumnLabel, ref _studentNumberColumn, true);
+            DrawColumnSelector("roster-student-number-column", PayloadStrings.RosterStudentNumberColumnLabel,
+                ref _studentNumberColumn, true);
             DrawColumnSelector("roster-group-column", PayloadStrings.RosterGroupColumnLabel, ref _groupColumn, true);
             ImGui.EndDisabled();
 
@@ -67,6 +69,7 @@ internal sealed class RosterPanel : IUiView
             ImGui.SameLine();
             ImGui.TextDisabled(string.Format(PayloadStrings.RosterRecordCountFormat, _preview.Rows.Count));
         }
+
         ImGui.TextDisabled(PayloadStrings.RosterImportNote);
 
         ImGui.Separator();
@@ -83,7 +86,8 @@ internal sealed class RosterPanel : IUiView
 
     private void DrawClearConfirmation()
     {
-        if (!ImGui.BeginPopupModal(PayloadStrings.RosterClearConfirmTitle + "###roster-clear-confirm", ImGuiWindowFlags.AlwaysAutoResize))
+        if (!ImGui.BeginPopupModal(PayloadStrings.RosterClearConfirmTitle + "###roster-clear-confirm",
+                ImGuiWindowFlags.AlwaysAutoResize))
             return;
 
         ImGui.Text(string.Format(PayloadStrings.RosterClearConfirmQuestionFormat, _roster.Students.Count));
@@ -120,10 +124,13 @@ internal sealed class RosterPanel : IUiView
         SpreadsheetPreview previewData = _preview!;
         string preview = selectedColumn >= 0 && selectedColumn < previewData.Headers.Count
             ? previewData.Headers[selectedColumn]
-            : allowNone ? PayloadStrings.RosterColumnNoneOption : PayloadStrings.RosterColumnUnsetOption;
+            : allowNone
+                ? PayloadStrings.RosterColumnNoneOption
+                : PayloadStrings.RosterColumnUnsetOption;
         if (ImGui.BeginCombo($"{label}##{id}", preview))
         {
-            if (allowNone && ImGui.Selectable($"{PayloadStrings.RosterColumnNoneOption}##{id}-none", selectedColumn < 0))
+            if (allowNone &&
+                ImGui.Selectable($"{PayloadStrings.RosterColumnNoneOption}##{id}-none", selectedColumn < 0))
                 selectedColumn = -1;
             for (int index = 0; index < previewData.Headers.Count; index++)
             {
@@ -133,6 +140,7 @@ internal sealed class RosterPanel : IUiView
                 if (selected)
                     ImGui.SetItemDefaultFocus();
             }
+
             ImGui.EndCombo();
         }
     }
@@ -140,7 +148,9 @@ internal sealed class RosterPanel : IUiView
 
     private void DrawRosterTable()
     {
-        if (_roster.Students.Count == 0 || !ImGui.BeginTable("##student-roster", 3, ImGuiTableFlags.Borders | ImGuiTableFlags.RowBg | ImGuiTableFlags.ScrollY, new Vector2(0, UiScale.Pixels(180))))
+        if (_roster.Students.Count == 0 || !ImGui.BeginTable("##student-roster", 3,
+                ImGuiTableFlags.Borders | ImGuiTableFlags.RowBg | ImGuiTableFlags.ScrollY,
+                new Vector2(0, UiScale.Pixels(180))))
             return;
 
         ImGui.TableSetupColumn(PayloadStrings.RosterNameHeader + "##student-name");
@@ -157,6 +167,7 @@ internal sealed class RosterPanel : IUiView
             ImGui.TableNextColumn();
             ImGui.TextUnformatted(student.Group ?? "");
         }
+
         ImGui.EndTable();
     }
 
@@ -165,12 +176,15 @@ internal sealed class RosterPanel : IUiView
         try
         {
             _preview = RosterImporter.Preview(_filePath.Trim());
-            _nameColumn = FindHeader(_preview.Headers, 0, "姓名", "名称", "学生姓名", "名字", "Name", "Student Name", "Full Name");
-            _studentNumberColumn = FindHeader(_preview.Headers, -1, "学号", "序号/编号", "编号", "学籍号", "Sequence / ID", "Student ID", "Student Number", "ID");
+            _nameColumn = FindHeader(_preview.Headers, 0, "姓名", "名称", "学生姓名", "名字", "Name", "Student Name",
+                "Full Name");
+            _studentNumberColumn = FindHeader(_preview.Headers, -1, "学号", "序号/编号", "编号", "学籍号", "Sequence / ID",
+                "Student ID", "Student Number", "ID");
             _groupColumn = FindHeader(_preview.Headers, -1, "小组", "分组", "组别", "Group", "Team");
             _status = PayloadStrings.RosterPreviewSuccessStatus;
         }
-        catch (Exception exception) when (exception is IOException or InvalidDataException or UnauthorizedAccessException or ArgumentException or JsonException)
+        catch (Exception exception) when (exception is IOException or InvalidDataException
+                                              or UnauthorizedAccessException or ArgumentException or JsonException)
         {
             _preview = null;
             _status = string.Format(PayloadStrings.RosterPreviewFailedFormat, exception.Message);
@@ -186,7 +200,8 @@ internal sealed class RosterPanel : IUiView
             _roster.Replace(result.Roster);
             _status = string.Format(PayloadStrings.RosterImportSuccessFormat, result.Roster.Count, result.SkippedRows);
         }
-        catch (Exception exception) when (exception is IOException or InvalidDataException or UnauthorizedAccessException or ArgumentException)
+        catch (Exception exception) when (exception is IOException or InvalidDataException
+                                              or UnauthorizedAccessException or ArgumentException)
         {
             _status = string.Format(PayloadStrings.RosterImportFailedFormat, exception.Message);
         }
@@ -243,7 +258,9 @@ internal static class WindowsFilePicker
             Filter = ExportStrings.PngFilter + "\0*.png\0\0",
             File = Path.GetFileName(path).PadRight(4096, '\0'),
             MaxFile = 4096,
-            InitialDirectory = Directory.Exists(Path.GetDirectoryName(path)) ? Path.GetDirectoryName(path)! : AppContext.BaseDirectory,
+            InitialDirectory = Directory.Exists(Path.GetDirectoryName(path))
+                ? Path.GetDirectoryName(path)!
+                : AppContext.BaseDirectory,
             Title = ExportStrings.Title,
             DefExt = "png",
             FilterIndex = 1,
@@ -261,7 +278,9 @@ internal static class WindowsFilePicker
             Filter = ExportStrings.ZipFilter + "\0*.zip\0\0",
             File = Path.GetFileName(path).PadRight(4096, '\0'),
             MaxFile = 4096,
-            InitialDirectory = Directory.Exists(Path.GetDirectoryName(path)) ? Path.GetDirectoryName(path)! : AppContext.BaseDirectory,
+            InitialDirectory = Directory.Exists(Path.GetDirectoryName(path))
+                ? Path.GetDirectoryName(path)!
+                : AppContext.BaseDirectory,
             Title = ExportStrings.ArchiveTitle,
             DefExt = "zip",
             FilterIndex = 1,
