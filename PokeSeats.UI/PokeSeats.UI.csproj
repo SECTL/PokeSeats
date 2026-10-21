@@ -51,6 +51,15 @@
     </ItemGroup>
 
     <ItemGroup>
+      <EmbeddedResource Update="HostStrings.resx">
+        <StronglyTypedLanguage>CSharp</StronglyTypedLanguage>
+        <StronglyTypedClassName>HostStrings</StronglyTypedClassName>
+        <StronglyTypedNamespace>$(RootNamespace)</StronglyTypedNamespace>
+        <StronglyTypedFileName>$(IntermediateOutputPath)HostStrings.Designer.cs</StronglyTypedFileName>
+      </EmbeddedResource>
+    </ItemGroup>
+
+    <ItemGroup>
       <ProjectReference Include="..\PokeSeats.UI.PluginContracts\PokeSeats.UI.PluginContracts.csproj" />
       <ProjectReference Include="..\PokeSeats.UI.DefaultWorkspace\PokeSeats.UI.DefaultWorkspace.csproj" ReferenceOutputAssembly="false" />
       <ProjectReference Include="..\PokeSeats.UI.DefaultPayload\PokeSeats.UI.DefaultPayload.csproj" ReferenceOutputAssembly="false" />

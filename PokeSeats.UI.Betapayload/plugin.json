@@ -3,5 +3,5 @@
   "apiVersion": 5,
   "assembly": "PokeSeats.UI.Betapayload.dll",
   "entryPoint": "PokeSeats.UI.Betapayload.BetapayloadPlugin",
-  "dependencies": []
+  "dependencies": ["pokeseats.default", "pokeseats.defaultpayload"]
 }

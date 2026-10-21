@@ -2,12 +2,6 @@
 
 本文件记录 PokeSeats 戳座的版本变更，格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)，版本号遵循[语义化版本](https://semver.org/lang/zh-CN/)。
 
-## [未发布]
-
-### 新增
-
-- **Betapayload 插件**：新增 `PokeSeats.UI.Betapayload`，以 `pokeseats.betapayload` 作为内置插件随宿主构建和发布，用于独立承载 beta 功能；目前不注册额外界面或命令，不改变稳定功能。
-
 ## [1.1.0] - 2026-10-18
 
 自带 .NET 运行时，解压即用，不必再单独安装运行时。

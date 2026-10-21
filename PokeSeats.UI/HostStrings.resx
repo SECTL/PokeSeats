@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms</value></resheader>
+  <data name="ProductName" xml:space="preserve"><value>PokeSeats 戳座</value></data>
+  <data name="WorkspaceSelectorTitle" xml:space="preserve"><value>切换工作区</value></data>
+  <data name="WorkspaceSelectorPrompt" xml:space="preserve"><value>请选择要在当前窗口中呈现的工作区布局模式。</value></data>
+  <data name="WorkspaceSelectorRestartHint" xml:space="preserve"><value>提示：安装、移除或更新插件后，需重启软件方可生效。</value></data>
+  <data name="WorkspaceSelectorEmpty" xml:space="preserve"><value>未检测到已安装的工作区插件。</value></data>
+  <data name="WorkspaceSelectorEmptyHint" xml:space="preserve"><value>请将工作区插件放置于 plugins 目录后重启软件。</value></data>
+  <data name="DiagnosticsTitle" xml:space="preserve"><value>插件加载诊断与日志</value></data>
+  <data name="Close" xml:space="preserve"><value>关闭</value></data>
+</root>

@@ -13,6 +13,11 @@ internal sealed class WorkspaceSelector
     private string? _pendingWorkspaceId;
     private bool _requestOpen;
 
+    // ImGui popup ids must match between OpenPopup and BeginPopupModal, so the label and the
+    // stable ###suffix are combined once instead of per frame.
+    private static readonly string SelectorPopupId =
+        HostStrings.WorkspaceSelectorTitle + "###pokeseats.host.workspace-selector";
+
     public WorkspaceSelector(WorkspaceManager manager)
     {
         _manager = manager;
@@ -49,23 +54,23 @@ internal sealed class WorkspaceSelector
 
         if (_requestOpen)
         {
-            ImGui.OpenPopup("切换工作区###pokeseats.host.workspace-selector");
+            ImGui.OpenPopup(SelectorPopupId);
             _requestOpen = false;
         }
         ImGuiViewportPtr viewport = ImGui.GetMainViewport();
         ImGui.SetNextWindowPos(viewport.Pos + viewport.Size * 0.5f, ImGuiCond.Appearing, new Vector2(0.5f));
         bool open = _open;
-        if (ImGui.BeginPopupModal("切换工作区###pokeseats.host.workspace-selector", ref open,
+        if (ImGui.BeginPopupModal(SelectorPopupId, ref open,
                 ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoDocking))
         {
-            ImGui.Text("请选择要在当前窗口中呈现的工作区布局模式。");
-            ImGui.TextDisabled("提示：安装、移除或更新插件后，需重启软件方可生效。");
+            ImGui.Text(HostStrings.WorkspaceSelectorPrompt);
+            ImGui.TextDisabled(HostStrings.WorkspaceSelectorRestartHint);
             ImGui.Separator();
 
             if (_manager.Workspaces.Count == 0)
             {
-                ImGui.Text("未检测到已安装的工作区插件。");
-                ImGui.TextDisabled("请将工作区插件放置于 plugins 目录后重启软件。");
+                ImGui.Text(HostStrings.WorkspaceSelectorEmpty);
+                ImGui.TextDisabled(HostStrings.WorkspaceSelectorEmptyHint);
             }
             else
             {
@@ -88,7 +93,7 @@ internal sealed class WorkspaceSelector
             DrawDiagnostics();
 
             ImGui.Separator();
-            if (ImGui.Button("关闭") || _pendingWorkspaceId is not null)
+            if (ImGui.Button(HostStrings.Close) || _pendingWorkspaceId is not null)
             {
                 ImGui.CloseCurrentPopup();
                 open = false;
@@ -113,7 +118,7 @@ internal sealed class WorkspaceSelector
             return;
 
         ImGui.Separator();
-        ImGui.TextDisabled("插件加载诊断与日志");
+        ImGui.TextDisabled(HostStrings.DiagnosticsTitle);
         foreach (string diagnostic in _manager.PluginDiagnostics)
             ImGui.TextWrapped(diagnostic);
         foreach (string diagnostic in _manager.Diagnostics)

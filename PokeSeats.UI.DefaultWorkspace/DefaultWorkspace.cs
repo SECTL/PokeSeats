@@ -57,13 +57,13 @@ public class DefaultWorkspace : IWorkspace
         
     }
 
-    private bool IsViewVisible(IUiView view)
+    protected virtual bool IsViewVisible(IUiView view)
         => _viewVisibility.TryGetValue(view.Id, out bool visible) ? visible : view.InitiallyVisible;
 
-    private void SetViewVisible(string viewId, bool visible)
+    protected virtual void SetViewVisible(string viewId, bool visible)
         => _viewVisibility[viewId] = visible;
 
-    private void OnViewOpenRequested(UiViewOpenRequested request)
+    protected virtual void OnViewOpenRequested(UiViewOpenRequested request)
     {
         IWorkspaceContext? current = context;
         if (current is null)
@@ -216,7 +216,7 @@ public class DefaultWorkspace : IWorkspace
             SetViewVisible(view.Id, false);
     }
 
-    private void DrawViews(float deltaSeconds)
+    protected virtual void DrawViews(IWorkspaceContext workspaceContext, float deltaSeconds)
     {
         float margin = UiScale.Pixels(DesignTokens.Metrics.SpaceLarge);
         Vector2 origin = ImGui.GetWindowPos() + new Vector2(margin);
@@ -280,7 +280,7 @@ public class DefaultWorkspace : IWorkspace
         {
             if (visible)
             {
-                DrawViews(deltaSeconds);
+                DrawViews(context, deltaSeconds);
                 DrawAboutPopup();
                 DrawSettingsPopup();
 

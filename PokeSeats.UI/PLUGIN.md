@@ -14,7 +14,6 @@
   builtins/
     pokeseats.default/          # 默认工作区
     pokeseats.defaultpayload/   # 默认业务面板
-    pokeseats.betapayload/      # Beta 功能插件
   plugins/
     sample.plugin/
       plugin.json
@@ -476,7 +475,7 @@ public sealed class LogoWorkspace : IWorkspace
 
 `builtins/pokeseats.defaultpayload` 提供四个视图：`pokeseats.defaultpayload.roster`（学生名单）、`pokeseats.defaultpayload.layout`（教室布局）、`pokeseats.defaultpayload.rules`（规则编辑）、`pokeseats.defaultpayload.seating-result`（排座结果，默认隐藏）。
 
-`builtins/pokeseats.betapayload` 是用于承载 beta 功能的内置插件，入口为 `PokeSeats.UI.Betapayload.BetapayloadPlugin`。构建和发布宿主时会自动携带；目前不注册视图、命令或工作区，不改变现有界面。后续实验功能在该插件的 `Initialize` 中通过现有契约注册，自己的数据使用 `data/plugins/pokeseats.betapayload/`。当前只引用插件契约，没有声明其他插件依赖；需要复用其他插件的类型时，应同时添加项目引用和清单依赖。
+Beta 功能与工作区的使用及实现说明见 [BETA.md](../BETA.md)。
 
 ## 限制与常见错误
 
@@ -495,5 +494,4 @@ public sealed class LogoWorkspace : IWorkspace
 - `PokeSeats.UI.TestPlugin`：可运行示例，包含停靠工作区、面板切换、命令和性能面板；不随发布包分发。
 - `PokeSeats.UI.DefaultWorkspace`：默认工作区实现，含菜单、平铺/悬浮布局和主题。
 - `PokeSeats.UI.DefaultPayload`：四个业务视图和 `UiViewOpenRequested` 的实际用法。
-- `PokeSeats.UI.Betapayload`：beta 功能的独立插件入口，目前不提供界面贡献。
 - `PokeSeats.UI.PluginContracts`：契约、`UiDesignTokens`、`UiScale` 和 API 版本定义。

@@ -4,15 +4,19 @@ namespace PokeSeats.UI.Betapayload;
 
 public sealed class BetapayloadPlugin : IUiPlugin
 {
+    public const string WorkspaceId = "pokeseats.betapayload.workspace";
+
     public void Initialize(IPluginContext context)
     {
         ArgumentNullException.ThrowIfNull(context);
 
-        // Beta features register their views and commands here, separately from DefaultPayload.
+        string settingsPath = Path.Combine(context.DataDirectory, "workspace-settings.json");
+        context.RegisterWorkspace(WorkspaceId, WorkspaceStrings.WorkspaceName,
+            () => new BetaWorkspace(settingsPath));
     }
 
     public void Dispose()
     {
-        // No plugin-owned resources yet.
+        // Workspace instances are owned and disposed by the host workspace manager.
     }
 }

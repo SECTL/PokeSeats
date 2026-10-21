@@ -4,10 +4,22 @@
         <TargetFramework>net6.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     </PropertyGroup>
 
     <ItemGroup>
       <ProjectReference Include="..\PokeSeats.UI.PluginContracts\PokeSeats.UI.PluginContracts.csproj" />
+      <ProjectReference Include="..\PokeSeats.UI.DefaultWorkspace\PokeSeats.UI.DefaultWorkspace.csproj" />
+      <PackageReference Include="ImGui.NET" Version="1.91.6.1" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <EmbeddedResource Update="WorkspaceStrings.resx">
+        <StronglyTypedLanguage>CSharp</StronglyTypedLanguage>
+        <StronglyTypedClassName>WorkspaceStrings</StronglyTypedClassName>
+        <StronglyTypedNamespace>$(RootNamespace)</StronglyTypedNamespace>
+        <StronglyTypedFileName>$(IntermediateOutputPath)WorkspaceStrings.Designer.cs</StronglyTypedFileName>
+      </EmbeddedResource>
     </ItemGroup>
 
 </Project>

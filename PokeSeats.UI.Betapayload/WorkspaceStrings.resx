@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms</value></resheader>
+  <data name="WorkspaceName" xml:space="preserve"><value>标签向导工作区（Beta）</value></data>
+  <data name="WorkspaceTitle" xml:space="preserve"><value>排座向导 / Beta</value></data>
+  <data name="NavigationHint" xml:space="preserve"><value>按步骤准备排座，也可以随时点击标签返回修改。Ctrl + Alt + Shift + X 切换工作区。</value></data>
+  <data name="RosterTab" xml:space="preserve"><value>1. 学生名单</value></data>
+  <data name="LayoutTab" xml:space="preserve"><value>2. 教室布局</value></data>
+  <data name="RulesTab" xml:space="preserve"><value>3. 规则与目标</value></data>
+  <data name="ResultTab" xml:space="preserve"><value>4. 排座结果</value></data>
+  <data name="RosterHint" xml:space="preserve"><value>先导入或编辑学生名单，再准备教室布局。</value></data>
+  <data name="LayoutHint" xml:space="preserve"><value>设置教室行列，绘制课桌、讲台和走道。</value></data>
+  <data name="RulesHint" xml:space="preserve"><value>设置必须满足的规则与优化目标，准备好后开始自动排座。</value></data>
+  <data name="ResultHint" xml:space="preserve"><value>在这里查看排座进度、结果和导出选项；需要调整时可返回前面的步骤。</value></data>
+  <data name="ExtensionHint" xml:space="preserve"><value>此标签由扩展插件提供，不影响前面的排座步骤。</value></data>
+  <data name="NoViews" xml:space="preserve"><value>没有可用的视图，请检查默认业务插件是否已正确加载。</value></data>
+  <data name="Previous" xml:space="preserve"><value>上一步</value></data>
+  <data name="Next" xml:space="preserve"><value>下一步</value></data>
+  <data name="StepFormat" xml:space="preserve"><value>第 {0} / {1} 步</value></data>
+</root>

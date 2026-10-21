@@ -114,6 +114,8 @@ Windows 发布包自带 .NET 运行时及 x64 `d3dcompiler_47.dll`。后者来�
 3. **定规则和目标**：在「规则编辑」里加硬性排除 / 相邻约束，在「排座目标」里配身高梯度或各排均衡策略。
 4. **求解导出**：点菜单栏「开始自动排座」，结果出来后一键导出高清排座图或 ZIP 快照。
 
+Beta 功能的使用方式与说明见 [BETA.md](BETA.md)。
+
 ---
 
 ## 🛠️ 从源码构建
@@ -156,7 +158,7 @@ PokeSeats/
 ├── PokeSeats.UI                    # 桌面宿主: D3D11 / OpenGL 渲染、插件加载
 ├── PokeSeats.UI.DefaultWorkspace   # 默认工作区: 停靠布局、主菜单、主题
 ├── PokeSeats.UI.DefaultPayload     # 内置功能: 名单管理、布局编辑器、规则编辑、结果导出
-└── PokeSeats.UI.Betapayload        # Beta 功能插件: 实验功能与稳定业务功能分离
+└── PokeSeats.UI.Betapayload        # Beta 功能插件，见 BETA.md
 ```
 
 > 插件系统的扩展说明见 [PokeSeats.UI/PLUGIN.md](PokeSeats.UI/PLUGIN.md)。

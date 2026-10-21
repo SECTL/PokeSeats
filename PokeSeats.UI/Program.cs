@@ -15,7 +15,7 @@ using StbImageSharp;
 var options = WindowOptions.Default with
 {
     Size = new Vector2D<int>((int)UiScale.ReferenceWidth, (int)UiScale.ReferenceHeight),
-    Title = "PokeSeats 戳座",
+    Title = HostStrings.ProductName,
     API = OperatingSystem.IsWindows() ? GraphicsAPI.None : GraphicsAPI.Default,
     VSync = true,
     ShouldSwapAutomatically = !OperatingSystem.IsWindows(),
