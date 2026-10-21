@@ -54,6 +54,7 @@
       <ProjectReference Include="..\PokeSeats.UI.PluginContracts\PokeSeats.UI.PluginContracts.csproj" />
       <ProjectReference Include="..\PokeSeats.UI.DefaultWorkspace\PokeSeats.UI.DefaultWorkspace.csproj" ReferenceOutputAssembly="false" />
       <ProjectReference Include="..\PokeSeats.UI.DefaultPayload\PokeSeats.UI.DefaultPayload.csproj" ReferenceOutputAssembly="false" />
+      <ProjectReference Include="..\PokeSeats.UI.Betapayload\PokeSeats.UI.Betapayload.csproj" ReferenceOutputAssembly="false" />
     </ItemGroup>
 
     <Target Name="GetBuiltinPluginFiles" DependsOnTargets="ResolveProjectReferences">
@@ -113,6 +114,29 @@
       <ItemGroup>
         <ResolvedFileToPublish Include="@(BuiltinPayloadFiles)">
           <RelativePath>builtins\pokeseats.defaultpayload\%(RecursiveDir)%(Filename)%(Extension)</RelativePath>
+          <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+        </ResolvedFileToPublish>
+      </ItemGroup>
+    </Target>
+
+    <Target Name="GetBuiltinBetapayloadFiles" DependsOnTargets="ResolveProjectReferences">
+      <MSBuild Projects="..\PokeSeats.UI.Betapayload\PokeSeats.UI.Betapayload.csproj" Targets="GetTargetPath" Properties="Configuration=$(Configuration)" RemoveProperties="RuntimeIdentifier">
+        <Output TaskParameter="TargetOutputs" ItemName="BuiltinBetapayloadAssembly" />
+      </MSBuild>
+      <ItemGroup>
+        <BuiltinBetapayloadFiles Include="@(BuiltinBetapayloadAssembly)" />
+        <BuiltinBetapayloadFiles Include="..\PokeSeats.UI.Betapayload\plugin.json" />
+      </ItemGroup>
+    </Target>
+
+    <Target Name="CopyBuiltinBetapayload" AfterTargets="Build" DependsOnTargets="GetBuiltinBetapayloadFiles">
+      <Copy SourceFiles="@(BuiltinBetapayloadFiles)" DestinationFolder="$(TargetDir)builtins\pokeseats.betapayload" SkipUnchangedFiles="true" />
+    </Target>
+
+    <Target Name="PublishBuiltinBetapayload" BeforeTargets="ComputeFilesToPublish" DependsOnTargets="GetBuiltinBetapayloadFiles">
+      <ItemGroup>
+        <ResolvedFileToPublish Include="@(BuiltinBetapayloadFiles)">
+          <RelativePath>builtins\pokeseats.betapayload\%(Filename)%(Extension)</RelativePath>
           <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
         </ResolvedFileToPublish>
       </ItemGroup>

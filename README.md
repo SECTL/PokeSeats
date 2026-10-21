@@ -155,7 +155,8 @@ PokeSeats/
 ├── PokeSeats.UI.PluginContracts    # 插件契约: 设计令牌、DPI 缩放、扩展点 API
 ├── PokeSeats.UI                    # 桌面宿主: D3D11 / OpenGL 渲染、插件加载
 ├── PokeSeats.UI.DefaultWorkspace   # 默认工作区: 停靠布局、主菜单、主题
-└── PokeSeats.UI.DefaultPayload     # 内置功能: 名单管理、布局编辑器、规则编辑、结果导出
+├── PokeSeats.UI.DefaultPayload     # 内置功能: 名单管理、布局编辑器、规则编辑、结果导出
+└── PokeSeats.UI.Betapayload        # Beta 功能插件: 实验功能与稳定业务功能分离
 ```
 
 > 插件系统的扩展说明见 [PokeSeats.UI/PLUGIN.md](PokeSeats.UI/PLUGIN.md)。

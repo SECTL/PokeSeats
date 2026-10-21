@@ -14,6 +14,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PokeSeats.UI.DefaultWorkspa
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PokeSeats.UI.DefaultPayload", "PokeSeats.UI.DefaultPayload\PokeSeats.UI.DefaultPayload.csproj", "{A8B3E2D1-2A4B-4C8F-9E61-7D50C1F4A9B6}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PokeSeats.UI.Betapayload", "PokeSeats.UI.Betapayload\PokeSeats.UI.Betapayload.csproj", "{A59D642B-68EF-4B43-912F-79689A412E5B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -48,5 +50,9 @@ Global
 	{A8B3E2D1-2A4B-4C8F-9E61-7D50C1F4A9B6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 	{A8B3E2D1-2A4B-4C8F-9E61-7D50C1F4A9B6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 	{A8B3E2D1-2A4B-4C8F-9E61-7D50C1F4A9B6}.Release|Any CPU.Build.0 = Release|Any CPU
+	{A59D642B-68EF-4B43-912F-79689A412E5B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+	{A59D642B-68EF-4B43-912F-79689A412E5B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+	{A59D642B-68EF-4B43-912F-79689A412E5B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+	{A59D642B-68EF-4B43-912F-79689A412E5B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
