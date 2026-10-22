@@ -20,6 +20,12 @@
         <StronglyTypedNamespace>$(RootNamespace)</StronglyTypedNamespace>
         <StronglyTypedFileName>$(IntermediateOutputPath)WorkspaceStrings.Designer.cs</StronglyTypedFileName>
       </EmbeddedResource>
+      <EmbeddedResource Update="UpdateStrings.resx">
+        <StronglyTypedLanguage>CSharp</StronglyTypedLanguage>
+        <StronglyTypedClassName>UpdateStrings</StronglyTypedClassName>
+        <StronglyTypedNamespace>$(RootNamespace)</StronglyTypedNamespace>
+        <StronglyTypedFileName>$(IntermediateOutputPath)UpdateStrings.Designer.cs</StronglyTypedFileName>
+      </EmbeddedResource>
     </ItemGroup>
 
 </Project>

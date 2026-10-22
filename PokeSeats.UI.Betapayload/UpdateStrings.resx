@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms</value></resheader>
+  <data name="RateLimited" xml:space="preserve"><value>GitHub 请求次数已达上限，请稍后重新检查。</value></data>
+  <data name="InvalidVersion" xml:space="preserve"><value>无法识别当前版本或 GitHub Release 的语义化版本号。</value></data>
+  <data name="UnsupportedPlatform" xml:space="preserve"><value>自动更新仅支持 Windows 和 Linux x64。</value></data>
+  <data name="InvalidPackage" xml:space="preserve"><value>发布包信息无效，请前往 GitHub Releases 手动下载。</value></data>
+  <data name="MissingAsset" xml:space="preserve"><value>新版尚未提供对应发布包：{0}</value></data>
+  <data name="MissingDigest" xml:space="preserve"><value>GitHub 未提供有效的 SHA-256 摘要，无法安全自动安装，请前往发布页手动下载。</value></data>
+  <data name="SizeMismatch" xml:space="preserve"><value>下载文件大小与 GitHub 发布记录不一致。</value></data>
+  <data name="DigestMismatch" xml:space="preserve"><value>下载文件的 SHA-256 校验失败，未执行安装。</value></data>
+  <data name="CheckFailed" xml:space="preserve"><value>检查更新失败：{0}</value></data>
+  <data name="DownloadFailed" xml:space="preserve"><value>下载或准备更新失败：{0}</value></data>
+  <data name="InstallFailed" xml:space="preserve"><value>启动更新失败：{0}</value></data>
+</root>

@@ -20,4 +20,26 @@
   <data name="Previous" xml:space="preserve"><value>上一步</value></data>
   <data name="Next" xml:space="preserve"><value>下一步</value></data>
   <data name="StepFormat" xml:space="preserve"><value>第 {0} / {1} 步</value></data>
+  <data name="UpdateViewName" xml:space="preserve"><value>软件更新（Beta）</value></data>
+  <data name="UpdateCurrentVersionFormat" xml:space="preserve"><value>当前版本：{0}</value></data>
+  <data name="UpdatePlatformUnsupported" xml:space="preserve"><value>当前平台暂不支持自动更新，请前往发布页面手动下载。</value></data>
+  <data name="UpdateStatusChecking" xml:space="preserve"><value>正在检查更新…</value></data>
+  <data name="UpdateStatusUpToDate" xml:space="preserve"><value>已是最新版本。</value></data>
+  <data name="UpdateStatusAvailableFormat" xml:space="preserve"><value>发现新版本 {0}</value></data>
+  <data name="UpdateStatusDownloading" xml:space="preserve"><value>正在下载更新，请保持网络连接…</value></data>
+  <data name="UpdateStatusReady" xml:space="preserve"><value>更新包已下载，可以安装。</value></data>
+  <data name="UpdateStatusInstalling" xml:space="preserve"><value>正在启动安装程序…</value></data>
+  <data name="UpdateStatusFailedFormat" xml:space="preserve"><value>更新失败：{0}</value></data>
+  <data name="UpdateUnknownError" xml:space="preserve"><value>未知错误</value></data>
+  <data name="UpdateCheckButton" xml:space="preserve"><value>检查更新</value></data>
+  <data name="UpdateRetryButton" xml:space="preserve"><value>重试检查</value></data>
+  <data name="UpdateDownloadButton" xml:space="preserve"><value>下载更新</value></data>
+  <data name="UpdateInstallButton" xml:space="preserve"><value>安装并重启</value></data>
+  <data name="UpdateSaveWarning" xml:space="preserve"><value>安装会退出程序，请先保存当前的排座数据与设置；更新完成后重新启动即可。</value></data>
+  <data name="UpdateReleaseNotesHeading" xml:space="preserve"><value>更新内容</value></data>
+  <data name="UpdateNoReleaseNotes" xml:space="preserve"><value>此版本未提供更新说明。</value></data>
+  <data name="UpdateReleasePageLink" xml:space="preserve"><value>打开发布页面</value></data>
+  <data name="UpdateOpenLinkFailedFormat" xml:space="preserve"><value>无法打开发布页面：{0}</value></data>
+  <data name="UpdateInstallLaunchFailedFormat" xml:space="preserve"><value>无法启动安装程序：{0}</value></data>
+  <data name="UpdateActionFailedFormat" xml:space="preserve"><value>操作失败：{0}</value></data>
 </root>
