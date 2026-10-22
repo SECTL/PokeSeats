@@ -25,6 +25,23 @@
 
 Beta 工作区复用已有业务视图和排座数据，不复制或重置名单、布局、规则与目标。菜单、外观设置和关于窗口复用标准工作区实现；Beta 外观设置单独保存到 `data/plugins/pokeseats.betapayload/workspace-settings.json`。
 
+## GitHub Releases 自动更新
+
+Betapayload 加载后会在后台检查 [SECTL/PokeSeats 的最新正式 Release](https://github.com/SECTL/PokeSeats/releases/latest)，不需要切换到 Beta 工作区。发现新版本时自动打开「软件更新（Beta）」；也可从菜单手动打开并重新检查。检查失败不会阻塞排座。
+
+版本按语义化版本比较，支持 `1.2.0`、`v1.2.0` 标签，忽略构建元数据，不安装草稿、预发布版、同版本或旧版本。当前版本来自宿主程序集的 informational version，统一由 `Directory.Build.props` 提供。
+
+更新操作分两步确认：
+
+1. **下载更新**：展示 Release 说明，下载当前系统对应的 ZIP，显示进度；核对 GitHub 提供的文件大小和 SHA-256，再检查压缩包路径与必要文件，在临时目录准备安装。缺少摘要、发布包不完整或校验失败时不会安装。
+2. **安装并重启**：先保存所需的座位表或排座数据。确认后请求宿主正常退出，外部更新助手等待进程结束，再备份并覆盖发布包中的文件，随后重新启动。复制失败时尝试回滚并启动旧版本；不会在后台检查时自行退出程序。
+
+自动安装支持 Windows x64 与 Linux x64，安装目录必须可写；Windows 使用系统 PowerShell，Linux 使用 `/bin/sh`。程序根目录包含 `.csproj` 或 `.sln` 时拒绝原地更新。Windows 的实际替换、重启与失败回滚已验证；Linux 更新助手尚未做目标系统运行验证。
+
+发布资产命名沿用 `PokeSeats-{版本}-win-x64.zip` / `PokeSeats-{版本}-linux-x64.zip`，带 `v` 的标签也支持资产版本不带 `v`。ZIP 可以是平铺文件，或由一个 `PokeSeats*` 顶层目录包裹，必须包含宿主及默认插件清单。下载来自 GitHub 官方 Release，不使用镜像或第三方接口。
+
+本地 `data/`、第三方 `plugins/`、根目录配置和布局文件不参与覆盖，发布包若包含这些内容会被拒绝。发布包未包含的已有文件不主动删除。成功后清理暂存包与备份；错误时保留诊断材料。更新日志与结果位于系统临时目录下 `PokeSeats-update-*/package/update-helper/`（特殊权限情况下使用独立临时目录），结果见 `result.txt`，详细过程见 `update.log`。
+
 ## 插件与实现约定
 
 - 项目：`PokeSeats.UI.Betapayload`。
@@ -41,6 +58,12 @@ Beta 工作区仅重写视图呈现与打开请求的处理，通过现有 `UiVi
 后续 Beta 功能在 `BetapayloadPlugin.Initialize` 中通过现有插件契约注册；插件自己的数据使用 `data/plugins/pokeseats.betapayload/`。通用插件契约见 [插件开发说明](PokeSeats.UI/PLUGIN.md)。
 
 ## Beta 变更记录
+
+### 2026-10-22
+
+- 新增后台 GitHub Releases 正式版检查、更新说明、手动下载、进度显示及安装后重启。
+- 新增按平台匹配发布包、大小与 SHA-256 校验、安全解压、退出后替换及复制失败回滚；保留本地数据、第三方插件与配置。
+- 宿主退出请求延后到当前界面帧完成再关闭，避免更新按钮触发退出时提前释放 ImGui 资源。
 
 ### 2026-10-21
 

@@ -86,6 +86,7 @@ flowchart TD
 * 座位表渲染成高清 PNG（内置 HarmonyOS Sans SC），讲台朝向、单元格颜色、批注都能调。
 * 一键导出 ZIP 快照（`students.json` / `rules.json` / `seating.json`），可重现名单、规则和座位分配。
 * 名单支持 Excel、CSV、JSON 导入；CSV 和原生 JSON 格式可保留前导零与 GUID。
+* Betapayload 提供 GitHub Releases 正式版更新检查，可从「软件更新（Beta）」查看说明、下载并确认重启安装；详见 [Beta 功能说明](BETA.md#github-releases-自动更新)。
 
 ---
 
