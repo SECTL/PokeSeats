@@ -23,6 +23,11 @@
   <data name="UpdateViewName" xml:space="preserve"><value>软件更新（Beta）</value></data>
   <data name="UpdateCurrentVersionFormat" xml:space="preserve"><value>当前版本：{0}</value></data>
   <data name="UpdatePlatformUnsupported" xml:space="preserve"><value>当前平台暂不支持自动更新，请前往发布页面手动下载。</value></data>
+  <data name="UpdateChannelLabel" xml:space="preserve"><value>更新通道</value></data>
+  <data name="UpdateChannelStable" xml:space="preserve"><value>稳定版</value></data>
+  <data name="UpdateChannelPrerelease" xml:space="preserve"><value>预发布版</value></data>
+  <data name="UpdateChannelStableHint" xml:space="preserve"><value>只接收正式发布的版本。</value></data>
+  <data name="UpdateChannelPrereleaseHint" xml:space="preserve"><value>同时接收 GitHub 上标记为 Pre-release 的版本，可能不稳定，建议先备份数据。</value></data>
   <data name="UpdateStatusChecking" xml:space="preserve"><value>正在检查更新…</value></data>
   <data name="UpdateStatusUpToDate" xml:space="preserve"><value>已是最新版本。</value></data>
   <data name="UpdateStatusAvailableFormat" xml:space="preserve"><value>发现新版本 {0}</value></data>

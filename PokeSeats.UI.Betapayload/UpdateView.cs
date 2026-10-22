@@ -47,6 +47,7 @@ internal sealed class UpdateView : IUiView, IUiCommand
         ImGui.TextUnformatted(_currentVersionText);
         if (!platformSupported)
             ImGui.TextWrapped(WorkspaceStrings.UpdatePlatformUnsupported);
+        DrawChannel(state);
         ImGui.Spacing();
 
         DrawStatus(state, designTokens);
@@ -62,6 +63,42 @@ internal sealed class UpdateView : IUiView, IUiCommand
 
         ImGui.Spacing();
         DrawActions(state, platformSupported);
+    }
+
+    private void DrawChannel(UpdateState state)
+    {
+        UpdateChannel channel = _updater.Channel;
+        // Switching tears down a downloaded package, so it waits until nothing is in flight.
+        bool busy = state.Status is UpdateStatus.Checking or UpdateStatus.Downloading or UpdateStatus.Installing;
+
+        ImGui.TextUnformatted(WorkspaceStrings.UpdateChannelLabel);
+        ImGui.SameLine();
+        ImGui.BeginDisabled(busy);
+        if (ImGui.RadioButton(WorkspaceStrings.UpdateChannelStable + "##stable",
+                channel == UpdateChannel.Stable) && channel != UpdateChannel.Stable)
+            SwitchChannel(UpdateChannel.Stable);
+        ImGui.SameLine();
+        if (ImGui.RadioButton(WorkspaceStrings.UpdateChannelPrerelease + "##prerelease",
+                channel == UpdateChannel.Prerelease) && channel != UpdateChannel.Prerelease)
+            SwitchChannel(UpdateChannel.Prerelease);
+        ImGui.EndDisabled();
+
+        ImGui.TextDisabled(channel == UpdateChannel.Prerelease
+            ? WorkspaceStrings.UpdateChannelPrereleaseHint
+            : WorkspaceStrings.UpdateChannelStableHint);
+    }
+
+    private void SwitchChannel(UpdateChannel channel)
+    {
+        _actionError = null;
+        try
+        {
+            _updater.SetChannel(channel);
+        }
+        catch (Exception exception)
+        {
+            _actionError = string.Format(WorkspaceStrings.UpdateActionFailedFormat, exception.Message);
+        }
     }
 
     private void DrawStatus(UpdateState state, UiDesignTokens designTokens)

@@ -8,6 +8,10 @@ using System.Text.Json;
 namespace PokeSeats.UI.Betapayload;
 
 internal enum UpdateStatus { Checking, UpToDate, Available, Downloading, Ready, Installing, Failed }
+
+/// <summary>Which GitHub releases the updater is allowed to offer.</summary>
+internal enum UpdateChannel { Stable, Prerelease }
+
 internal sealed record ReleaseUpdate(string Tag, string Version, string Notes, Uri PageUrl,
     Uri DownloadUrl, long Size, string? Sha256);
 internal sealed record UpdateState(UpdateStatus Status, ReleaseUpdate? Release = null,
@@ -16,11 +20,13 @@ internal sealed record UpdateState(UpdateStatus Status, ReleaseUpdate? Release =
 internal sealed class GitHubUpdater : IDisposable
 {
     private const string LatestRelease = "https://api.github.com/repos/SECTL/PokeSeats/releases/latest";
+    private const string AllReleases = "https://api.github.com/repos/SECTL/PokeSeats/releases?per_page=100";
     private const long MaximumPackageSize = 1024L * 1024 * 1024;
     private readonly object _gate = new();
     private readonly HttpClient _http;
     private readonly CancellationTokenSource _lifetime = new();
     private readonly Action _onUpdateAvailable;
+    private readonly Action<UpdateChannel>? _rememberChannel;
     private UpdateState _state = new(UpdateStatus.UpToDate);
     private bool _disposed;
     private bool _helperStarted;
@@ -30,10 +36,14 @@ internal sealed class GitHubUpdater : IDisposable
     public string CurrentVersion { get; }
     public string? Platform { get; }
     public UpdateState State => Volatile.Read(ref _state);
+    public UpdateChannel Channel { get; private set; }
 
-    public GitHubUpdater(Action onUpdateAvailable)
+    public GitHubUpdater(Action onUpdateAvailable, UpdateChannel channel = UpdateChannel.Stable,
+        Action<UpdateChannel>? rememberChannel = null)
     {
         _onUpdateAvailable = onUpdateAvailable;
+        _rememberChannel = rememberChannel;
+        Channel = channel;
         Assembly assembly = Assembly.GetEntryAssembly() ?? typeof(GitHubUpdater).Assembly;
         CurrentVersion = assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion
             ?? assembly.GetName().Version?.ToString(3) ?? "0.0.0";
@@ -43,6 +53,38 @@ internal sealed class GitHubUpdater : IDisposable
         _http.DefaultRequestHeaders.UserAgent.ParseAdd("PokeSeats-Updater/1.0");
         _http.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/vnd.github+json"));
         _http.DefaultRequestHeaders.Add("X-GitHub-Api-Version", "2022-11-28");
+    }
+
+    /// <summary>
+    /// Switches the channel and re-checks. A downloaded package belongs to the previous
+    /// channel, so it is discarded; running downloads and the installer helper block a switch.
+    /// </summary>
+    public void SetChannel(UpdateChannel channel)
+    {
+        lock (_gate)
+        {
+            if (_disposed || Channel == channel || State.Status is UpdateStatus.Downloading or UpdateStatus.Installing)
+                return;
+            Channel = channel;
+            if (_stagingDirectory is not null)
+            {
+                DeleteStaging(_stagingDirectory);
+                _stagingDirectory = null;
+                _packageRoot = null;
+            }
+            _state = new UpdateState(UpdateStatus.UpToDate);
+        }
+
+        try
+        {
+            _rememberChannel?.Invoke(channel);
+        }
+        catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
+        {
+            Console.Error.WriteLine($"Unable to remember the update channel: {exception.Message}");
+        }
+
+        Check();
     }
 
     public void Check()
@@ -58,9 +100,11 @@ internal sealed class GitHubUpdater : IDisposable
 
     private async Task CheckAsync()
     {
+        UpdateChannel channel = Channel;
         try
         {
-            using HttpResponseMessage response = await _http.GetAsync(LatestRelease, _lifetime.Token).ConfigureAwait(false);
+            string endpoint = channel == UpdateChannel.Prerelease ? AllReleases : LatestRelease;
+            using HttpResponseMessage response = await _http.GetAsync(endpoint, _lifetime.Token).ConfigureAwait(false);
             if (response.StatusCode == HttpStatusCode.NotFound)
             {
                 SetState(new UpdateState(UpdateStatus.UpToDate));
@@ -71,10 +115,10 @@ internal sealed class GitHubUpdater : IDisposable
             response.EnsureSuccessStatusCode();
             await using Stream stream = await response.Content.ReadAsStreamAsync(_lifetime.Token).ConfigureAwait(false);
             using JsonDocument document = await JsonDocument.ParseAsync(stream, cancellationToken: _lifetime.Token).ConfigureAwait(false);
-            ReleaseUpdate? release = SelectRelease(document.RootElement, CurrentVersion, Platform);
+            ReleaseUpdate? release = SelectRelease(document.RootElement, CurrentVersion, Platform, channel);
             lock (_gate)
             {
-                if (_disposed)
+                if (_disposed || Channel != channel)
                     return;
                 _state = release is null ? new UpdateState(UpdateStatus.UpToDate) : new UpdateState(UpdateStatus.Available, release);
                 if (release is not null)
@@ -83,24 +127,69 @@ internal sealed class GitHubUpdater : IDisposable
         }
         catch (Exception error)
         {
-            SetFailure(UpdateStrings.CheckFailed, error);
+            if (Channel == channel)
+                SetFailure(UpdateStrings.CheckFailed, error);
         }
     }
 
-    internal static ReleaseUpdate? SelectRelease(JsonElement release, string currentVersion, string? platform)
+    /// <summary>
+    /// Picks the newest eligible release. Accepts the single object returned by
+    /// <c>/releases/latest</c> or the array returned by <c>/releases</c>; in list form a release
+    /// without a package for this platform is skipped instead of failing the whole check.
+    /// </summary>
+    internal static ReleaseUpdate? SelectRelease(JsonElement root, string currentVersion, string? platform,
+        UpdateChannel channel = UpdateChannel.Stable)
     {
-        if (release.GetProperty("draft").GetBoolean() || release.GetProperty("prerelease").GetBoolean())
-            return null;
-        string tag = release.GetProperty("tag_name").GetString() ?? "";
-        if (!ReleaseVersion.TryParse(tag, out ReleaseVersion remote) || remote.Prerelease is not null)
-            throw new InvalidDataException(UpdateStrings.InvalidVersion);
         if (!ReleaseVersion.TryParse(currentVersion, out ReleaseVersion current))
             throw new InvalidDataException(UpdateStrings.InvalidVersion);
-        if (remote.CompareTo(current) <= 0)
-            return null;
-        if (platform is null)
-            throw new PlatformNotSupportedException(UpdateStrings.UnsupportedPlatform);
-        string expected = $"PokeSeats-{tag.TrimStart('v', 'V')}-{platform}.zip";
+
+        bool single = root.ValueKind != JsonValueKind.Array;
+        ReleaseUpdate? best = null;
+        ReleaseVersion bestVersion = default;
+        foreach (JsonElement release in Candidates(root, single))
+        {
+            if (release.GetProperty("draft").GetBoolean())
+                continue;
+            if (channel == UpdateChannel.Stable && release.GetProperty("prerelease").GetBoolean())
+                continue;
+
+            string tag = release.GetProperty("tag_name").GetString() ?? "";
+            if (!ReleaseVersion.TryParse(tag, out ReleaseVersion remote))
+                throw new InvalidDataException(UpdateStrings.InvalidVersion);
+            if (channel == UpdateChannel.Stable && remote.Prerelease is not null)
+                continue;
+            if (remote.CompareTo(current) <= 0)
+                continue;
+            if (platform is null)
+                throw new PlatformNotSupportedException(UpdateStrings.UnsupportedPlatform);
+
+            ReleaseUpdate? candidate = CreateUpdate(release, tag, remote, platform, skipMissingPackage: !single);
+            if (candidate is null)
+                continue;
+            if (best is null || remote.CompareTo(bestVersion) > 0)
+            {
+                best = candidate;
+                bestVersion = remote;
+            }
+        }
+        return best;
+    }
+
+    private static IEnumerable<JsonElement> Candidates(JsonElement root, bool single)
+    {
+        if (single)
+        {
+            yield return root;
+            yield break;
+        }
+        foreach (JsonElement release in root.EnumerateArray())
+            yield return release;
+    }
+
+    private static ReleaseUpdate? CreateUpdate(JsonElement release, string tag, ReleaseVersion version,
+        string platform, bool skipMissingPackage)
+    {
+        string expected = $"PokeSeats-{version.Number}-{platform}.zip";
         string taggedName = $"PokeSeats-{tag}-{platform}.zip";
         JsonElement? selected = null;
         foreach (JsonElement asset in release.GetProperty("assets").EnumerateArray())
@@ -114,7 +203,11 @@ internal sealed class GitHubUpdater : IDisposable
             selected = asset;
         }
         if (selected is not { } package)
+        {
+            if (skipMissingPackage)
+                return null;
             throw new InvalidDataException(string.Format(UpdateStrings.MissingAsset, expected));
+        }
         long size = package.GetProperty("size").GetInt64();
         string? url = package.GetProperty("browser_download_url").GetString();
         if (size <= 0 || size > MaximumPackageSize || !Uri.TryCreate(url, UriKind.Absolute, out Uri? download)

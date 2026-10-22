@@ -16,7 +16,10 @@ public sealed class BetapayloadPlugin : IUiPlugin
         context.RegisterWorkspace(WorkspaceId, WorkspaceStrings.WorkspaceName,
             () => new BetaWorkspace(settingsPath));
 
-        _updater = new GitHubUpdater(() => context.Events.Publish(new UiViewOpenRequested(UpdateView.ViewId)));
+        var channelStore = new UpdateChannelStore(Path.Combine(context.DataDirectory, "update-settings.json"));
+        _updater = new GitHubUpdater(
+            () => context.Events.Publish(new UiViewOpenRequested(UpdateView.ViewId)),
+            channelStore.Load(), channelStore.Save);
         var updateView = new UpdateView(_updater, context.Events);
         context.RegisterView(updateView);
         context.RegisterCommand(updateView);
