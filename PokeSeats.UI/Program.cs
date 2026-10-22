@@ -33,6 +33,7 @@ WorkspaceManager? workspaces = null;
 WorkspaceSelector? selector = null;
 SectlStatsReporter? statsReporter = null;
 Vector2D<int>? pendingFramebufferSize = null;
+bool exitRequested = false;
 var scaling = new UiScaling();
 
 window.Load += () =>
@@ -98,7 +99,9 @@ window.Load += () =>
     statsReporter = new SectlStatsReporter(config);
     statsReporter.Start();
     
-    catalog.CreateEventScope().Subscribe<ApplicationExitRequested>(_ => window.Close());
+    // A view may request exit while an ImGui window is still open. Finish that frame
+    // before Closing disposes workspaces, plugins and the renderer.
+    catalog.CreateEventScope().Subscribe<ApplicationExitRequested>(_ => exitRequested = true);
 };
 
 window.FramebufferResize += size =>
@@ -134,6 +137,8 @@ window.Render += delta =>
     scaling.DrawScaleIndicator();
     renderer.Render();
     selector.ApplyPendingSwitch();
+    if (exitRequested)
+        window.Close();
 };
 
 window.Closing += () =>
