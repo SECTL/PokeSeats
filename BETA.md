@@ -27,9 +27,17 @@ Beta 工作区复用已有业务视图和排座数据，不复制或重置名单
 
 ## GitHub Releases 自动更新
 
-Betapayload 加载后会在后台检查 [SECTL/PokeSeats 的最新正式 Release](https://github.com/SECTL/PokeSeats/releases/latest)，不需要切换到 Beta 工作区。发现新版本时自动打开「软件更新（Beta）」；也可从菜单手动打开并重新检查。检查失败不会阻塞排座。
+Betapayload 加载后会在后台检查 GitHub Releases，不需要切换到 Beta 工作区。发现新版本时自动打开「软件更新（Beta）」；也可从菜单手动打开并重新检查。检查失败不会阻塞排座。
 
-版本按语义化版本比较，支持 `1.2.0`、`v1.2.0` 标签，忽略构建元数据，不安装草稿、预发布版、同版本或旧版本。当前版本来自宿主程序集的 informational version，统一由 `Directory.Build.props` 提供。
+更新通道可选**稳定版**（默认）或**预发布版**：
+
+- 稳定版只读取 `/releases/latest`，因此 GitHub 上标记为 Pre-release 的版本永远不会被提供。
+- 预发布版读取 `/releases` 列表并取版本号最高的一个，标记为 Pre-release 的版本也参与比较；草稿始终排除。
+- 两项都按语义化版本比较，`1.2.0-beta.1` 高于 `1.1.9`、低于 `1.2.0`；标签与预发布标识任一体现预发布，稳定版通道都会跳过。
+- 切换通道会丢弃已下载的更新包并立即重新检查；下载中或正在启动安装助手时不允许切换。
+- 选择保存在 `data/plugins/pokeseats.betapayload/update-settings.json`，下次启动沿用。
+
+版本按语义化版本比较，支持 `1.2.0`、`v1.2.0` 标签，忽略构建元数据，不安装草稿、同版本或旧版本。当前版本来自宿主程序集的 informational version，统一由 `Directory.Build.props` 提供。
 
 更新操作分两步确认：
 
