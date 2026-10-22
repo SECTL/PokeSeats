@@ -2,12 +2,19 @@
 
 本文件记录 PokeSeats 戳座的版本变更，格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)，版本号遵循[语义化版本](https://semver.org/lang/zh-CN/)。
 
-## [未发布]
+## [1.2.0] - 2026-10-22
+
+新增 Beta 插件：标签向导工作区，以及从 GitHub Releases 检查并安装更新。
 
 ### 新增
 
+- **Beta 标签向导工作区**：把原有业务视图组织为四个不可关闭的步骤标签（学生名单、教室布局、规则与目标、排座结果），可自由点击标签或使用底部的「上一步」「下一步」。规则页与结果页提供「开始自动排座」，开始后自动跳到结果标签，检测到冲突规则时自动返回规则标签。按 `Ctrl + Alt + Shift + X` 打开工作区选择器即可在标准工作区与 Beta 工作区之间切换；Beta 外观设置单独保存在 `data/plugins/pokeseats.betapayload/`。标准工作区保持不变，其他插件贡献的视图会追加为附加标签。
 - **Beta 自动更新**：Betapayload 启动后后台检查 GitHub Releases 最新正式版，按语义化版本与系统平台判断更新；菜单提供更新说明、下载进度与「安装并重启」。发布包经大小、SHA-256 和安全解压检查后暂存，等待宿主退出再替换文件；复制失败时尝试回滚，保留本地数据、第三方插件和配置。使用与发布约定见 [BETA.md](BETA.md#github-releases-自动更新)。
 - **更新通道**：可在「软件更新（Beta）」里选择稳定版或预发布版。预发布版会同时接受 GitHub 上标记为 Pre-release 的版本，切换后立即重新检查，选择记在插件数据目录中。
+
+### 变更
+
+- 界面文案统一抽到各插件自己的 resx 资源，代码中不再硬编码中文文本。
 
 ### 修复
 
@@ -57,5 +64,6 @@
 - 求解器依赖的原生库只有 64 位版本，构建目标固定为 x64。
 - 排座结果不会自动写入磁盘，需要留档时请导出座位表图片。
 
+[1.2.0]: https://github.com/SECTL/PokeSeats/releases/tag/1.2.0
 [1.1.0]: https://github.com/SECTL/PokeSeats/releases/tag/1.1.0
 [1.0.0]: https://github.com/SECTL/PokeSeats/releases/tag/1.0.0
