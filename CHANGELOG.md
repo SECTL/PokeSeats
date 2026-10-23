@@ -2,6 +2,12 @@
 
 本文件记录 PokeSeats 戳座的版本变更，格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)，版本号遵循[语义化版本](https://semver.org/lang/zh-CN/)。
 
+## [未发布]
+
+### 变更
+
+- **应用图标**：换成新的图标设计，保留可编辑 SVG、1024 × 1024 PNG 与 16 至 256 像素八档尺寸的 ICO，Windows 可执行文件与应用窗口继续共用同一份图形。
+
 ## [1.2.0] - 2026-10-22
 
 新增 Beta 插件：标签向导工作区，以及从 GitHub Releases 检查并安装更新。
